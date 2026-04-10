@@ -1,3 +1,143 @@
+# PROJECT CONTEXT: DMW SURVEY SYSTEM WITH GEO-TAGGING
+
+You are an expert full-stack developer assisting in building a web-based survey system.
+
+## 🧠 PROJECT OVERVIEW
+
+We are building a Survey System for DMW (Department of Migrant Workers).
+
+The system must:
+
+- Display a questionnaire (already provided)
+- Allow respondents to answer the survey
+- Automatically capture GEOLOCATION (latitude & longitude)
+- Store all responses in Supabase database
+
+## 🎯 CORE FEATURE (VERY IMPORTANT)
+
+GEO-TAGGING:
+
+- When the user submits the survey, the system must capture:
+  - latitude
+  - longitude
+- Use browser Geolocation API
+- Ask user permission properly
+- Handle errors (denied, timeout, unavailable)
+
+## 🧰 TECH STACK
+
+Frontend:
+
+- Vue 3 (Composition API)
+- Vuetify (UI framework)
+
+Backend:
+
+- Supabase (Database + API)
+
+Version Control:
+
+- GitHub
+
+## 📁 EXPECTED PROJECT STRUCTURE
+
+src/
+components/
+views/
+router/
+services/
+supabase.js
+geolocation.js
+composables/
+utils/
+
+## ⚙️ ENVIRONMENT SETUP CHECK
+
+Before coding, verify:
+
+1. Node.js installed
+2. Vue project created (Vite)
+3. Vuetify installed and configured
+4. Supabase project created
+5. .env file exists with:
+   VITE_SUPABASE_URL
+   VITE_SUPABASE_KEY
+6. Supabase client initialized
+
+If something is missing, provide setup steps.
+
+## 🗄️ DATABASE DESIGN
+
+Create a table called: responses
+
+Fields:
+
+- id (uuid, primary key)
+- created_at (timestamp)
+- answers (json)
+- latitude (float)
+- longitude (float)
+
+## 🧩 SYSTEM FEATURES
+
+1. Survey Page
+
+- Render questions dynamically
+- Support input types:
+  - text
+  - multiple choice
+  - dropdown
+
+2. Submit Function
+
+- Collect all answers
+- Get geolocation
+- Save to Supabase
+
+3. Error Handling
+
+- Geolocation denied
+- Network issues
+- Validation
+
+## 📍 GEOLOCATION IMPLEMENTATION GUIDE
+
+Use:
+navigator.geolocation.getCurrentPosition()
+
+Handle:
+
+- success → get coords
+- error → show message
+
+## 📌 CODING RULES
+
+- Use Composition API
+- Keep components modular
+- Separate logic into services
+- Use async/await
+- Add comments for clarity
+
+## 🧪 WHAT TO DO FIRST
+
+1. Check environment readiness
+2. Setup Supabase connection
+3. Create survey form UI
+4. Add geolocation feature
+5. Connect submission to database
+
+## 📄 QUESTIONNAIRE SOURCE
+
+Refer to: docs/questionnaire.md
+
+Generate UI based on this file.
+
+---
+
+Now begin by checking if the environment is ready and list missing requirements before writing code.
+
+Here's the questioner:
+
 **OFW Family Profiling and Reintegration Needs Assessment Form**  
 _(for Profiling, Welfare Assistance, Reintegration Planning, Referral, and Case Management)_
 
