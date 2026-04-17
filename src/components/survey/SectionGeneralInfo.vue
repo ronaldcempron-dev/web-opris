@@ -1,51 +1,138 @@
+<!-- src/components/survey/SectionGeneralInfo.vue -->
 <template>
-  <v-card-text>
+  <div>
+    <h2 class="text-h5 font-weight-bold mb-6 text-primary">I. General Information</h2>
+
     <v-row dense>
-      <v-col cols="12" md="6"
-        ><v-text-field v-model="data.dateOfInterview" label="Date of Interview" type="date"
-      /></v-col>
-      <v-col cols="12" md="6"
-        ><v-text-field v-model="data.timeOfInterview" label="Time of Interview" type="time"
-      /></v-col>
-      <v-col cols="12"
-        ><v-text-field v-model="data.enumeratorName" label="Name of Enumerator/Interviewer"
-      /></v-col>
-      <v-col cols="12" md="4"><v-text-field v-model="data.barangay" label="Barangay" /></v-col>
-      <v-col cols="12" md="4"
-        ><v-text-field v-model="data.municipality" label="Municipality/City"
-      /></v-col>
-      <v-col cols="12" md="4"
-        ><v-text-field v-model="data.province" label="Province/Region"
-      /></v-col>
-      <v-col cols="12"
-        ><v-text-field
-          v-model="data.householdControlNumber"
+      <!-- Date of Interview -->
+      <v-col cols="12" md="4">
+        <v-text-field
+          v-model="localData.dateOfInterview"
+          label="Date of Interview"
+          type="date"
+          variant="outlined"
+          density="comfortable"
+          @update:modelValue="emitUpdate"
+        />
+      </v-col>
+
+      <!-- Time of Interview -->
+      <v-col cols="12" md="4">
+        <v-text-field
+          v-model="localData.timeOfInterview"
+          label="Time of Interview"
+          type="time"
+          variant="outlined"
+          density="comfortable"
+          @update:modelValue="emitUpdate"
+        />
+      </v-col>
+
+      <!-- Name of Enumerator -->
+      <v-col cols="12" md="4">
+        <v-text-field
+          v-model="localData.enumeratorName"
+          label="Name of Enumerator/Interviewer"
+          variant="outlined"
+          density="comfortable"
+          @update:modelValue="emitUpdate"
+        />
+      </v-col>
+
+      <!-- Barangay -->
+      <v-col cols="12" md="4">
+        <v-text-field
+          v-model="localData.barangay"
+          label="Barangay"
+          variant="outlined"
+          density="comfortable"
+          @update:modelValue="emitUpdate"
+        />
+      </v-col>
+
+      <!-- Municipality/City -->
+      <v-col cols="12" md="4">
+        <v-text-field
+          v-model="localData.municipalityCity"
+          label="Municipality/City"
+          variant="outlined"
+          density="comfortable"
+          @update:modelValue="emitUpdate"
+        />
+      </v-col>
+
+      <!-- Province/Region -->
+      <v-col cols="12" md="4">
+        <v-text-field
+          v-model="localData.provinceRegion"
+          label="Province/Region"
+          variant="outlined"
+          density="comfortable"
+          @update:modelValue="emitUpdate"
+        />
+      </v-col>
+
+      <!-- Household Control Number / Survey ID -->
+      <v-col cols="12" md="6">
+        <v-text-field
+          v-model="localData.householdControlNumber"
           label="Household Control Number / Survey ID"
-      /></v-col>
-      <v-col cols="12">
-        <v-label>Type of Respondent</v-label>
-        <v-checkbox
-          v-for="opt in types"
-          :key="opt"
-          v-model="data.typeOfRespondent"
-          :label="opt"
-          :value="opt"
+          variant="outlined"
+          density="comfortable"
+          @update:modelValue="emitUpdate"
+        />
+      </v-col>
+
+      <!-- GPS Location -->
+      <v-col cols="12" md="6">
+        <v-text-field
+          v-model="localData.gpsLocation"
+          label="GPS Location (if applicable)"
+          variant="outlined"
+          density="comfortable"
+          append-inner-icon="mdi-map-marker"
+          @click:append-inner="$emit('capture-gps')"
+          @update:modelValue="emitUpdate"
         />
       </v-col>
     </v-row>
-  </v-card-text>
+  </div>
 </template>
 
 <script setup>
-defineProps({ data: Object })
-const types = [
-  'Current OFW',
-  'Returning OFW (vacation)',
-  'Returned OFW (reintegrated)',
-  'Distressed OFW / family of distressed OFW',
-  'Family left behind of current OFW',
-  'Repatriated OFW',
-  'Deceased OFW family',
-  'Other',
-]
+import { ref, watch } from 'vue'
+
+const props = defineProps({
+  data: {
+    type: Object,
+    default: () => ({}),
+  },
+})
+
+const emit = defineEmits(['update:data'])
+
+const localData = ref({
+  dateOfInterview: '',
+  timeOfInterview: '',
+  enumeratorName: '',
+  barangay: '',
+  municipalityCity: '',
+  provinceRegion: '',
+  householdControlNumber: '',
+  gpsLocation: '',
+  ...props.data,
+})
+
+// Two-way binding
+watch(
+  localData,
+  (newVal) => {
+    emit('update:data', { ...newVal })
+  },
+  { deep: true },
+)
+
+const emitUpdate = () => {
+  emit('update:data', { ...localData.value })
+}
 </script>
