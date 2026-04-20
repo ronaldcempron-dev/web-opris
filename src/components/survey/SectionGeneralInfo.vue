@@ -4,7 +4,7 @@
     <h2 class="text-h5 font-weight-bold mb-6 text-primary">I. General Information</h2>
 
     <v-row dense>
-      <!-- Date of Interview -->
+      <!-- Date -->
       <v-col cols="12" md="4">
         <v-text-field
           v-model="localData.dateOfInterview"
@@ -16,7 +16,7 @@
         />
       </v-col>
 
-      <!-- Time of Interview -->
+      <!-- Time -->
       <v-col cols="12" md="4">
         <v-text-field
           v-model="localData.timeOfInterview"
@@ -28,7 +28,7 @@
         />
       </v-col>
 
-      <!-- Name of Enumerator -->
+      <!-- Enumerator -->
       <v-col cols="12" md="4">
         <v-text-field
           v-model="localData.enumeratorName"
@@ -39,7 +39,7 @@
         />
       </v-col>
 
-      <!-- Barangay -->
+      <!-- Location -->
       <v-col cols="12" md="4">
         <v-text-field
           v-model="localData.barangay"
@@ -50,7 +50,6 @@
         />
       </v-col>
 
-      <!-- Municipality/City -->
       <v-col cols="12" md="4">
         <v-text-field
           v-model="localData.municipalityCity"
@@ -61,7 +60,6 @@
         />
       </v-col>
 
-      <!-- Province/Region -->
       <v-col cols="12" md="4">
         <v-text-field
           v-model="localData.provinceRegion"
@@ -72,7 +70,7 @@
         />
       </v-col>
 
-      <!-- Household Control Number / Survey ID -->
+      <!-- Survey ID -->
       <v-col cols="12" md="6">
         <v-text-field
           v-model="localData.householdControlNumber"
@@ -83,14 +81,12 @@
         />
       </v-col>
 
-      <!-- ✅ PERFECTLY ALIGNED GPS LOCATION -->
+      <!-- GPS -->
       <v-col cols="12" md="6">
         <v-row align="center" no-gutters>
-          <!-- Button -->
           <v-col cols="auto">
             <v-btn
               color="primary"
-              variant="elevated"
               size="large"
               prepend-icon="mdi-crosshairs-gps"
               :loading="gpsLoading"
@@ -100,19 +96,57 @@
             </v-btn>
           </v-col>
 
-          <!-- Coordinates -->
           <v-col class="pl-4">
             <div
               v-if="localData.latitude && localData.longitude"
-              class="text-body-1 font-weight-medium text-success"
+              class="text-success font-weight-medium"
             >
               Latitude: {{ localData.latitude.toFixed(6) }} | Longitude:
               {{ localData.longitude.toFixed(6) }}
             </div>
 
-            <div v-else class="text-body-2 text-medium-emphasis">Click to capture location</div>
+            <div v-else class="text-grey">Click to capture location</div>
           </v-col>
         </v-row>
+      </v-col>
+    </v-row>
+
+    <!-- TYPE OF RESPONDENT -->
+    <v-divider class="my-6" />
+
+    <v-row>
+      <v-col cols="12">
+        <label class="text-body-1 font-weight-medium mb-2 d-block"> Type of Respondent </label>
+
+        <v-radio-group v-model="localData.typeOfRespondent" @update:modelValue="handleTypeChange">
+          <v-row dense>
+            <v-col cols="12" sm="6" md="4" v-for="option in respondentTypes" :key="option">
+              <v-radio :value="option">
+                <template #label>
+                  <!-- NORMAL OPTIONS -->
+                  <span v-if="option !== 'Other'">{{ option }}</span>
+
+                  <!-- OTHER WITH INLINE UNDERLINE INPUT -->
+                  <div v-else class="d-flex align-center">
+                    <span>Other</span>
+
+                    <v-text-field
+                      v-if="localData.typeOfRespondent === 'Other'"
+                      v-model="localData.typeOfRespondentOther"
+                      placeholder="Please specify"
+                      variant="underlined"
+                      density="comfortable"
+                      hide-details
+                      class="ml-4"
+                      style="width: 280px"
+                      @update:modelValue="emitUpdate"
+                    />
+                  </div>
+                </template>
+              </v-radio>
+            </v-col>
+          </v-row>
+        </v-radio-group>
       </v-col>
     </v-row>
   </div>
@@ -122,18 +156,25 @@
 import { ref, watch } from 'vue'
 import { getCurrentPosition } from '@/services/geolocation'
 
-const props = defineProps({
-  data: {
-    type: Object,
-    default: () => ({}),
-  },
-})
-
+const props = defineProps({ data: Object })
 const emit = defineEmits(['update:data'])
+
+const respondentTypes = [
+  'Current OFW',
+  'Returning OFW (vacation)',
+  'Returned OFW (reintegrated)',
+  'Distressed OFW / family of distressed OFW',
+  'Family left behind of current OFW',
+  'Repatriated OFW',
+  'Deceased OFW family',
+  'Other',
+]
 
 const gpsLoading = ref(false)
 
 const localData = ref({
+  typeOfRespondent: '',
+  typeOfRespondentOther: '',
   dateOfInterview: '',
   timeOfInterview: '',
   enumeratorName: '',
@@ -141,45 +182,36 @@ const localData = ref({
   municipalityCity: '',
   provinceRegion: '',
   householdControlNumber: '',
-  gpsLocation: '',
   latitude: null,
   longitude: null,
   ...props.data,
 })
 
-// Two-way binding
-watch(
-  localData,
-  (newVal) => {
-    emit('update:data', { ...newVal })
-  },
-  { deep: true },
-)
+// Sync with parent
+watch(localData, (v) => emit('update:data', { ...v }), { deep: true })
 
-const emitUpdate = () => {
-  emit('update:data', { ...localData.value })
+const emitUpdate = () => emit('update:data', { ...localData.value })
+
+// Handle "Other"
+const handleTypeChange = () => {
+  if (localData.value.typeOfRespondent !== 'Other') {
+    localData.value.typeOfRespondentOther = ''
+  }
+  emitUpdate()
 }
 
-// GPS Capture
+// GPS
 const captureGPS = async () => {
   gpsLoading.value = true
 
   try {
-    const position = await getCurrentPosition()
-
-    localData.value.latitude = position.latitude
-    localData.value.longitude = position.longitude
-
-    localData.value.gpsLocation = `${position.latitude.toFixed(6)}, ${position.longitude.toFixed(6)}`
-
-    emitUpdate()
+    const pos = await getCurrentPosition()
+    localData.value.latitude = pos.latitude
+    localData.value.longitude = pos.longitude
   } catch (error) {
-    console.error(error)
-    alert(
-      '❌ Unable to get GPS location.\n\nPlease allow location access in your browser and try again.',
-    )
-  } finally {
-    gpsLoading.value = false
+    alert('❌ Please allow location access')
   }
+
+  gpsLoading.value = false
 }
 </script>

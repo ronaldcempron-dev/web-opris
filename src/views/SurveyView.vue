@@ -8,7 +8,7 @@
           <!-- LEFT: DMW Logo + Text BELOW -->
           <div class="header-left">
             <v-img src="/DMW Logo.png" width="70" height="70" contain />
-            <div class="header-left-text">TANANAN NG OFW</div>
+            <div class="header-left-text">TAHANAN NG OFW</div>
           </div>
 
           <!-- CENTER: Title now split into TWO clean lines + Subtitle -->
