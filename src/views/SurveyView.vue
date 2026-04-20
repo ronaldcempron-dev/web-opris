@@ -3,18 +3,19 @@
     <!-- MAIN CONTENT -->
     <v-main>
       <v-container fluid class="pa-6 pa-md-8" style="max-width: 1400px; margin: 0 auto">
-        <!-- ✅ NEW HEADER -->
+        <!-- ✅ HEADER (unchanged) -->
         <div class="header-container">
-          <!-- LEFT -->
+          <!-- LEFT: DMW Logo + Text BELOW -->
           <div class="header-left">
             <v-img src="/DMW Logo.png" width="70" height="70" contain />
             <div class="header-left-text">TANANAN NG OFW</div>
           </div>
 
-          <!-- CENTER -->
+          <!-- CENTER: Title now split into TWO clean lines + Subtitle -->
           <div class="header-center">
             <div class="main-title">
-              OFW Family Profiling and Reintegration Needs Assessment Form
+              OFW Family Profiling and Reintegration<br />
+              Needs Assessment Form
             </div>
             <div class="subtitle">
               for Profiling, Welfare Assistance, Reintegration Planning, Referral, and Case
@@ -22,15 +23,16 @@
             </div>
           </div>
 
-          <!-- RIGHT -->
+          <!-- RIGHT: Bagong Pilipinas Logo + Text BELOW -->
           <div class="header-right">
             <v-img src="/BagongPilipinas.png" width="70" height="70" contain />
+            <div class="header-right-text">BAGONG PILIPINAS</div>
           </div>
         </div>
 
         <!-- MAIN FORM CARD -->
         <v-card elevation="8" rounded="xl" color="white" class="mx-auto">
-          <!-- PROGRESS + BREADCRUMBS -->
+          <!-- PROGRESS + CLICKABLE BREADCRUMBS -->
           <div class="px-8 pt-6 pb-4 bg-grey-lighten-5">
             <div class="d-flex align-center justify-space-between mb-3">
               <div class="text-body-1 font-weight-medium text-grey-darken-2">
@@ -48,15 +50,29 @@
               class="mb-5"
             />
 
+            <!-- ✅ NEW CLICKABLE SECTION NAVIGATION -->
+            <!-- Beautiful, clean, responsive breadcrumbs that are fully clickable -->
             <v-breadcrumbs
               :items="breadcrumbItems"
               density="compact"
               divider="›"
               class="text-caption text-grey-darken-2"
-              style="flex-wrap: wrap"
+              style="flex-wrap: wrap; gap: 4px"
             >
+              <!-- Prepend icon -->
               <template v-slot:prepend>
                 <v-icon color="primary" size="18" class="mr-1">mdi-form-select</v-icon>
+              </template>
+
+              <!-- Custom clickable item -->
+              <template v-slot:item="{ item }">
+                <span
+                  class="breadcrumb-link"
+                  :class="{ active: item.step === step }"
+                  @click="step = item.step"
+                >
+                  {{ item.title }}
+                </span>
               </template>
             </v-breadcrumbs>
           </div>
@@ -163,7 +179,7 @@
 </template>
 
 <script setup>
-// ✅ unchanged
+// ✅ unchanged imports
 import { ref, computed } from 'vue'
 import { useSurveyForm } from '@/composables/useSurveyForm'
 import { getCurrentPosition } from '@/services/geolocation'
@@ -194,26 +210,27 @@ const { formData } = useSurveyForm()
 const step = ref(1)
 const submitting = ref(false)
 
+// ✅ UPDATED: Now each item has a "step" number so we can jump directly
 const breadcrumbItems = computed(() => [
-  { title: 'General Information' },
-  { title: 'Respondent Identification' },
-  { title: 'Household Profile' },
-  { title: 'OFW Profile' },
-  { title: 'Migration History' },
-  { title: 'Present Status' },
-  { title: 'Socio-Economic Profile' },
-  { title: 'Livelihood Status' },
-  { title: 'Education Status' },
-  { title: 'Health & Psychosocial Status' },
-  { title: 'Social Protection & Assistance' },
-  { title: 'Present Problems & Issues' },
-  { title: 'Reintegration Status' },
-  { title: 'Training, Employment & Needs' },
-  { title: 'Risk Screening' },
-  { title: 'Community Participation' },
-  { title: 'Financial Literacy' },
-  { title: 'Open-Ended Questions' },
-  { title: "Enumerator's Assessment" },
+  { title: 'General Information', step: 1 },
+  { title: 'Respondent Identification', step: 2 },
+  { title: 'Household Profile', step: 3 },
+  { title: 'OFW Profile', step: 4 },
+  { title: 'Migration History', step: 5 },
+  { title: 'Present Status', step: 6 },
+  { title: 'Socio-Economic Profile', step: 7 },
+  { title: 'Livelihood Status', step: 8 },
+  { title: 'Education Status', step: 9 },
+  { title: 'Health & Psychosocial Status', step: 10 },
+  { title: 'Social Protection & Assistance', step: 11 },
+  { title: 'Present Problems & Issues', step: 12 },
+  { title: 'Reintegration Status', step: 13 },
+  { title: 'Training, Employment & Needs', step: 14 },
+  { title: 'Risk Screening', step: 15 },
+  { title: 'Community Participation', step: 16 },
+  { title: 'Financial Literacy', step: 17 },
+  { title: 'Open-Ended Questions', step: 18 },
+  { title: "Enumerator's Assessment", step: 19 },
 ])
 
 const handleSubmit = async () => {
@@ -238,7 +255,7 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped>
-/* CARD */
+/* CARD & HEADER styles unchanged */
 .v-card {
   border-radius: 24px;
   overflow: hidden;
@@ -249,53 +266,81 @@ const handleSubmit = async () => {
   background-color: #f8f9fc !important;
 }
 
-/* ✅ HEADER */
+/* HEADER styles unchanged */
 .header-container {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 24px;
   margin-bottom: 24px;
   padding: 0 16px;
+  width: 100%;
 }
 
-.header-left {
+.header-left,
+.header-right {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  min-width: 220px;
-}
-
-.header-left-text {
-  font-size: 20px;
-  font-weight: 700;
-  color: #1e3a8a;
-}
-
-.header-center {
-  text-align: center;
-  flex: 1;
+  gap: 8px;
+  justify-self: start;
 }
 
 .header-right {
-  display: flex;
-  justify-content: flex-end;
-  min-width: 120px;
+  justify-self: end;
 }
 
-/* TITLE */
-.main-title {
-  font-size: clamp(26px, 4vw, 48px);
-  font-weight: 800;
+.header-left-text,
+.header-right-text {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e3a8a;
+  text-align: center;
+  white-space: nowrap;
   line-height: 1.2;
+}
+
+.main-title {
+  font-size: clamp(24px, 3.6vw, 42px);
+  font-weight: 800;
+  line-height: 1.15;
   color: #1f2937;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.8px;
+  text-align: center;
+  white-space: pre-line;
 }
 
 .subtitle {
   font-size: 16px;
   color: #4b5563;
   font-weight: 500;
-  margin-top: 6px;
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* ✅ NEW: Clickable Breadcrumb Styling */
+.breadcrumb-link {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.breadcrumb-link:hover {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.breadcrumb-link.active {
+  color: #1976d2 !important;
+  font-weight: 700;
+  background-color: #e3f2fd;
+  border-radius: 4px;
+}
+
+/* Make sure the divider stays clean */
+.v-breadcrumbs {
+  flex-wrap: wrap;
+  row-gap: 4px;
 }
 </style>

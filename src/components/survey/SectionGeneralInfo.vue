@@ -83,17 +83,36 @@
         />
       </v-col>
 
-      <!-- GPS Location -->
+      <!-- ✅ PERFECTLY ALIGNED GPS LOCATION -->
       <v-col cols="12" md="6">
-        <v-text-field
-          v-model="localData.gpsLocation"
-          label="GPS Location (if applicable)"
-          variant="outlined"
-          density="comfortable"
-          append-inner-icon="mdi-map-marker"
-          @click:append-inner="$emit('capture-gps')"
-          @update:modelValue="emitUpdate"
-        />
+        <v-row align="center" no-gutters>
+          <!-- Button -->
+          <v-col cols="auto">
+            <v-btn
+              color="primary"
+              variant="elevated"
+              size="large"
+              prepend-icon="mdi-crosshairs-gps"
+              :loading="gpsLoading"
+              @click="captureGPS"
+            >
+              Capture Location
+            </v-btn>
+          </v-col>
+
+          <!-- Coordinates -->
+          <v-col class="pl-4">
+            <div
+              v-if="localData.latitude && localData.longitude"
+              class="text-body-1 font-weight-medium text-success"
+            >
+              Latitude: {{ localData.latitude.toFixed(6) }} | Longitude:
+              {{ localData.longitude.toFixed(6) }}
+            </div>
+
+            <div v-else class="text-body-2 text-medium-emphasis">Click to capture location</div>
+          </v-col>
+        </v-row>
       </v-col>
     </v-row>
   </div>
@@ -101,6 +120,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { getCurrentPosition } from '@/services/geolocation'
 
 const props = defineProps({
   data: {
@@ -111,6 +131,8 @@ const props = defineProps({
 
 const emit = defineEmits(['update:data'])
 
+const gpsLoading = ref(false)
+
 const localData = ref({
   dateOfInterview: '',
   timeOfInterview: '',
@@ -120,6 +142,8 @@ const localData = ref({
   provinceRegion: '',
   householdControlNumber: '',
   gpsLocation: '',
+  latitude: null,
+  longitude: null,
   ...props.data,
 })
 
@@ -134,5 +158,28 @@ watch(
 
 const emitUpdate = () => {
   emit('update:data', { ...localData.value })
+}
+
+// GPS Capture
+const captureGPS = async () => {
+  gpsLoading.value = true
+
+  try {
+    const position = await getCurrentPosition()
+
+    localData.value.latitude = position.latitude
+    localData.value.longitude = position.longitude
+
+    localData.value.gpsLocation = `${position.latitude.toFixed(6)}, ${position.longitude.toFixed(6)}`
+
+    emitUpdate()
+  } catch (error) {
+    console.error(error)
+    alert(
+      '❌ Unable to get GPS location.\n\nPlease allow location access in your browser and try again.',
+    )
+  } finally {
+    gpsLoading.value = false
+  }
 }
 </script>

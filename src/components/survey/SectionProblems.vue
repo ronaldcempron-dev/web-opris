@@ -1,35 +1,71 @@
+<!-- src/components/survey/SectionProblems.vue -->
 <template>
-  <v-card-text>
-    <v-row dense>
+  <div>
+    <h2 class="text-h5 font-weight-bold mb-6 text-primary">
+      XII. Present Problems & Issues Encountered
+    </h2>
+
+    <!-- Major problems currently faced -->
+    <div class="mb-10">
+      <label class="text-body-1 font-weight-medium mb-4 d-block">
+        What are the major problems currently faced by the OFW/family?<br />
+        <small class="text-grey-darken-1">(Check all that apply)</small>
+      </label>
+      <v-row dense>
+        <v-col cols="12" sm="6" md="4" v-for="problem in majorProblems" :key="problem">
+          <v-checkbox
+            v-model="localData.majorProblems"
+            :label="problem"
+            :value="problem"
+            density="compact"
+            @update:modelValue="emitUpdate"
+          />
+        </v-col>
+      </v-row>
+    </div>
+
+    <!-- Most urgent concern -->
+    <v-row dense class="mb-10">
       <v-col cols="12">
-        <v-label>Major problems currently faced (check all that apply)</v-label>
-        <v-checkbox
-          v-for="opt in majorProblems"
-          :key="opt"
-          v-model="data.majorProblems"
-          :label="opt"
-          :value="opt"
-        />
-      </v-col>
-      <v-col cols="12">
-        <v-text-field v-model="data.mostUrgent" label="Which is the MOST urgent concern?" />
-      </v-col>
-      <v-col cols="12">
-        <v-label>Has the family experienced any of the following due to migration?</v-label>
-        <v-checkbox
-          v-for="opt in migrationIssues"
-          :key="opt"
-          v-model="data.migrationRelatedIssues"
-          :label="opt"
-          :value="opt"
+        <v-text-field
+          v-model="localData.mostUrgentConcern"
+          label="Which is the MOST urgent concern?"
+          variant="outlined"
+          density="comfortable"
+          @update:modelValue="emitUpdate"
         />
       </v-col>
     </v-row>
-  </v-card-text>
+
+    <!-- Problems experienced due to migration -->
+    <div>
+      <label class="text-body-1 font-weight-medium mb-4 d-block">
+        Has the family experienced any of the following due to migration?<br />
+        <small class="text-grey-darken-1">(Check all that apply)</small>
+      </label>
+      <v-row dense>
+        <v-col cols="12" sm="6" md="4" v-for="issue in migrationIssues" :key="issue">
+          <v-checkbox
+            v-model="localData.migrationIssues"
+            :label="issue"
+            :value="issue"
+            density="compact"
+            @update:modelValue="emitUpdate"
+          />
+        </v-col>
+      </v-row>
+    </div>
+  </div>
 </template>
 
 <script setup>
-defineProps({ data: Object })
+import { ref, watch } from 'vue'
+
+const props = defineProps({
+  data: { type: Object, default: () => ({}) },
+})
+
+const emit = defineEmits(['update:data'])
 
 const majorProblems = [
   'Loss of income / no remittance',
@@ -49,6 +85,7 @@ const majorProblems = [
   'No livelihood capital',
   'No local job opportunities',
   'Reintegration difficulties',
+  'Other',
 ]
 
 const migrationIssues = [
@@ -60,5 +97,18 @@ const migrationIssues = [
   'Return without savings',
   'Traumatic return/repatriation',
   'Community stigma / discrimination',
+  'Other',
 ]
+
+const localData = ref({
+  majorProblems: [],
+  mostUrgentConcern: '',
+  migrationIssues: [],
+  ...props.data,
+})
+
+// Two-way sync with SurveyView
+watch(localData, (newVal) => emit('update:data', { ...newVal }), { deep: true })
+
+const emitUpdate = () => emit('update:data', { ...localData.value })
 </script>
