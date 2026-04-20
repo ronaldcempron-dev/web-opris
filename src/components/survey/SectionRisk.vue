@@ -1,47 +1,84 @@
+<!-- src/components/survey/SectionRisk.vue -->
 <template>
-  <v-card-text>
-    <v-row dense>
+  <div>
+    <h2 class="text-h5 font-weight-bold mb-6 text-primary">
+      XV. Case-Specific Risk Screening (for Vulnerable Households)
+    </h2>
+
+    <!-- Ongoing case -->
+    <div class="mb-10">
+      <label class="text-body-1 font-weight-medium mb-4 d-block">
+        Does the OFW/family have any ongoing case?<br />
+        <small class="text-grey-darken-1">(Please check all that apply)</small>
+      </label>
+      <v-row dense>
+        <v-col cols="12" sm="6" md="4" v-for="caseType in ongoingCases" :key="caseType">
+          <v-checkbox
+            v-model="localData.ongoingCase"
+            :label="caseType"
+            :value="caseType"
+            density="compact"
+            @update:modelValue="emitUpdate"
+          />
+        </v-col>
+      </v-row>
+    </div>
+
+    <!-- Need urgent referral? -->
+    <v-row dense class="mb-8">
       <v-col cols="12">
-        <v-label>Ongoing case (check all that apply)</v-label>
-        <v-checkbox
-          v-for="opt in riskCases"
-          :key="opt"
-          v-model="data.ongoingCase"
-          :label="opt"
-          :value="opt"
-        />
-      </v-col>
-      <v-col cols="12">
-        <v-switch
-          v-model="data.needsUrgentReferral"
+        <v-radio-group
+          v-model="localData.needsUrgentReferral"
           label="Does the household need urgent referral?"
-        />
-      </v-col>
-      <v-col cols="12" v-if="data.needsUrgentReferral">
-        <v-label>If yes, referred to</v-label>
-        <v-checkbox
-          v-for="opt in referralOptions"
-          :key="opt"
-          v-model="data.referralTo"
-          :label="opt"
-          :value="opt"
-        />
-      </v-col>
-      <v-col cols="12">
-        <v-select
-          v-model="data.priorityLevel"
-          label="Priority level assigned by enumerator"
-          :items="['High / urgent', 'Medium', 'Low']"
-        />
+          inline
+          @update:modelValue="emitUpdate"
+        >
+          <v-radio label="Yes" value="Yes" />
+          <v-radio label="No" value="No" />
+        </v-radio-group>
       </v-col>
     </v-row>
-  </v-card-text>
+
+    <!-- If yes, referred to -->
+    <div v-if="localData.needsUrgentReferral === 'Yes'" class="mb-10">
+      <label class="text-body-1 font-weight-medium mb-4 d-block"> If yes, referred to: </label>
+      <v-row dense>
+        <v-col cols="12" sm="6" md="4" v-for="agency in referralAgencies" :key="agency">
+          <v-checkbox
+            v-model="localData.referredTo"
+            :label="agency"
+            :value="agency"
+            density="compact"
+            @update:modelValue="emitUpdate"
+          />
+        </v-col>
+      </v-row>
+    </div>
+
+    <!-- Priority level assigned by enumerator -->
+    <div>
+      <label class="text-body-1 font-weight-medium mb-3 d-block">
+        Priority level assigned by enumerator
+      </label>
+      <v-radio-group v-model="localData.priorityLevel" inline @update:modelValue="emitUpdate">
+        <v-radio label="High / urgent" value="High / urgent" />
+        <v-radio label="Medium" value="Medium" />
+        <v-radio label="Low" value="Low" />
+      </v-radio-group>
+    </div>
+  </div>
 </template>
 
 <script setup>
-defineProps({ data: Object })
+import { ref, watch } from 'vue'
 
-const riskCases = [
+const props = defineProps({
+  data: { type: Object, default: () => ({}) },
+})
+
+const emit = defineEmits(['update:data'])
+
+const ongoingCases = [
   'Illegal recruitment',
   'Human trafficking',
   'Labor case / unpaid wages',
@@ -53,9 +90,10 @@ const riskCases = [
   'Child protection concern',
   'Domestic violence / VAWC',
   'None',
+  'Other',
 ]
 
-const referralOptions = [
+const referralAgencies = [
   'DMW',
   'OWWA',
   'LGU/MSWDO',
@@ -66,5 +104,19 @@ const referralOptions = [
   'TESDA',
   'PESO',
   'NGO / CSO',
+  'Other',
 ]
+
+const localData = ref({
+  ongoingCase: [],
+  needsUrgentReferral: '',
+  referredTo: [],
+  priorityLevel: '',
+  ...props.data,
+})
+
+// Two-way sync with SurveyView
+watch(localData, (newVal) => emit('update:data', { ...newVal }), { deep: true })
+
+const emitUpdate = () => emit('update:data', { ...localData.value })
 </script>
