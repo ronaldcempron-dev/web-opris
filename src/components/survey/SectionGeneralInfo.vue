@@ -97,12 +97,40 @@
           </v-col>
 
           <v-col class="pl-4">
-            <div
-              v-if="localData.latitude && localData.longitude"
-              class="text-success font-weight-medium"
-            >
-              Latitude: {{ localData.latitude.toFixed(6) }} | Longitude:
-              {{ localData.longitude.toFixed(6) }}
+            <div v-if="localData.latitude && localData.longitude">
+              <!-- LATITUDE -->
+              <div class="d-flex align-center mb-1">
+                <span class="font-weight-medium">
+                  LATITUDE: {{ localData.latitude.toFixed(6) }}
+                </span>
+
+                <v-btn
+                  icon="mdi-content-copy"
+                  size="small"
+                  variant="text"
+                  class="ml-2"
+                  @click="copyLat"
+                />
+
+                <span v-if="copiedLat" class="text-success text-caption ml-1"> Copied! </span>
+              </div>
+
+              <!-- LONGITUDE -->
+              <div class="d-flex align-center">
+                <span class="font-weight-medium">
+                  LONGITUDE: {{ localData.longitude.toFixed(6) }}
+                </span>
+
+                <v-btn
+                  icon="mdi-content-copy"
+                  size="small"
+                  variant="text"
+                  class="ml-2"
+                  @click="copyLng"
+                />
+
+                <span v-if="copiedLng" class="text-success text-caption ml-1"> Copied! </span>
+              </div>
             </div>
 
             <div v-else class="text-grey">Click to capture location</div>
@@ -123,12 +151,10 @@
             <v-col cols="12" sm="6" md="4" v-for="option in respondentTypes" :key="option">
               <v-radio :value="option">
                 <template #label>
-                  <!-- NORMAL OPTIONS -->
                   <span v-if="option !== 'Other'">{{ option }}</span>
 
-                  <!-- OTHER WITH INLINE UNDERLINE INPUT -->
-                  <div v-else class="d-flex align-center">
-                    <span>Other</span>
+                  <div v-else class="d-flex align-center" style="align-items: flex-start">
+                    <span class="mt-1">Other</span>
 
                     <v-text-field
                       v-if="localData.typeOfRespondent === 'Other'"
@@ -137,7 +163,7 @@
                       variant="underlined"
                       density="comfortable"
                       hide-details
-                      class="ml-4"
+                      class="ml-4 mt-n2"
                       style="width: 280px"
                       @update:modelValue="emitUpdate"
                     />
@@ -171,6 +197,8 @@ const respondentTypes = [
 ]
 
 const gpsLoading = ref(false)
+const copiedLat = ref(false)
+const copiedLng = ref(false)
 
 const localData = ref({
   typeOfRespondent: '',
@@ -187,12 +215,10 @@ const localData = ref({
   ...props.data,
 })
 
-// Sync with parent
 watch(localData, (v) => emit('update:data', { ...v }), { deep: true })
 
 const emitUpdate = () => emit('update:data', { ...localData.value })
 
-// Handle "Other"
 const handleTypeChange = () => {
   if (localData.value.typeOfRespondent !== 'Other') {
     localData.value.typeOfRespondentOther = ''
@@ -200,10 +226,8 @@ const handleTypeChange = () => {
   emitUpdate()
 }
 
-// GPS
 const captureGPS = async () => {
   gpsLoading.value = true
-
   try {
     const pos = await getCurrentPosition()
     localData.value.latitude = pos.latitude
@@ -211,7 +235,19 @@ const captureGPS = async () => {
   } catch (error) {
     alert('❌ Please allow location access')
   }
-
   gpsLoading.value = false
+}
+
+/* COPY FUNCTIONS WITH FEEDBACK */
+const copyLat = async () => {
+  await navigator.clipboard.writeText(localData.value.latitude.toFixed(6))
+  copiedLat.value = true
+  setTimeout(() => (copiedLat.value = false), 1500)
+}
+
+const copyLng = async () => {
+  await navigator.clipboard.writeText(localData.value.longitude.toFixed(6))
+  copiedLng.value = true
+  setTimeout(() => (copiedLng.value = false), 1500)
 }
 </script>
