@@ -1,12 +1,27 @@
 <template>
   <v-app theme="light">
+    <v-navigation-drawer v-model="drawer" app temporary width="260">
+      <v-list nav>
+        <v-list-item prepend-icon="mdi-file-document" title="Survey Form" @click="goTo('/')" />
+        <v-list-item prepend-icon="mdi-table" title="View Responses" @click="goTo('/responses')" />
+      </v-list>
+    </v-navigation-drawer>
     <!-- MAIN CONTENT -->
     <v-main>
       <v-container fluid class="pa-6 pa-md-8" style="max-width: 1400px; margin: 0 auto">
         <!-- ✅ HEADER (unchanged) -->
         <div class="header-container">
           <!-- LEFT: DMW Logo + Text BELOW -->
-          <div class="header-left">
+          <div class="header-left" style="position: relative">
+            <v-btn
+              icon
+              variant="text"
+              class="menu-btn"
+              @click="drawer = true"
+              style="position: absolute; left: -48px; top: 8px"
+            >
+              <v-icon>mdi-menu</v-icon>
+            </v-btn>
             <v-img src="/DMW Logo.png" width="70" height="70" contain />
             <div class="header-left-text">TAHANAN NG OFW</div>
           </div>
@@ -184,6 +199,14 @@ import { ref, computed } from 'vue'
 import { useSurveyForm } from '@/composables/useSurveyForm'
 import { getCurrentPosition } from '@/services/geolocation'
 import { supabase } from '@/services/supabase'
+import Sidebar from '@/components/common/Sidebar.vue'
+// Handle selecting a response from the sidebar (future: show details, etc)
+const onSelectResponse = (response) => {
+  // For now, just alert. Replace with detail view logic as needed.
+  alert(
+    `Selected response for: ${response.respondent_name || 'No Name'}\nDate: ${new Date(response.created_at).toLocaleString()}`,
+  )
+}
 
 // sections...
 import SectionGeneralInfo from '@/components/survey/SectionGeneralInfo.vue'
@@ -209,6 +232,15 @@ import SectionEnumerator from '@/components/survey/SectionEnumerator.vue'
 const { formData } = useSurveyForm()
 const step = ref(1)
 const submitting = ref(false)
+
+const drawer = ref(false)
+import { useRouter } from 'vue-router'
+const router = useRouter()
+
+const goTo = (path) => {
+  router.push(path)
+  drawer.value = false
+}
 
 // ✅ UPDATED: Now each item has a "step" number so we can jump directly
 const breadcrumbItems = computed(() => [
