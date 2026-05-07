@@ -1,12 +1,7 @@
 <template>
   <v-app theme="light">
-    <!-- Navigation Drawer -->
-    <v-navigation-drawer v-model="drawer" app temporary width="260">
-      <v-list nav>
-        <v-list-item prepend-icon="mdi-file-document" title="Survey Form" @click="goTo('/')" />
-        <v-list-item prepend-icon="mdi-table" title="View Responses" @click="goTo('/responses')" />
-      </v-list>
-    </v-navigation-drawer>
+    <!-- Sidebar Navigation -->
+    <Sidebar />
 
     <!-- MAIN CONTENT -->
     <v-main>
@@ -117,6 +112,7 @@
 </template>
 
 <script setup>
+import Sidebar from '@/components/common/Sidebar.vue'
 import { ref, computed, onMounted } from 'vue'
 import { supabase } from '@/services/supabase'
 import { useRouter } from 'vue-router'
