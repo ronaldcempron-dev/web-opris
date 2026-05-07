@@ -1,33 +1,22 @@
 <template>
   <v-app theme="light" style="background: #f5f4f0">
-    <!-- ─── SIDE DRAWER ─── -->
-    <v-navigation-drawer v-model="drawer" app temporary width="280" color="white">
-      <div class="pa-6 pb-4">
-        <div class="drawer-nav-label">Navigation</div>
-        <v-list nav density="compact" class="pa-0">
-          <v-list-item
-            prepend-icon="mdi-file-document-outline"
-            title="Survey Form"
-            @click="goTo('/')"
-            rounded="lg"
-            class="mb-1"
-          />
-          <v-list-item
-            prepend-icon="mdi-table-large"
-            title="View Responses"
-            @click="goTo('/responses')"
-            rounded="lg"
-          />
-        </v-list>
-      </div>
-    </v-navigation-drawer>
+    <!-- Shared Sidebar -->
+    <Sidebar v-model="drawer" />
 
+    <!-- ─── MAIN CONTENT ─── -->
     <v-main>
       <div class="survey-layout">
         <!-- ─── STICKY TOP RAIL ─── -->
         <div class="progress-rail">
           <div class="progress-rail-inner">
-            <v-btn icon variant="text" size="small" @click="drawer = true" class="rail-menu-btn">
+            <v-btn
+              icon
+              variant="text"
+              size="small"
+              @click="drawer = !drawer"
+              class="rail-menu-btn"
+              style="z-index: 10"
+            >
               <v-icon>mdi-menu</v-icon>
             </v-btn>
 
@@ -109,63 +98,63 @@
 
             <div class="section-body">
               <v-stepper-window v-model="step">
-                <v-stepper-window-item :value="1"
-                  ><SectionGeneralInfo :data="formData.general"
-                /></v-stepper-window-item>
-                <v-stepper-window-item :value="2"
-                  ><SectionRespondent :data="formData.respondent"
-                /></v-stepper-window-item>
-                <v-stepper-window-item :value="3"
-                  ><SectionHousehold :data="formData.household"
-                /></v-stepper-window-item>
-                <v-stepper-window-item :value="4"
-                  ><SectionOFWProfile :data="formData.ofwProfile"
-                /></v-stepper-window-item>
-                <v-stepper-window-item :value="5"
-                  ><SectionMigration :data="formData.migration"
-                /></v-stepper-window-item>
-                <v-stepper-window-item :value="6"
-                  ><SectionPresentStatus :data="formData.presentStatus"
-                /></v-stepper-window-item>
-                <v-stepper-window-item :value="7"
-                  ><SectionSocioEconomic :data="formData.socioEconomic"
-                /></v-stepper-window-item>
-                <v-stepper-window-item :value="8"
-                  ><SectionLivelihood :data="formData.livelihood"
-                /></v-stepper-window-item>
-                <v-stepper-window-item :value="9"
-                  ><SectionEducation :data="formData.education"
-                /></v-stepper-window-item>
-                <v-stepper-window-item :value="10"
-                  ><SectionHealth :data="formData.health"
-                /></v-stepper-window-item>
-                <v-stepper-window-item :value="11"
-                  ><SectionAssistance :data="formData.assistance"
-                /></v-stepper-window-item>
-                <v-stepper-window-item :value="12"
-                  ><SectionProblems :data="formData.problems"
-                /></v-stepper-window-item>
-                <v-stepper-window-item :value="13"
-                  ><SectionReintegration :data="formData.reintegration"
-                /></v-stepper-window-item>
-                <v-stepper-window-item :value="14"
-                  ><SectionNeeds :data="formData.needs"
-                /></v-stepper-window-item>
-                <v-stepper-window-item :value="15"
-                  ><SectionRisk :data="formData.risk"
-                /></v-stepper-window-item>
-                <v-stepper-window-item :value="16"
-                  ><SectionCommunity :data="formData.community"
-                /></v-stepper-window-item>
-                <v-stepper-window-item :value="17"
-                  ><SectionFinancial :data="formData.financial"
-                /></v-stepper-window-item>
-                <v-stepper-window-item :value="18"
-                  ><SectionOpenEnded :data="formData.openEnded"
-                /></v-stepper-window-item>
-                <v-stepper-window-item :value="19"
-                  ><SectionEnumerator :data="formData.enumerator"
-                /></v-stepper-window-item>
+                <v-stepper-window-item :value="1">
+                  <SectionGeneralInfo :data="formData.general" />
+                </v-stepper-window-item>
+                <v-stepper-window-item :value="2">
+                  <SectionRespondent :data="formData.respondent" />
+                </v-stepper-window-item>
+                <v-stepper-window-item :value="3">
+                  <SectionHousehold :data="formData.household" />
+                </v-stepper-window-item>
+                <v-stepper-window-item :value="4">
+                  <SectionOFWProfile :data="formData.ofwProfile" />
+                </v-stepper-window-item>
+                <v-stepper-window-item :value="5">
+                  <SectionMigration :data="formData.migration" />
+                </v-stepper-window-item>
+                <v-stepper-window-item :value="6">
+                  <SectionPresentStatus :data="formData.presentStatus" />
+                </v-stepper-window-item>
+                <v-stepper-window-item :value="7">
+                  <SectionSocioEconomic :data="formData.socioEconomic" />
+                </v-stepper-window-item>
+                <v-stepper-window-item :value="8">
+                  <SectionLivelihood :data="formData.livelihood" />
+                </v-stepper-window-item>
+                <v-stepper-window-item :value="9">
+                  <SectionEducation :data="formData.education" />
+                </v-stepper-window-item>
+                <v-stepper-window-item :value="10">
+                  <SectionHealth :data="formData.health" />
+                </v-stepper-window-item>
+                <v-stepper-window-item :value="11">
+                  <SectionAssistance :data="formData.assistance" />
+                </v-stepper-window-item>
+                <v-stepper-window-item :value="12">
+                  <SectionProblems :data="formData.problems" />
+                </v-stepper-window-item>
+                <v-stepper-window-item :value="13">
+                  <SectionReintegration :data="formData.reintegration" />
+                </v-stepper-window-item>
+                <v-stepper-window-item :value="14">
+                  <SectionNeeds :data="formData.needs" />
+                </v-stepper-window-item>
+                <v-stepper-window-item :value="15">
+                  <SectionRisk :data="formData.risk" />
+                </v-stepper-window-item>
+                <v-stepper-window-item :value="16">
+                  <SectionCommunity :data="formData.community" />
+                </v-stepper-window-item>
+                <v-stepper-window-item :value="17">
+                  <SectionFinancial :data="formData.financial" />
+                </v-stepper-window-item>
+                <v-stepper-window-item :value="18">
+                  <SectionOpenEnded :data="formData.openEnded" />
+                </v-stepper-window-item>
+                <v-stepper-window-item :value="19">
+                  <SectionEnumerator :data="formData.enumerator" />
+                </v-stepper-window-item>
               </v-stepper-window>
             </div>
 
@@ -219,6 +208,9 @@ import { getCurrentPosition } from '@/services/geolocation'
 import { supabase } from '@/services/supabase'
 import { useRouter } from 'vue-router'
 
+import Sidebar from '@/components/common/Sidebar.vue'
+
+// Section Components
 import SectionGeneralInfo from '@/components/survey/SectionGeneralInfo.vue'
 import SectionRespondent from '@/components/survey/SectionRespondent.vue'
 import SectionHousehold from '@/components/survey/SectionHousehold.vue'
@@ -241,9 +233,10 @@ import SectionEnumerator from '@/components/survey/SectionEnumerator.vue'
 
 const { formData } = useSurveyForm()
 const { smAndDown } = useDisplay()
+
 const step = ref(1)
 const submitting = ref(false)
-const drawer = ref(false)
+const drawer = ref(true)
 const navScroll = ref(null)
 const activePill = ref(null)
 const router = useRouter()
@@ -252,7 +245,6 @@ const logoSize = computed(() => (smAndDown.value ? 44 : 60))
 
 const goTo = (path) => {
   router.push(path)
-  drawer.value = false
 }
 
 const breadcrumbItems = [
@@ -327,7 +319,7 @@ const handleSubmit = async () => {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 200;
+  z-index: 100 !important;
   background: rgba(255, 255, 255, 0.97);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -345,7 +337,8 @@ const handleSubmit = async () => {
 
 .rail-menu-btn {
   color: #6b7280 !important;
-  flex-shrink: 0;
+  z-index: 110;
+  position: relative;
 }
 
 .rail-logos {
@@ -681,7 +674,7 @@ const handleSubmit = async () => {
   margin-bottom: 20px;
 }
 
-/* ══ TABLET  ≤ 768px ═════════════════════ */
+/* ══ RESPONSIVE ══════════════════════════ */
 @media (max-width: 768px) {
   .survey-body {
     padding: 70px 24px 0;
@@ -689,21 +682,13 @@ const handleSubmit = async () => {
   .progress-rail-inner {
     padding: 9px 24px 7px;
   }
-
   .header-logos-row {
     grid-template-columns: 58px 1fr 58px;
     gap: 8px;
   }
-
-  .logo-label {
-    font-size: 8px;
-    max-width: 58px;
-  }
-
   .survey-header {
     padding: 22px 0 18px;
   }
-
   .section-heading {
     padding: 18px 24px 14px;
   }
@@ -713,25 +698,8 @@ const handleSubmit = async () => {
   .form-footer {
     padding: 14px 24px;
   }
-
-  .dot {
-    width: 6px;
-    height: 6px;
-  }
-  .dot.active {
-    width: 15px;
-  }
-
-  .btn {
-    font-size: 13px;
-    padding: 9px 16px;
-  }
-  .btn-placeholder {
-    width: 80px;
-  }
 }
 
-/* ══ MOBILE  ≤ 480px ═════════════════════ */
 @media (max-width: 480px) {
   .survey-body {
     padding: 62px 12px 0;
@@ -739,21 +707,9 @@ const handleSubmit = async () => {
   .progress-rail-inner {
     padding: 9px 12px 7px;
   }
-
-  /* Rail: hide long title, keep sub */
   .rail-title {
     display: none;
   }
-  .rail-sub {
-    font-size: 11px;
-    color: #6b7280;
-  }
-  .rail-pct {
-    font-size: 11px;
-    padding: 2px 8px;
-  }
-
-  /* Header: tighter grid */
   .survey-header {
     padding: 14px 0 12px;
   }
@@ -761,26 +717,6 @@ const handleSubmit = async () => {
     grid-template-columns: 48px 1fr 48px;
     gap: 6px;
   }
-  .logo-label {
-    font-size: 7.5px;
-    letter-spacing: 0.8px;
-    max-width: 50px;
-  }
-
-  /* Title */
-  .survey-title {
-    font-size: clamp(13px, 5vw, 17px);
-    letter-spacing: -0.2px;
-  }
-  .title-break {
-    display: none;
-  }
-  .survey-subtitle {
-    font-size: 11px;
-    line-height: 1.5;
-  }
-
-  /* Pills: number-only circles */
   .snav-label {
     display: none;
   }
@@ -790,39 +726,15 @@ const handleSubmit = async () => {
     height: 32px;
     border-radius: 50%;
     justify-content: center;
-    min-height: 32px;
   }
-  .snav-num {
-    width: 20px;
-    height: 20px;
-    font-size: 10px;
-    background: transparent;
-  }
-
-  /* Form panel */
   .form-panel {
     border-radius: 14px;
   }
   .section-heading {
     padding: 14px 16px 12px;
-    gap: 8px;
-  }
-  .section-badge {
-    font-size: 10px;
-    padding: 3px 8px;
-  }
-  .section-title {
-    font-size: 13px;
   }
   .section-body {
     padding: 16px 16px 8px;
-    min-height: 180px;
-  }
-
-  /* Footer */
-  .form-footer {
-    padding: 12px 16px;
-    gap: 8px;
   }
   .footer-dots-wrap {
     display: none;
@@ -830,22 +742,11 @@ const handleSubmit = async () => {
   .mobile-step-counter {
     display: block;
   }
-
-  /* Buttons */
-  .btn {
-    font-size: 13px;
-    padding: 9px 13px;
-    border-radius: 8px;
-  }
   .btn-text {
     display: none;
   }
-  .btn-placeholder {
-    width: 42px;
-  }
 }
 
-/* ══ LARGE DESKTOP  ≥ 1200px ════════════ */
 @media (min-width: 1200px) {
   .survey-body {
     padding: 84px 56px 0;
@@ -859,10 +760,6 @@ const handleSubmit = async () => {
   .header-logos-row {
     grid-template-columns: 84px 1fr 84px;
   }
-  .logo-label {
-    font-size: 10px;
-    max-width: 80px;
-  }
   .section-heading {
     padding: 28px 52px 22px;
   }
@@ -871,9 +768,6 @@ const handleSubmit = async () => {
   }
   .form-footer {
     padding: 20px 52px;
-  }
-  .btn-placeholder {
-    width: 120px;
   }
 }
 </style>

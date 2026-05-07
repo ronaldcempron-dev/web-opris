@@ -1,92 +1,87 @@
 <template>
   <v-app theme="light">
-    <!-- Navigation Drawer -->
-    <v-navigation-drawer v-model="drawer" app temporary width="260">
-      <v-list nav>
-        <v-list-item prepend-icon="mdi-file-document" title="Survey Form" @click="goTo('/')" />
-        <v-list-item prepend-icon="mdi-table" title="View Responses" @click="goTo('/responses')" />
-      </v-list>
-    </v-navigation-drawer>
+    <!-- Shared Sidebar -->
+    <Sidebar v-model="drawer" :show-responses-list="true" @select="viewFullReport" />
 
-    <!-- MAIN CONTENT -->
     <v-main>
-      <v-container fluid class="pa-6 pa-md-8" style="max-width: 1400px; margin: 0 auto">
-        <!-- HEADER -->
-        <div class="header-container">
-          <div class="header-left" style="position: relative">
-            <v-btn
-              icon
-              variant="text"
-              class="menu-btn"
-              @click="drawer = true"
-              style="position: absolute; left: -48px; top: 8px"
-            >
+      <div class="responses-layout">
+        <!-- STICKY TOP RAIL - FIXED -->
+        <div class="progress-rail">
+          <div class="progress-rail-inner">
+            <v-btn icon variant="text" size="small" @click="drawer = !drawer" class="rail-menu-btn">
               <v-icon>mdi-menu</v-icon>
             </v-btn>
-            <v-img src="/DMW Logo.png" width="70" height="70" contain />
-            <div class="header-left-text">TAHANAN NG OFW</div>
-          </div>
 
-          <div class="header-center">
-            <div class="main-title">Survey Responses</div>
-            <div class="subtitle">OFW Family Profiling and Reintegration Needs Assessment</div>
-          </div>
+            <div class="rail-logos">
+              <v-img src="/DMW Logo.png" width="26" height="26" contain />
+              <v-img src="/BagongPilipinas.png" width="26" height="26" contain />
+            </div>
 
-          <div class="header-right">
-            <v-img src="/BagongPilipinas.png" width="70" height="70" contain />
-            <div class="header-right-text">BAGONG PILIPINAS</div>
-          </div>
-        </div>
+            <div class="rail-title-block">
+              <span class="rail-title">OFW Family Profiling</span>
+              <span class="rail-sub">Survey Responses</span>
+            </div>
 
-        <!-- MAIN CARD -->
-        <v-card elevation="8" rounded="xl" color="white" class="mx-auto">
-          <v-card-title class="px-8 pt-8 pb-4 d-flex align-center">
-            <v-icon color="primary" size="32" class="mr-3">mdi-table</v-icon>
-            <span class="text-h4 font-weight-bold">All Submitted Responses</span>
             <v-spacer />
+
             <v-btn
               color="primary"
+              variant="outlined"
+              size="small"
               @click="fetchResponses"
               :loading="loading"
               prepend-icon="mdi-refresh"
             >
               Refresh
             </v-btn>
-          </v-card-title>
+          </div>
 
-          <v-card-text class="px-8 pb-8">
-            <v-text-field
-              v-model="search"
-              label="Search by Respondent or Enumerator..."
-              prepend-inner-icon="mdi-magnify"
-              variant="outlined"
-              clearable
-              class="mb-6"
-            />
+          <div class="rail-bar-track">
+            <div class="rail-bar-fill" style="width: 100%" />
+          </div>
+        </div>
 
-            <v-data-table
-              :headers="headers"
-              :items="filteredResponses"
-              :loading="loading"
-              item-value="id"
-              :items-per-page="10"
-            >
-              <template #item.created_at="{ item }">
-                {{ formatDate(item.created_at) }}
-              </template>
+        <!-- MAIN BODY -->
+        <div class="responses-body">
+          <v-card elevation="8" rounded="xl" color="white" class="mx-auto">
+            <v-card-title class="px-8 pt-8 pb-4 d-flex align-center">
+              <v-icon color="primary" size="32" class="mr-3">mdi-table</v-icon>
+              <span class="text-h4 font-weight-bold">All Submitted Responses</span>
+            </v-card-title>
 
-              <template #item.actions="{ item }">
-                <v-btn color="primary" variant="text" size="small" @click="viewFullReport(item)">
-                  View Full Report
-                </v-btn>
-              </template>
-            </v-data-table>
-          </v-card-text>
-        </v-card>
-      </v-container>
+            <v-card-text class="px-8 pb-8">
+              <v-text-field
+                v-model="search"
+                label="Search by Respondent or Enumerator..."
+                prepend-inner-icon="mdi-magnify"
+                variant="outlined"
+                clearable
+                class="mb-6"
+              />
+
+              <v-data-table
+                :headers="headers"
+                :items="filteredResponses"
+                :loading="loading"
+                item-value="id"
+                :items-per-page="10"
+              >
+                <template #item.created_at="{ item }">
+                  {{ formatDate(item.created_at) }}
+                </template>
+                <template #item.actions="{ item }">
+                  <v-btn color="primary" variant="text" size="small" @click="viewFullReport(item)">
+                    View Full Report
+                  </v-btn>
+                </template>
+              </v-data-table>
+            </v-card-text>
+          </v-card>
+        </div>
+      </div>
     </v-main>
 
-    <!-- BEAUTIFUL FULL REPORT MODAL -->
+    <!-- FULL REPORT MODAL -->
     <v-dialog v-model="reportDialog" max-width="1100" scrollable>
       <v-card v-if="selectedResponse" rounded="xl" elevation="10">
         <v-card-title class="d-flex align-center justify-space-between pa-6">
@@ -119,11 +114,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { supabase } from '@/services/supabase'
-import { useRouter } from 'vue-router'
+import Sidebar from '@/components/common/Sidebar.vue'
 import ReportDetailView from '@/components/responses/ReportDetailView.vue'
 
-const router = useRouter()
-const drawer = ref(false)
+const drawer = ref(true)
 
 const responses = ref([])
 const loading = ref(true)
@@ -140,12 +134,11 @@ const headers = [
 
 const fetchResponses = async () => {
   loading.value = true
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('responses')
     .select('*')
     .order('created_at', { ascending: false })
-
-  if (!error) responses.value = data || []
+  if (data) responses.value = data
   loading.value = false
 }
 
@@ -167,40 +160,56 @@ const viewFullReport = (item) => {
   selectedResponse.value = item
   reportDialog.value = true
 }
-
-const goTo = (path) => {
-  router.push(path)
-  drawer.value = false
-}
 </script>
 
 <style scoped>
-/* Reuse same header styles as SurveyView */
-.header-container {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 24px;
-  margin-bottom: 32px;
-  padding: 0 16px;
+.responses-layout {
+  min-height: 100vh;
+  background: #f5f4f0;
 }
-.header-left,
-.header-right {
+.responses-body {
+  width: 100%;
+  padding: 90px 40px 40px;
+  box-sizing: border-box;
+}
+
+.progress-rail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100 !important;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.progress-rail-inner {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  padding: 10px 40px 8px;
+  box-sizing: border-box;
 }
-.header-left-text,
-.header-right-text {
-  font-size: 18px;
-  font-weight: 700;
-  color: #1e3a8a;
+
+.rail-menu-btn {
+  color: #6b7280 !important;
 }
-.main-title {
-  font-size: clamp(26px, 3.8vw, 42px);
-  font-weight: 800;
-  color: #1f2937;
-  text-align: center;
+
+@media (max-width: 768px) {
+  .responses-body {
+    padding: 80px 24px 24px;
+  }
+  .progress-rail-inner {
+    padding: 10px 24px 8px;
+  }
+}
+@media (max-width: 480px) {
+  .responses-body {
+    padding: 75px 16px 24px;
+  }
+  .progress-rail-inner {
+    padding: 10px 16px 8px;
+  }
 }
 </style>
