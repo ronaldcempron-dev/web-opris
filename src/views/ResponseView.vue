@@ -12,14 +12,8 @@
               <v-icon>mdi-menu</v-icon>
             </v-btn>
 
-            <div class="rail-logos">
-              <v-img src="/DMW Logo.png" width="26" height="26" contain />
-              <v-img src="/BagongPilipinas.png" width="26" height="26" contain />
-            </div>
-
             <div class="rail-title-block">
               <span class="rail-title">OFW Family Profiling</span>
-              <span class="rail-sub">Survey Responses</span>
             </div>
 
             <v-spacer />
@@ -211,5 +205,97 @@ const viewFullReport = (item) => {
   .progress-rail-inner {
     padding: 10px 16px 8px;
   }
+}
+
+/* ══ STICKY RAIL ═════════════════════════ */
+.progress-rail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100 !important;
+
+  /* SAME BLUE AS RESPONSES VIEW */
+  background: #1d4ed8;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.progress-rail-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 40px 7px;
+  box-sizing: border-box;
+}
+
+.rail-menu-btn {
+  color: white !important;
+  z-index: 110;
+  position: relative;
+}
+
+.rail-title-block {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.rail-title {
+  font-size: 13px;
+  font-weight: 700;
+
+  /* WHITE TEXT */
+  color: white;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rail-sub {
+  font-size: 11px;
+
+  /* LIGHTER WHITE */
+  color: rgba(255, 255, 255, 0.75);
+
+  white-space: nowrap;
+}
+
+.rail-pct {
+  font-size: 12px;
+  font-weight: 700;
+
+  /* WHITE BADGE */
+  color: #1d4ed8;
+  background: white;
+
+  border-radius: 20px;
+  padding: 3px 10px;
+
+  flex-shrink: 0;
+}
+
+.rail-bar-track {
+  height: 3px;
+
+  /* LIGHT BLUE TRACK */
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.rail-bar-fill {
+  height: 100%;
+
+  /* WHITE PROGRESS */
+  background: white;
+
+  transition: width 0.35s ease;
 }
 </style>

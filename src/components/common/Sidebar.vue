@@ -9,11 +9,6 @@
     class="custom-sidebar"
   >
     <v-list nav density="compact">
-      <v-list-item>
-        <v-list-item-title class="text-h6 font-weight-bold text-primary">
-          OFW Family Profiling
-        </v-list-item-title>
-      </v-list-item>
       <v-divider />
 
       <v-list-item
@@ -30,29 +25,6 @@
       />
 
       <v-divider class="my-4" />
-
-      <v-list-item v-if="showResponsesList">
-        <v-list-item-title class="text-subtitle-1 font-weight-medium mb-2">
-          Recent Responses
-        </v-list-item-title>
-      </v-list-item>
-
-      <v-list-item
-        v-for="response in responses"
-        :key="response.id"
-        v-if="showResponsesList"
-        class="response-item"
-        @click="selectResponse(response)"
-      >
-        <v-list-item-content>
-          <v-list-item-title class="text-body-2">
-            {{ response.respondent_name || 'Unnamed Respondent' }}
-          </v-list-item-title>
-          <v-list-item-subtitle class="text-caption">
-            {{ formatDate(response.created_at) }}
-          </v-list-item-subtitle>
-        </v-list-item-content>
-      </v-list-item>
     </v-list>
   </v-navigation-drawer>
 </template>

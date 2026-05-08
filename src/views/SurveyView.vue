@@ -20,11 +20,6 @@
               <v-icon>mdi-menu</v-icon>
             </v-btn>
 
-            <div class="rail-logos">
-              <v-img src="/DMW Logo.png" width="26" height="26" contain />
-              <v-img src="/BagongPilipinas.png" width="26" height="26" contain />
-            </div>
-
             <div class="rail-title-block">
               <span class="rail-title">OFW Family Profiling</span>
               <span class="rail-sub">Section {{ step }} of 19</span>
@@ -314,16 +309,23 @@ const handleSubmit = async () => {
 }
 
 /* ══ STICKY RAIL ═════════════════════════ */
+/* ══ STICKY RAIL ═════════════════════════ */
 .progress-rail {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 100 !important;
-  background: rgba(255, 255, 255, 0.97);
+
+  /* NEW BLUE HEADER */
+  background: linear-gradient(135deg, #1d4ed8, #2563eb, #3b82f6);
+
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid #e5e7eb;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+
+  box-shadow: 0 4px 18px rgba(37, 99, 235, 0.25);
 }
 
 .progress-rail-inner {
@@ -331,21 +333,14 @@ const handleSubmit = async () => {
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 9px 40px 7px;
+  padding: 10px 40px 8px;
   box-sizing: border-box;
 }
 
 .rail-menu-btn {
-  color: #6b7280 !important;
+  color: white !important;
   z-index: 110;
   position: relative;
-}
-
-.rail-logos {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
 }
 
 .rail-title-block {
@@ -358,7 +353,7 @@ const handleSubmit = async () => {
 .rail-title {
   font-size: 13px;
   font-weight: 700;
-  color: #1f2937;
+  color: white;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -366,29 +361,43 @@ const handleSubmit = async () => {
 
 .rail-sub {
   font-size: 11px;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.75);
   white-space: nowrap;
 }
 
 .rail-pct {
   font-size: 12px;
   font-weight: 700;
-  color: #1d4ed8;
-  background: #eff6ff;
+
+  /* WHITE GLASS EFFECT */
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
+
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
   border-radius: 20px;
-  padding: 3px 10px;
+  padding: 4px 12px;
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
   flex-shrink: 0;
 }
 
 .rail-bar-track {
-  height: 3px;
-  background: #e5e7eb;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .rail-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #1d4ed8, #3b82f6);
+
+  /* LIGHTER PROGRESS */
+  background: linear-gradient(90deg, #ffffff, #dbeafe);
+
   transition: width 0.35s ease;
+
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
 /* ══ HEADER ══════════════════════════════ */
