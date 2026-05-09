@@ -1,70 +1,128 @@
 <!-- src/components/survey/SectionRisk.vue -->
 <template>
   <div>
-    <h2 class="text-h5 font-weight-bold mb-6 text-primary">
-      XV. Case-Specific Risk Screening (for Vulnerable Households)
-    </h2>
+    <div class="section-body">
+      <!-- ── BLOCK: Ongoing Cases ── -->
+      <div class="field-group">
+        <label class="field-label" style="display: block; margin-bottom: 10px">
+          Does the OFW/family have any ongoing case?
+        </label>
+        <small class="text-grey-darken-1 mb-4 d-block" style="font-size: 12px">
+          (Please check all that apply)
+        </small>
+        <v-row dense>
+          <v-col cols="12" sm="6" md="4" v-for="caseType in ongoingCases" :key="caseType">
+            <div
+              class="checkbox-card"
+              :class="{ 'checkbox-card--selected': localData.ongoingCase.includes(caseType) }"
+              @click="toggleOngoingCase(caseType)"
+            >
+              <v-checkbox
+                v-model="localData.ongoingCase"
+                :value="caseType"
+                hide-details
+                density="compact"
+                class="checkbox-inner"
+                @click.stop
+              >
+                <template #label>
+                  <span class="checkbox-label">{{ caseType }}</span>
+                </template>
+              </v-checkbox>
+            </div>
+          </v-col>
+        </v-row>
+      </div>
 
-    <!-- Ongoing case -->
-    <div class="mb-10">
-      <label class="text-body-1 font-weight-medium mb-4 d-block">
-        Does the OFW/family have any ongoing case?<br />
-        <small class="text-grey-darken-1">(Please check all that apply)</small>
-      </label>
-      <v-row dense>
-        <v-col cols="12" sm="6" md="4" v-for="caseType in ongoingCases" :key="caseType">
-          <v-checkbox
-            v-model="localData.ongoingCase"
-            :label="caseType"
-            :value="caseType"
-            density="compact"
-            @update:modelValue="emitUpdate"
-          />
-        </v-col>
-      </v-row>
-    </div>
+      <!-- ── BLOCK: Urgent Referral ── -->
+      <div class="field-group">
+        <label class="field-label" style="display: block; margin-bottom: 10px">
+          Does the household need urgent referral?
+        </label>
+        <v-row dense>
+          <v-col cols="6" md="3">
+            <div
+              class="radio-card"
+              :class="{ 'radio-card--selected': localData.needsUrgentReferral === 'Yes' }"
+              @click="selectUrgentReferral('Yes')"
+            >
+              <div class="radio-card-inner">
+                <div
+                  class="radio-dot"
+                  :class="{ 'radio-dot--selected': localData.needsUrgentReferral === 'Yes' }"
+                />
+                <span class="radio-label-text">Yes</span>
+              </div>
+            </div>
+          </v-col>
+          <v-col cols="6" md="3">
+            <div
+              class="radio-card"
+              :class="{ 'radio-card--selected': localData.needsUrgentReferral === 'No' }"
+              @click="selectUrgentReferral('No')"
+            >
+              <div class="radio-card-inner">
+                <div
+                  class="radio-dot"
+                  :class="{ 'radio-dot--selected': localData.needsUrgentReferral === 'No' }"
+                />
+                <span class="radio-label-text">No</span>
+              </div>
+            </div>
+          </v-col>
+        </v-row>
+      </div>
 
-    <!-- Need urgent referral? -->
-    <v-row dense class="mb-8">
-      <v-col cols="12">
-        <v-radio-group
-          v-model="localData.needsUrgentReferral"
-          label="Does the household need urgent referral?"
-          inline
-          @update:modelValue="emitUpdate"
-        >
-          <v-radio label="Yes" value="Yes" />
-          <v-radio label="No" value="No" />
-        </v-radio-group>
-      </v-col>
-    </v-row>
+      <!-- ── BLOCK: Referred To (Conditional) ── -->
+      <div v-if="localData.needsUrgentReferral === 'Yes'" class="field-group">
+        <label class="field-label" style="display: block; margin-bottom: 10px"> Referred To </label>
+        <v-row dense>
+          <v-col cols="12" sm="6" md="4" v-for="agency in referralAgencies" :key="agency">
+            <div
+              class="checkbox-card"
+              :class="{ 'checkbox-card--selected': localData.referredTo.includes(agency) }"
+              @click="toggleReferralAgency(agency)"
+            >
+              <v-checkbox
+                v-model="localData.referredTo"
+                :value="agency"
+                hide-details
+                density="compact"
+                class="checkbox-inner"
+                @click.stop
+              >
+                <template #label>
+                  <span class="checkbox-label">{{ agency }}</span>
+                </template>
+              </v-checkbox>
+            </div>
+          </v-col>
+        </v-row>
+      </div>
 
-    <!-- If yes, referred to -->
-    <div v-if="localData.needsUrgentReferral === 'Yes'" class="mb-10">
-      <label class="text-body-1 font-weight-medium mb-4 d-block"> If yes, referred to: </label>
-      <v-row dense>
-        <v-col cols="12" sm="6" md="4" v-for="agency in referralAgencies" :key="agency">
-          <v-checkbox
-            v-model="localData.referredTo"
-            :label="agency"
-            :value="agency"
-            density="compact"
-            @update:modelValue="emitUpdate"
-          />
-        </v-col>
-      </v-row>
-    </div>
-
-    <!-- Priority level assigned by enumerator -->
-    <div>
-      <label class="text-body-1 font-weight-medium mb-3 d-block">
-        Priority level assigned by enumerator
-      </label>
-      <v-radio-group v-model="localData.priorityLevel" inline @update:modelValue="emitUpdate">
-        <v-radio label="High / urgent" value="High / urgent" />
-        <v-radio label="Medium" value="Medium" />
-        <v-radio label="Low" value="Low" />
-      </v-radio-group>
+      <!-- ── BLOCK: Priority Level ── -->
+      <div class="field-group" style="margin-bottom: 0">
+        <label class="field-label" style="display: block; margin-bottom: 10px">
+          Priority Level Assigned by Enumerator
+        </label>
+        <v-row dense>
+          <v-col cols="12" sm="6" md="4" v-for="level in priorityLevels" :key="level">
+            <div
+              class="radio-card"
+              :class="{ 'radio-card--selected': localData.priorityLevel === level }"
+              @click="selectPriority(level)"
+            >
+              <div class="radio-card-inner">
+                <div
+                  class="radio-dot"
+                  :class="{ 'radio-dot--selected': localData.priorityLevel === level }"
+                />
+                <span class="radio-label-text">{{ level }}</span>
+              </div>
+            </div>
+          </v-col>
+        </v-row>
+      </div>
     </div>
   </div>
 </template>
@@ -107,6 +165,8 @@ const referralAgencies = [
   'Other',
 ]
 
+const priorityLevels = ['High / urgent', 'Medium', 'Low']
+
 const localData = ref({
   ongoingCase: [],
   needsUrgentReferral: '',
@@ -115,8 +175,118 @@ const localData = ref({
   ...props.data,
 })
 
-// Two-way sync with SurveyView
 watch(localData, (newVal) => emit('update:data', { ...newVal }), { deep: true })
 
 const emitUpdate = () => emit('update:data', { ...localData.value })
+
+// Handlers
+const toggleOngoingCase = (caseType) => {
+  const idx = localData.value.ongoingCase.indexOf(caseType)
+  if (idx === -1) localData.value.ongoingCase.push(caseType)
+  else localData.value.ongoingCase.splice(idx, 1)
+  emitUpdate()
+}
+
+const selectUrgentReferral = (val) => {
+  localData.value.needsUrgentReferral = val
+  if (val === 'No') localData.value.referredTo = []
+  emitUpdate()
+}
+
+const toggleReferralAgency = (agency) => {
+  const idx = localData.value.referredTo.indexOf(agency)
+  if (idx === -1) localData.value.referredTo.push(agency)
+  else localData.value.referredTo.splice(idx, 1)
+  emitUpdate()
+}
+
+const selectPriority = (level) => {
+  localData.value.priorityLevel = level
+  emitUpdate()
+}
 </script>
+
+<style scoped>
+.section-body {
+  padding: 10px 24px 24px;
+}
+
+.field-group {
+  margin-bottom: 14px;
+}
+
+.field-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6b7fa8;
+  line-height: 1.4;
+}
+
+/* Radio & Checkbox Cards */
+.radio-card,
+.checkbox-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition:
+    border-color 0.14s,
+    background 0.14s;
+  background: #ffffff;
+}
+
+.radio-card:hover,
+.checkbox-card:hover {
+  border-color: #93c5fd;
+  background: #f8faff;
+}
+
+.radio-card--selected,
+.checkbox-card--selected {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.radio-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.radio-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #d1d5db;
+  flex-shrink: 0;
+  background: #ffffff;
+}
+
+.radio-dot--selected {
+  border-color: #3b82f6;
+  background: #3b82f6;
+  box-shadow: inset 0 0 0 2px #ffffff;
+}
+
+.radio-label-text,
+.checkbox-label {
+  font-size: 13px;
+  color: #111827;
+}
+
+.radio-card--selected .radio-label-text,
+.checkbox-card--selected .checkbox-label {
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .section-body {
+    padding: 14px 14px 18px;
+  }
+}
+</style>

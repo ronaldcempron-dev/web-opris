@@ -1,84 +1,96 @@
 <!-- src/components/survey/SectionOpenEnded.vue -->
 <template>
   <div>
-    <h2 class="text-h5 font-weight-bold mb-6 text-primary">XVIII. Open-Ended Questions</h2>
+    <div class="section-body">
+      <!-- ── BLOCK: Open-Ended Questions ── -->
 
-    <v-row dense>
-      <!-- 1. Changes brought by overseas migration -->
-      <v-col cols="12" class="mb-8">
-        <label class="text-body-1 font-weight-medium mb-3 d-block">
-          What changes has overseas migration brought to your family?
-        </label>
-        <v-textarea
-          v-model="localData.changesFromMigration"
-          variant="outlined"
-          density="comfortable"
-          rows="4"
-          placeholder="Write your answer here..."
-          @update:modelValue="emitUpdate"
-        />
-      </v-col>
+      <!-- 1. Changes from Migration -->
+      <div class="field-group">
+        <div class="field-item">
+          <label class="field-label"
+            >What changes has overseas migration brought to your family?</label
+          >
+          <v-textarea
+            v-model="localData.changesFromMigration"
+            variant="outlined"
+            density="comfortable"
+            rows="4"
+            placeholder="Share the positive and negative changes experienced..."
+            class="modern-input"
+            @update:modelValue="emitUpdate"
+          />
+        </div>
+      </div>
 
-      <!-- 2. Biggest challenges -->
-      <v-col cols="12" class="mb-8">
-        <label class="text-body-1 font-weight-medium mb-3 d-block">
-          What are the biggest challenges you face as an OFW/family left behind/returned OFW?
-        </label>
-        <v-textarea
-          v-model="localData.biggestChallenges"
-          variant="outlined"
-          density="comfortable"
-          rows="4"
-          placeholder="Write your answer here..."
-          @update:modelValue="emitUpdate"
-        />
-      </v-col>
+      <!-- 2. Biggest Challenges -->
+      <div class="field-group">
+        <div class="field-item">
+          <label class="field-label"
+            >What are the biggest challenges you face as an OFW / family left behind / returned
+            OFW?</label
+          >
+          <v-textarea
+            v-model="localData.biggestChallenges"
+            variant="outlined"
+            density="comfortable"
+            rows="4"
+            placeholder="Describe the main difficulties you are currently experiencing..."
+            class="modern-input"
+            @update:modelValue="emitUpdate"
+          />
+        </div>
+      </div>
 
-      <!-- 3. Support needed from government/LGU -->
-      <v-col cols="12" class="mb-8">
-        <label class="text-body-1 font-weight-medium mb-3 d-block">
-          What kind of support do you most need from the government or LGU?
-        </label>
-        <v-textarea
-          v-model="localData.mostNeededSupport"
-          variant="outlined"
-          density="comfortable"
-          rows="3"
-          placeholder="Write your answer here..."
-          @update:modelValue="emitUpdate"
-        />
-      </v-col>
+      <!-- 3. Support Needed -->
+      <div class="field-group">
+        <div class="field-item">
+          <label class="field-label"
+            >What kind of support do you most need from the government or LGU?</label
+          >
+          <v-textarea
+            v-model="localData.mostNeededSupport"
+            variant="outlined"
+            density="comfortable"
+            rows="3"
+            placeholder="e.g. livelihood support, skills training, financial assistance, etc."
+            class="modern-input"
+            @update:modelValue="emitUpdate"
+          />
+        </div>
+      </div>
 
-      <!-- 4. Future plans -->
-      <v-col cols="12" class="mb-8">
-        <label class="text-body-1 font-weight-medium mb-3 d-block">
-          What are your future plans for the family / OFW?
-        </label>
-        <v-textarea
-          v-model="localData.futurePlans"
-          variant="outlined"
-          density="comfortable"
-          rows="3"
-          placeholder="Write your answer here..."
-          @update:modelValue="emitUpdate"
-        />
-      </v-col>
+      <!-- 4. Future Plans -->
+      <div class="field-group">
+        <div class="field-item">
+          <label class="field-label">What are your future plans for the family / OFW?</label>
+          <v-textarea
+            v-model="localData.futurePlans"
+            variant="outlined"
+            density="comfortable"
+            rows="3"
+            placeholder="Short-term and long-term plans..."
+            class="modern-input"
+            @update:modelValue="emitUpdate"
+          />
+        </div>
+      </div>
 
-      <!-- 5. Other comments -->
-      <v-col cols="12">
-        <label class="text-body-1 font-weight-medium mb-3 d-block">
-          Other comments or concerns:
-        </label>
-        <v-textarea
-          v-model="localData.otherComments"
-          variant="outlined"
-          density="comfortable"
-          rows="4"
-          placeholder="Any additional information..."
-          @update:modelValue="emitUpdate"
-        />
-      </v-col>
-    </v-row>
+      <!-- 5. Other Comments -->
+      <div class="field-group" style="margin-bottom: 0">
+        <div class="field-item">
+          <label class="field-label">Other comments or concerns</label>
+          <v-textarea
+            v-model="localData.otherComments"
+            variant="outlined"
+            density="comfortable"
+            rows="4"
+            placeholder="Any additional information, suggestions, or concerns..."
+            class="modern-input"
+            @update:modelValue="emitUpdate"
+          />
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -100,8 +112,54 @@ const localData = ref({
   ...props.data,
 })
 
-// Two-way sync with SurveyView
 watch(localData, (newVal) => emit('update:data', { ...newVal }), { deep: true })
 
 const emitUpdate = () => emit('update:data', { ...localData.value })
 </script>
+
+<style scoped>
+.section-body {
+  padding: 10px 24px 24px;
+}
+
+.field-group {
+  margin-bottom: 14px;
+}
+
+.field-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 100%;
+}
+
+.field-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6b7fa8;
+  line-height: 1.4;
+}
+
+/* Modern Input for Textareas */
+.modern-input :deep(.v-field) {
+  border-radius: 10px;
+  background: #f8faff;
+  border-color: #e2e8f0;
+  font-size: 13.5px;
+  color: #111827;
+}
+
+.modern-input :deep(.v-field--focused) {
+  border-color: #3b82f6;
+  background: #ffffff;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .section-body {
+    padding: 14px 14px 18px;
+  }
+}
+</style>
