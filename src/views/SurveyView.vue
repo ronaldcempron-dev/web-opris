@@ -9,25 +9,27 @@
         <!-- ─── STICKY TOP RAIL ─── -->
         <div class="progress-rail">
           <div class="progress-rail-inner">
-            <v-btn
-              icon
-              variant="text"
-              size="small"
-              @click="drawer = !drawer"
-              class="rail-menu-btn"
-              style="z-index: 10"
-            >
-              <v-icon>mdi-menu</v-icon>
-            </v-btn>
-
-            <div class="rail-title-block">
-              <span class="rail-title">OFW Family Profiling</span>
-              <span class="rail-sub">Section {{ step }} of 19</span>
+            <div class="left-rail" style="margin-left: 0; padding-left: 0">
+              <v-btn
+                icon
+                variant="text"
+                size="small"
+                @click="drawer = !drawer"
+                class="rail-menu-btn"
+              >
+                <v-icon>mdi-menu</v-icon>
+              </v-btn>
+              <div class="rail-title-block">
+                <span class="rail-title">OFW Family Profiling</span>
+                <span class="rail-sub">Section {{ step }} of 19</span>
+              </div>
             </div>
 
             <v-spacer />
 
-            <div class="rail-pct">{{ Math.round((step / 19) * 100) }}%</div>
+            <div style="min-width: 90px; display: flex; justify-content: flex-end">
+              <div class="rail-pct">{{ Math.round((step / 19) * 100) }}%</div>
+            </div>
           </div>
 
           <div class="rail-bar-track">
@@ -302,45 +304,57 @@ const handleSubmit = async () => {
   background: #f5f4f0;
 }
 
+.progress-rail,
+.progress-rail-inner {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+
 .survey-body {
   width: 100%;
   padding: 80px 40px 0;
   box-sizing: border-box;
 }
 
-/* ══ STICKY RAIL ═════════════════════════ */
-/* ══ STICKY RAIL ═════════════════════════ */
+/* ─── STICKY TOP RAIL - FIXED ALIGNMENT ─── */
 .progress-rail {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 100 !important;
-
-  /* NEW BLUE HEADER */
   background: linear-gradient(135deg, #1d4ed8, #2563eb, #3b82f6);
-
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-
   box-shadow: 0 4px 18px rgba(37, 99, 235, 0.25);
 }
 
 .progress-rail-inner {
   display: flex;
   align-items: center;
-  gap: 10px;
   width: 100%;
-  padding: 10px 40px 8px;
+  padding: 10px 0 8px 0;
   box-sizing: border-box;
+  min-height: 52px;
+  gap: 12px;
+}
+
+/* Left side - locked together */
+.left-rail {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  margin-left: 0;
+  padding-left: 0;
 }
 
 .rail-menu-btn {
   color: white !important;
   z-index: 110;
   position: relative;
+  flex-shrink: 0;
 }
 
 .rail-title-block {
@@ -365,22 +379,17 @@ const handleSubmit = async () => {
   white-space: nowrap;
 }
 
+/* Right side */
 .rail-pct {
   font-size: 12px;
   font-weight: 700;
-
-  /* WHITE GLASS EFFECT */
   color: white;
   background: rgba(255, 255, 255, 0.15);
-
   border: 1px solid rgba(255, 255, 255, 0.2);
-
   border-radius: 20px;
   padding: 4px 12px;
-
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-
   flex-shrink: 0;
 }
 
@@ -391,12 +400,8 @@ const handleSubmit = async () => {
 
 .rail-bar-fill {
   height: 100%;
-
-  /* LIGHTER PROGRESS */
   background: linear-gradient(90deg, #ffffff, #dbeafe);
-
   transition: width 0.35s ease;
-
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 

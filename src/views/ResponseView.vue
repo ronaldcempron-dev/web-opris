@@ -8,26 +8,42 @@
         <!-- STICKY TOP RAIL - FIXED -->
         <div class="progress-rail">
           <div class="progress-rail-inner">
-            <v-btn icon variant="text" size="small" @click="drawer = !drawer" class="rail-menu-btn">
-              <v-icon>mdi-menu</v-icon>
-            </v-btn>
-
-            <div class="rail-title-block">
-              <span class="rail-title">OFW Family Profiling</span>
+            <div class="left-rail">
+              <v-btn
+                icon
+                variant="text"
+                size="small"
+                @click="drawer = !drawer"
+                class="rail-menu-btn"
+              >
+                <v-icon>mdi-menu</v-icon>
+              </v-btn>
+              <div class="rail-title-block">
+                <span class="rail-title">OFW Family Profiling</span>
+              </div>
             </div>
 
             <v-spacer />
 
-            <v-btn
-              color="primary"
-              variant="outlined"
-              size="small"
-              @click="fetchResponses"
-              :loading="loading"
-              prepend-icon="mdi-refresh"
+            <div
+              style="min-width: 90px; display: flex; justify-content: flex-end; margin-right: 16px"
             >
-              Refresh
-            </v-btn>
+              <v-btn
+                color="primary"
+                variant="outlined"
+                size="small"
+                @click="fetchResponses"
+                :loading="loading"
+                prepend-icon="mdi-refresh"
+                style="
+                  color: white;
+                  border-color: rgba(255, 255, 255, 0.4);
+                  background: rgba(255, 255, 255, 0.12);
+                "
+              >
+                Refresh
+              </v-btn>
+            </div>
           </div>
 
           <div class="rail-bar-track">
@@ -161,84 +177,46 @@ const viewFullReport = (item) => {
   min-height: 100vh;
   background: #f5f4f0;
 }
-.responses-body {
-  width: 100%;
-  padding: 90px 40px 40px;
-  box-sizing: border-box;
-}
 
+/* ─── STICKY TOP RAIL - FIXED ALIGNMENT ─── */
 .progress-rail {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 100 !important;
-  background: rgba(255, 255, 255, 0.97);
+  background: linear-gradient(135deg, #1d4ed8, #2563eb, #3b82f6);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid #e5e7eb;
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 18px rgba(37, 99, 235, 0.25);
 }
 
 .progress-rail-inner {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 10px 0 8px 0;
+  box-sizing: border-box;
+  min-height: 52px;
+  gap: 12px;
+}
+
+/* Left side - locked */
+.left-rail {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 40px 8px;
-  box-sizing: border-box;
-}
-
-.rail-menu-btn {
-  color: #6b7280 !important;
-}
-
-@media (max-width: 768px) {
-  .responses-body {
-    padding: 80px 24px 24px;
-  }
-  .progress-rail-inner {
-    padding: 10px 24px 8px;
-  }
-}
-@media (max-width: 480px) {
-  .responses-body {
-    padding: 75px 16px 24px;
-  }
-  .progress-rail-inner {
-    padding: 10px 16px 8px;
-  }
-}
-
-/* ══ STICKY RAIL ═════════════════════════ */
-.progress-rail {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100 !important;
-
-  /* SAME BLUE AS RESPONSES VIEW */
-  background: #1d4ed8;
-
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-}
-
-.progress-rail-inner {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 9px 40px 7px;
-  box-sizing: border-box;
+  flex-shrink: 0;
+  margin-left: 0;
+  padding-left: 0;
 }
 
 .rail-menu-btn {
   color: white !important;
   z-index: 110;
   position: relative;
+  flex-shrink: 0;
 }
 
 .rail-title-block {
@@ -251,51 +229,47 @@ const viewFullReport = (item) => {
 .rail-title {
   font-size: 13px;
   font-weight: 700;
-
-  /* WHITE TEXT */
   color: white;
-
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.rail-sub {
-  font-size: 11px;
-
-  /* LIGHTER WHITE */
-  color: rgba(255, 255, 255, 0.75);
-
-  white-space: nowrap;
-}
-
-.rail-pct {
-  font-size: 12px;
-  font-weight: 700;
-
-  /* WHITE BADGE */
-  color: #1d4ed8;
-  background: white;
-
-  border-radius: 20px;
-  padding: 3px 10px;
-
-  flex-shrink: 0;
-}
-
 .rail-bar-track {
-  height: 3px;
-
-  /* LIGHT BLUE TRACK */
+  height: 4px;
   background: rgba(255, 255, 255, 0.18);
 }
 
 .rail-bar-fill {
   height: 100%;
-
-  /* WHITE PROGRESS */
-  background: white;
-
+  background: linear-gradient(90deg, #ffffff, #dbeafe);
   transition: width 0.35s ease;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+/* Main Content */
+.responses-body {
+  width: 100%;
+  padding: 80px 40px 40px;
+  box-sizing: border-box;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .responses-body {
+    padding: 70px 24px 24px;
+  }
+  .progress-rail-inner {
+    padding: 9px 24px 7px;
+  }
+}
+
+@media (max-width: 480px) {
+  .responses-body {
+    padding: 62px 12px 24px;
+  }
+  .progress-rail-inner {
+    padding: 9px 12px 7px;
+  }
 }
 </style>
