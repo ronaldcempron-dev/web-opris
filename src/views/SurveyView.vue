@@ -96,61 +96,118 @@
             <div class="section-body">
               <v-stepper-window v-model="step">
                 <v-stepper-window-item :value="1">
-                  <SectionGeneralInfo :data="formData.general" />
+                  <SectionGeneralInfo
+                    :data="formData.general"
+                    @update:data="(val) => Object.assign(formData.general, val)"
+                  />
                 </v-stepper-window-item>
                 <v-stepper-window-item :value="2">
-                  <SectionRespondent :data="formData.respondent" />
+                  <SectionRespondent
+                    :data="formData.respondent"
+                    @update:data="(val) => Object.assign(formData.respondent, val)"
+                  />
                 </v-stepper-window-item>
                 <v-stepper-window-item :value="3">
-                  <SectionHousehold :data="formData.household" />
+                  <SectionHousehold
+                    :data="formData.household"
+                    @update:data="(val) => Object.assign(formData.household, val)"
+                  />
                 </v-stepper-window-item>
                 <v-stepper-window-item :value="4">
-                  <SectionOFWProfile :data="formData.ofwProfile" />
+                  <SectionOFWProfile
+                    :data="formData.ofwProfile"
+                    @update:data="(val) => Object.assign(formData.ofwProfile, val)"
+                  />
                 </v-stepper-window-item>
                 <v-stepper-window-item :value="5">
-                  <SectionMigration :data="formData.migration" />
+                  <SectionMigration
+                    :data="formData.migration"
+                    @update:data="(val) => Object.assign(formData.migration, val)"
+                  />
                 </v-stepper-window-item>
                 <v-stepper-window-item :value="6">
-                  <SectionPresentStatus :data="formData.presentStatus" />
+                  <SectionPresentStatus
+                    :data="formData.presentStatus"
+                    @update:data="(val) => Object.assign(formData.presentStatus, val)"
+                  />
                 </v-stepper-window-item>
                 <v-stepper-window-item :value="7">
-                  <SectionSocioEconomic :data="formData.socioEconomic" />
+                  <SectionSocioEconomic
+                    :data="formData.socioEconomic"
+                    @update:data="(val) => Object.assign(formData.socioEconomic, val)"
+                  />
                 </v-stepper-window-item>
                 <v-stepper-window-item :value="8">
-                  <SectionLivelihood :data="formData.livelihood" />
+                  <SectionLivelihood
+                    :data="formData.livelihood"
+                    @update:data="(val) => Object.assign(formData.livelihood, val)"
+                  />
                 </v-stepper-window-item>
                 <v-stepper-window-item :value="9">
-                  <SectionEducation :data="formData.education" />
+                  <SectionEducation
+                    :data="formData.education"
+                    @update:data="(val) => Object.assign(formData.education, val)"
+                  />
                 </v-stepper-window-item>
                 <v-stepper-window-item :value="10">
-                  <SectionHealth :data="formData.health" />
+                  <SectionHealth
+                    :data="formData.health"
+                    @update:data="(val) => Object.assign(formData.health, val)"
+                  />
                 </v-stepper-window-item>
                 <v-stepper-window-item :value="11">
-                  <SectionAssistance :data="formData.assistance" />
+                  <SectionAssistance
+                    :data="formData.assistance"
+                    @update:data="(val) => Object.assign(formData.assistance, val)"
+                  />
                 </v-stepper-window-item>
                 <v-stepper-window-item :value="12">
-                  <SectionProblems :data="formData.problems" />
+                  <SectionProblems
+                    :data="formData.problems"
+                    @update:data="(val) => Object.assign(formData.problems, val)"
+                  />
                 </v-stepper-window-item>
                 <v-stepper-window-item :value="13">
-                  <SectionReintegration :data="formData.reintegration" />
+                  <SectionReintegration
+                    :data="formData.reintegration"
+                    @update:data="(val) => Object.assign(formData.reintegration, val)"
+                  />
                 </v-stepper-window-item>
                 <v-stepper-window-item :value="14">
-                  <SectionNeeds :data="formData.needs" />
+                  <SectionNeeds
+                    :data="formData.needs"
+                    @update:data="(val) => Object.assign(formData.needs, val)"
+                  />
                 </v-stepper-window-item>
                 <v-stepper-window-item :value="15">
-                  <SectionRisk :data="formData.risk" />
+                  <SectionRisk
+                    :data="formData.risk"
+                    @update:data="(val) => Object.assign(formData.risk, val)"
+                  />
                 </v-stepper-window-item>
                 <v-stepper-window-item :value="16">
-                  <SectionCommunity :data="formData.community" />
+                  <SectionCommunity
+                    :data="formData.community"
+                    @update:data="(val) => Object.assign(formData.community, val)"
+                  />
                 </v-stepper-window-item>
                 <v-stepper-window-item :value="17">
-                  <SectionFinancial :data="formData.financial" />
+                  <SectionFinancial
+                    :data="formData.financial"
+                    @update:data="(val) => Object.assign(formData.financial, val)"
+                  />
                 </v-stepper-window-item>
                 <v-stepper-window-item :value="18">
-                  <SectionOpenEnded :data="formData.openEnded" />
+                  <SectionOpenEnded
+                    :data="formData.openEnded"
+                    @update:data="(val) => Object.assign(formData.openEnded, val)"
+                  />
                 </v-stepper-window-item>
                 <v-stepper-window-item :value="19">
-                  <SectionEnumerator :data="formData.enumerator" />
+                  <SectionEnumerator
+                    :data="formData.enumerator"
+                    @update:data="(val) => Object.assign(formData.enumerator, val)"
+                  />
                 </v-stepper-window-item>
               </v-stepper-window>
             </div>
@@ -278,24 +335,39 @@ watch(step, async () => {
 
 const handleSubmit = async () => {
   submitting.value = true
+
   try {
+    // Get GPS
     const geo = await getCurrentPosition()
+
+    console.log('FORM DATA:', JSON.stringify(formData, null, 2))
+
     const { error } = await supabase.from('responses').insert({
-      answers: { ...formData },
+      // Save all answers as a deep copy
+      answers: JSON.parse(JSON.stringify(formData)),
+
+      // GPS
       latitude: geo.latitude,
       longitude: geo.longitude,
-      enumerator_name: formData.general.enumeratorName,
-      respondent_name: formData.respondent.name,
+
+      // Extra columns
+      enumerator_name: formData.general?.enumeratorName || '',
+      respondent_name: formData.respondent?.name || '',
     })
+
     if (error) throw error
+
     alert('🎉 Survey submitted successfully!\n📍 GPS Location captured!')
   } catch (err) {
+    console.error(err)
     alert('❌ ' + err.message)
   } finally {
     submitting.value = false
   }
 }
 </script>
+
+<!-- !! KEEP YOUR EXISTING <style scoped> BLOCK HERE — UNCHANGED !! -->
 
 <style scoped>
 /* ══ LAYOUT ══════════════════════════════ */
