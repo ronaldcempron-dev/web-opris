@@ -17,18 +17,20 @@
               :class="{ 'checkbox-card--selected': localData.immediateAssistance.includes(item) }"
               @click="toggleImmediateAssistance(item)"
             >
-              <v-checkbox
-                v-model="localData.immediateAssistance"
-                :value="item"
-                hide-details
-                density="compact"
-                class="checkbox-inner"
-                @click.stop
-              >
-                <template #label>
-                  <span class="checkbox-label">{{ item }}</span>
-                </template>
-              </v-checkbox>
+              <div class="check-card-inner">
+                <div
+                  class="check-box"
+                  :class="{ 'check-box--selected': localData.immediateAssistance.includes(item) }"
+                >
+                  <v-icon
+                    v-if="localData.immediateAssistance.includes(item)"
+                    size="11"
+                    color="white"
+                    >mdi-check</v-icon
+                  >
+                </div>
+                <span class="checkbox-label">{{ item }}</span>
+              </div>
             </div>
           </v-col>
         </v-row>
@@ -48,18 +50,22 @@
               }"
               @click="togglePreferredSkill(skill)"
             >
-              <v-checkbox
-                v-model="localData.preferredSkillsTraining"
-                :value="skill"
-                hide-details
-                density="compact"
-                class="checkbox-inner"
-                @click.stop
-              >
-                <template #label>
-                  <span class="checkbox-label">{{ skill }}</span>
-                </template>
-              </v-checkbox>
+              <div class="check-card-inner">
+                <div
+                  class="check-box"
+                  :class="{
+                    'check-box--selected': localData.preferredSkillsTraining.includes(skill),
+                  }"
+                >
+                  <v-icon
+                    v-if="localData.preferredSkillsTraining.includes(skill)"
+                    size="11"
+                    color="white"
+                    >mdi-check</v-icon
+                  >
+                </div>
+                <span class="checkbox-label">{{ skill }}</span>
+              </div>
             </div>
           </v-col>
         </v-row>
@@ -250,6 +256,7 @@ const selectFamilyCircle = (val) => {
   line-height: 1.4;
 }
 
+/* Modern Input */
 .modern-input :deep(.v-field) {
   border-radius: 10px;
   background: #f8faff;
@@ -320,6 +327,31 @@ const selectFamilyCircle = (val) => {
 .checkbox-card--selected .checkbox-label {
   color: #1d4ed8;
   font-weight: 600;
+}
+
+/* Custom Checkbox Style */
+.check-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.check-box {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 2px solid #d1d5db;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.14s;
+}
+
+.check-box--selected {
+  border-color: #3b82f6;
+  background: #3b82f6;
 }
 
 /* Mobile */

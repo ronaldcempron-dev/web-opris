@@ -10,22 +10,17 @@
         <v-row dense>
           <v-col cols="12" sm="6" md="4" v-for="option in currentStatusOptions" :key="option">
             <div
-              class="checkbox-card"
-              :class="{ 'checkbox-card--selected': localData.currentStatus.includes(option) }"
-              @click="toggleCurrentStatus(option)"
+              class="radio-card"
+              :class="{ 'radio-card--selected': localData.currentStatus === option }"
+              @click="selectCurrentStatus(option)"
             >
-              <v-checkbox
-                v-model="localData.currentStatus"
-                :value="option"
-                hide-details
-                density="compact"
-                class="checkbox-inner"
-                @click.stop
-              >
-                <template #label>
-                  <span class="checkbox-label">{{ option }}</span>
-                </template>
-              </v-checkbox>
+              <div class="radio-card-inner">
+                <div
+                  class="radio-dot"
+                  :class="{ 'radio-dot--selected': localData.currentStatus === option }"
+                />
+                <span class="radio-label-text">{{ option }}</span>
+              </div>
             </div>
           </v-col>
         </v-row>
@@ -93,18 +88,17 @@
               :class="{ 'checkbox-card--selected': localData.industrySector.includes(sector) }"
               @click="toggleIndustry(sector)"
             >
-              <v-checkbox
-                v-model="localData.industrySector"
-                :value="sector"
-                hide-details
-                density="compact"
-                class="checkbox-inner"
-                @click.stop
-              >
-                <template #label>
-                  <span class="checkbox-label">{{ sector }}</span>
-                </template>
-              </v-checkbox>
+              <div class="check-card-inner">
+                <div
+                  class="check-box"
+                  :class="{ 'check-box--selected': localData.industrySector.includes(sector) }"
+                >
+                  <v-icon v-if="localData.industrySector.includes(sector)" size="11" color="white"
+                    >mdi-check</v-icon
+                  >
+                </div>
+                <span class="checkbox-label">{{ sector }}</span>
+              </div>
             </div>
           </v-col>
         </v-row>
@@ -185,7 +179,7 @@
         </v-row>
       </div>
 
-      <!-- ── BLOCK: Recruitment ── -->
+      <!-- ── BLOCK: Recruitment Channel ── -->
       <div class="field-group">
         <label class="field-label" style="display: block; margin-bottom: 10px">
           Recruitment Channel
@@ -193,22 +187,17 @@
         <v-row dense>
           <v-col cols="12" sm="6" md="4" v-for="channel in recruitmentChannels" :key="channel">
             <div
-              class="checkbox-card"
-              :class="{ 'checkbox-card--selected': localData.recruitmentChannel.includes(channel) }"
-              @click="toggleRecruitmentChannel(channel)"
+              class="radio-card"
+              :class="{ 'radio-card--selected': localData.recruitmentChannel === channel }"
+              @click="selectRecruitmentChannel(channel)"
             >
-              <v-checkbox
-                v-model="localData.recruitmentChannel"
-                :value="channel"
-                hide-details
-                density="compact"
-                class="checkbox-inner"
-                @click.stop
-              >
-                <template #label>
-                  <span class="checkbox-label">{{ channel }}</span>
-                </template>
-              </v-checkbox>
+              <div class="radio-card-inner">
+                <div
+                  class="radio-dot"
+                  :class="{ 'radio-dot--selected': localData.recruitmentChannel === channel }"
+                />
+                <span class="radio-label-text">{{ channel }}</span>
+              </div>
             </div>
           </v-col>
         </v-row>
@@ -249,7 +238,7 @@
 
           <v-col cols="12" md="3">
             <div class="field-item">
-              <label class="field-label">Date of Latest Deployment / Return</label>
+              <label class="field-label">Date of Latest Deployment</label>
               <v-text-field
                 v-model="localData.latestDeploymentDate"
                 type="date"
@@ -323,18 +312,17 @@
               :class="{ 'checkbox-card--selected': localData.reasonForGoing.includes(reason) }"
               @click="toggleReason(reason)"
             >
-              <v-checkbox
-                v-model="localData.reasonForGoing"
-                :value="reason"
-                hide-details
-                density="compact"
-                class="checkbox-inner"
-                @click.stop
-              >
-                <template #label>
-                  <span class="checkbox-label">{{ reason }}</span>
-                </template>
-              </v-checkbox>
+              <div class="check-card-inner">
+                <div
+                  class="check-box"
+                  :class="{ 'check-box--selected': localData.reasonForGoing.includes(reason) }"
+                >
+                  <v-icon v-if="localData.reasonForGoing.includes(reason)" size="11" color="white"
+                    >mdi-check</v-icon
+                  >
+                </div>
+                <span class="checkbox-label">{{ reason }}</span>
+              </div>
             </div>
           </v-col>
         </v-row>
@@ -397,7 +385,7 @@ const reasonsForGoing = [
 ]
 
 const localData = ref({
-  currentStatus: [],
+  currentStatus: '',
   countryDestination: '',
   cityArea: '',
   jobTitle: '',
@@ -405,7 +393,7 @@ const localData = ref({
   otherIndustry: '',
   deploymentType: '',
   documentationStatus: '',
-  recruitmentChannel: [],
+  recruitmentChannel: '',
   recruitmentAgency: '',
   firstDeploymentDate: '',
   latestDeploymentDate: '',
@@ -421,10 +409,8 @@ watch(localData, (newVal) => emit('update:data', { ...newVal }), { deep: true })
 const emitUpdate = () => emit('update:data', { ...localData.value })
 
 // Toggle helpers
-const toggleCurrentStatus = (option) => {
-  const idx = localData.value.currentStatus.indexOf(option)
-  if (idx === -1) localData.value.currentStatus.push(option)
-  else localData.value.currentStatus.splice(idx, 1)
+const selectCurrentStatus = (option) => {
+  localData.value.currentStatus = option
   emitUpdate()
 }
 
@@ -435,10 +421,8 @@ const toggleIndustry = (sector) => {
   emitUpdate()
 }
 
-const toggleRecruitmentChannel = (channel) => {
-  const idx = localData.value.recruitmentChannel.indexOf(channel)
-  if (idx === -1) localData.value.recruitmentChannel.push(channel)
-  else localData.value.recruitmentChannel.splice(idx, 1)
+const selectRecruitmentChannel = (channel) => {
+  localData.value.recruitmentChannel = channel
   emitUpdate()
 }
 
@@ -561,5 +545,26 @@ const selectDocumentationStatus = (val) => {
   .section-body {
     padding: 14px 14px 18px;
   }
+}
+.check-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.check-box {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 2px solid #d1d5db;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.14s;
+}
+.check-box--selected {
+  border-color: #3b82f6;
+  background: #3b82f6;
 }
 </style>

@@ -10,29 +10,29 @@
         <v-row dense>
           <v-col cols="12" sm="6" md="4" v-for="option in locationOptions" :key="option">
             <div
-              class="checkbox-card"
-              :class="{ 'checkbox-card--selected': localData.presentLocation.includes(option) }"
-              @click="toggleLocation(option)"
+              class="radio-card"
+              :class="{ 'radio-card--selected': localData.presentLocation === option }"
+              @click="selectLocation(option)"
             >
-              <v-checkbox
-                v-model="localData.presentLocation"
-                :value="option"
-                hide-details
-                density="compact"
-                class="checkbox-inner"
-                @click.stop
-              >
-                <template #label>
-                  <span class="checkbox-label">{{ option }}</span>
-                </template>
-              </v-checkbox>
+              <div class="radio-card-inner">
+                <div
+                  class="radio-dot"
+                  :class="{ 'radio-dot--selected': localData.presentLocation === option }"
+                />
+                <span class="radio-label-text">{{ option }}</span>
+              </div>
             </div>
           </v-col>
         </v-row>
       </div>
 
       <!-- ── BLOCK: Current Employment Status (Abroad) ── -->
-      <div v-if="localData.presentLocation.includes('Abroad')" class="field-group">
+      <div
+        v-if="
+          localData.presentLocation === 'Returned' || localData.presentLocation === 'Repatriated'
+        "
+        class="field-group"
+      >
         <label class="field-label" style="display: block; margin-bottom: 10px">
           Current Employment Status (Abroad)
         </label>
@@ -129,18 +129,20 @@
               :class="{ 'checkbox-card--selected': localData.currentLivelihood.includes(option) }"
               @click="toggleLivelihood(option)"
             >
-              <v-checkbox
-                v-model="localData.currentLivelihood"
-                :value="option"
-                hide-details
-                density="compact"
-                class="checkbox-inner"
-                @click.stop
-              >
-                <template #label>
-                  <span class="checkbox-label">{{ option }}</span>
-                </template>
-              </v-checkbox>
+              <div class="check-card-inner">
+                <div
+                  class="check-box"
+                  :class="{ 'check-box--selected': localData.currentLivelihood.includes(option) }"
+                >
+                  <v-icon
+                    v-if="localData.currentLivelihood.includes(option)"
+                    size="11"
+                    color="white"
+                    >mdi-check</v-icon
+                  >
+                </div>
+                <span class="checkbox-label">{{ option }}</span>
+              </div>
             </div>
           </v-col>
         </v-row>
@@ -246,7 +248,7 @@ const livelihoodSources = [
 ]
 
 const localData = ref({
-  presentLocation: [],
+  presentLocation: '',
   abroadEmploymentStatus: [],
   reasonForReturn: [],
   dateOfReturn: '',
@@ -260,10 +262,8 @@ watch(localData, (newVal) => emit('update:data', { ...newVal }), { deep: true })
 const emitUpdate = () => emit('update:data', { ...localData.value })
 
 // Toggle functions
-const toggleLocation = (option) => {
-  const idx = localData.value.presentLocation.indexOf(option)
-  if (idx === -1) localData.value.presentLocation.push(option)
-  else localData.value.presentLocation.splice(idx, 1)
+const selectLocation = (option) => {
+  localData.value.presentLocation = option
   emitUpdate()
 }
 
@@ -397,5 +397,27 @@ const selectPlanning = (val) => {
   .section-body {
     padding: 14px 14px 18px;
   }
+}
+
+.check-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.check-box {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 2px solid #d1d5db;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.14s;
+}
+.check-box--selected {
+  border-color: #3b82f6;
+  background: #3b82f6;
 }
 </style>

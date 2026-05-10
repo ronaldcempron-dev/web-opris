@@ -17,18 +17,17 @@
               :class="{ 'checkbox-card--selected': localData.majorProblems.includes(problem) }"
               @click="toggleMajorProblem(problem)"
             >
-              <v-checkbox
-                v-model="localData.majorProblems"
-                :value="problem"
-                hide-details
-                density="compact"
-                class="checkbox-inner"
-                @click.stop
-              >
-                <template #label>
-                  <span class="checkbox-label">{{ problem }}</span>
-                </template>
-              </v-checkbox>
+              <div class="check-card-inner">
+                <div
+                  class="check-box"
+                  :class="{ 'check-box--selected': localData.majorProblems.includes(problem) }"
+                >
+                  <v-icon v-if="localData.majorProblems.includes(problem)" size="11" color="white"
+                    >mdi-check</v-icon
+                  >
+                </div>
+                <span class="checkbox-label">{{ problem }}</span>
+              </div>
             </div>
           </v-col>
         </v-row>
@@ -65,18 +64,17 @@
               :class="{ 'checkbox-card--selected': localData.migrationIssues.includes(issue) }"
               @click="toggleMigrationIssue(issue)"
             >
-              <v-checkbox
-                v-model="localData.migrationIssues"
-                :value="issue"
-                hide-details
-                density="compact"
-                class="checkbox-inner"
-                @click.stop
-              >
-                <template #label>
-                  <span class="checkbox-label">{{ issue }}</span>
-                </template>
-              </v-checkbox>
+              <div class="check-card-inner">
+                <div
+                  class="check-box"
+                  :class="{ 'check-box--selected': localData.migrationIssues.includes(issue) }"
+                >
+                  <v-icon v-if="localData.migrationIssues.includes(issue)" size="11" color="white"
+                    >mdi-check</v-icon
+                  >
+                </div>
+                <span class="checkbox-label">{{ issue }}</span>
+              </div>
             </div>
           </v-col>
         </v-row>
@@ -192,7 +190,8 @@ const toggleMigrationIssue = (issue) => {
   background: #ffffff;
 }
 
-/* Checkbox Cards */
+/* Radio & Checkbox Cards */
+.radio-card,
 .checkbox-card {
   border: 1px solid #e5e7eb;
   border-radius: 10px;
@@ -205,24 +204,72 @@ const toggleMigrationIssue = (issue) => {
   background: #ffffff;
 }
 
+.radio-card:hover,
 .checkbox-card:hover {
   border-color: #93c5fd;
   background: #f8faff;
 }
 
+.radio-card--selected,
 .checkbox-card--selected {
   border-color: #3b82f6;
   background: #eff6ff;
 }
 
+.radio-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.radio-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #d1d5db;
+  flex-shrink: 0;
+  background: #ffffff;
+}
+
+.radio-dot--selected {
+  border-color: #3b82f6;
+  background: #3b82f6;
+  box-shadow: inset 0 0 0 2px #ffffff;
+}
+
+.radio-label-text,
 .checkbox-label {
   font-size: 13px;
   color: #111827;
 }
 
+.radio-card--selected .radio-label-text,
 .checkbox-card--selected .checkbox-label {
   color: #1d4ed8;
   font-weight: 600;
+}
+
+/* Custom Checkbox Style */
+.check-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.check-box {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 2px solid #d1d5db;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.14s;
+}
+.check-box--selected {
+  border-color: #3b82f6;
+  background: #3b82f6;
 }
 
 /* Mobile */

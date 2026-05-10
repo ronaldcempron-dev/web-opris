@@ -19,18 +19,22 @@
               }"
               @click="toggleAgency(agency)"
             >
-              <v-checkbox
-                v-model="localData.receivedAssistanceFrom"
-                :value="agency"
-                hide-details
-                density="compact"
-                class="checkbox-inner"
-                @click.stop
-              >
-                <template #label>
-                  <span class="checkbox-label">{{ agency }}</span>
-                </template>
-              </v-checkbox>
+              <div class="check-card-inner">
+                <div
+                  class="check-box"
+                  :class="{
+                    'check-box--selected': localData.receivedAssistanceFrom.includes(agency),
+                  }"
+                >
+                  <v-icon
+                    v-if="localData.receivedAssistanceFrom.includes(agency)"
+                    size="11"
+                    color="white"
+                    >mdi-check</v-icon
+                  >
+                </div>
+                <span class="checkbox-label">{{ agency }}</span>
+              </div>
             </div>
           </v-col>
         </v-row>
@@ -51,18 +55,17 @@
               :class="{ 'checkbox-card--selected': localData.typeOfAssistance.includes(type) }"
               @click="toggleAssistanceType(type)"
             >
-              <v-checkbox
-                v-model="localData.typeOfAssistance"
-                :value="type"
-                hide-details
-                density="compact"
-                class="checkbox-inner"
-                @click.stop
-              >
-                <template #label>
-                  <span class="checkbox-label">{{ type }}</span>
-                </template>
-              </v-checkbox>
+              <div class="check-card-inner">
+                <div
+                  class="check-box"
+                  :class="{ 'check-box--selected': localData.typeOfAssistance.includes(type) }"
+                >
+                  <v-icon v-if="localData.typeOfAssistance.includes(type)" size="11" color="white"
+                    >mdi-check</v-icon
+                  >
+                </div>
+                <span class="checkbox-label">{{ type }}</span>
+              </div>
             </div>
           </v-col>
         </v-row>
@@ -229,13 +232,6 @@ const selectAwareness = (val) => {
   margin-bottom: 14px;
 }
 
-.field-item {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  height: 100%;
-}
-
 .field-label {
   font-size: 11px;
   font-weight: 700;
@@ -302,6 +298,29 @@ const selectAwareness = (val) => {
 .checkbox-card--selected .checkbox-label {
   color: #1d4ed8;
   font-weight: 600;
+}
+
+/* Custom Checkbox Style */
+.check-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.check-box {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 2px solid #d1d5db;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.14s;
+}
+.check-box--selected {
+  border-color: #3b82f6;
+  background: #3b82f6;
 }
 
 /* Mobile */

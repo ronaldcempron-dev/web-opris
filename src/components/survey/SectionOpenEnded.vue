@@ -7,9 +7,9 @@
       <!-- 1. Changes from Migration -->
       <div class="field-group">
         <div class="field-item">
-          <label class="field-label"
-            >What changes has overseas migration brought to your family?</label
-          >
+          <label class="field-label">
+            What changes has overseas migration brought to your family?
+          </label>
           <v-textarea
             v-model="localData.changesFromMigration"
             variant="outlined"
@@ -25,10 +25,9 @@
       <!-- 2. Biggest Challenges -->
       <div class="field-group">
         <div class="field-item">
-          <label class="field-label"
-            >What are the biggest challenges you face as an OFW / family left behind / returned
-            OFW?</label
-          >
+          <label class="field-label">
+            What are the biggest challenges you face as an OFW / family left behind / returned OFW?
+          </label>
           <v-textarea
             v-model="localData.biggestChallenges"
             variant="outlined"
@@ -44,9 +43,9 @@
       <!-- 3. Support Needed -->
       <div class="field-group">
         <div class="field-item">
-          <label class="field-label"
-            >What kind of support do you most need from the government or LGU?</label
-          >
+          <label class="field-label">
+            What kind of support do you most need from the government or LGU?
+          </label>
           <v-textarea
             v-model="localData.mostNeededSupport"
             variant="outlined"
@@ -62,7 +61,7 @@
       <!-- 4. Future Plans -->
       <div class="field-group">
         <div class="field-item">
-          <label class="field-label">What are your future plans for the family / OFW?</label>
+          <label class="field-label"> What are your future plans for the family / OFW? </label>
           <v-textarea
             v-model="localData.futurePlans"
             variant="outlined"

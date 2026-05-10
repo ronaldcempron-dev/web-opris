@@ -65,49 +65,34 @@
           <v-col cols="12" md="4">
             <div class="field-item">
               <label class="field-label">Civil Status</label>
-              <v-text-field
-                v-model="localData.civilStatus"
-                placeholder="e.g. Married, Single, Widowed"
-                variant="outlined"
-                density="comfortable"
-                hide-details
-                class="modern-input"
-                @update:modelValue="emitUpdate"
-              />
+              <select class="native-select" v-model="localData.civilStatus" @change="emitUpdate">
+                <option value="">—</option>
+                <option v-for="s in civilStatusOptions" :key="s" :value="s">{{ s }}</option>
+              </select>
             </div>
           </v-col>
         </v-row>
       </div>
 
       <!-- ── Educational Attainment (multi) ── -->
+      <!-- ── Educational Attainment (single select) ── -->
       <div class="field-group">
-        <label class="field-label" style="display: block; margin-bottom: 10px"
-          >Educational Attainment</label
-        >
+        <label class="field-label" style="display: block; margin-bottom: 10px">
+          Educational Attainment
+        </label>
         <v-row dense>
           <v-col cols="12" sm="6" md="4" v-for="option in educationOptions" :key="option">
             <div
-              class="checkbox-card"
-              :class="{
-                'checkbox-card--selected': localData.educationalAttainment.includes(option),
-              }"
-              @click="toggleEducation(option)"
+              class="radio-card"
+              :class="{ 'radio-card--selected': localData.educationalAttainment === option }"
+              @click="selectEducation(option)"
             >
-              <div class="check-card-inner">
+              <div class="radio-card-inner">
                 <div
-                  class="check-box"
-                  :class="{
-                    'check-box--selected': localData.educationalAttainment.includes(option),
-                  }"
-                >
-                  <v-icon
-                    v-if="localData.educationalAttainment.includes(option)"
-                    size="11"
-                    color="white"
-                    >mdi-check</v-icon
-                  >
-                </div>
-                <span class="checkbox-label">{{ option }}</span>
+                  class="radio-dot"
+                  :class="{ 'radio-dot--selected': localData.educationalAttainment === option }"
+                />
+                <span class="radio-label-text">{{ option }}</span>
               </div>
             </div>
           </v-col>
@@ -281,12 +266,14 @@ const philhealthOptions = ['Active', 'Inactive', 'Unknown']
 const sssOptions = ['Active', 'Inactive', 'None']
 const pagibigOptions = ['Active', 'Inactive', 'None']
 
+const civilStatusOptions = ['Single', 'Married', 'Widowed', 'Separated', 'Annulled']
+
 const localData = ref({
   nameOfOFW: '',
   sex: '',
   age: null,
   civilStatus: '',
-  educationalAttainment: [],
+  educationalAttainment: '',
   technicalSkills: '',
   passportNumber: '',
   dmwRegistrationNumber: '',
@@ -321,10 +308,8 @@ const selectPagibig = (val) => {
   emitUpdate()
 }
 
-const toggleEducation = (option) => {
-  const idx = localData.value.educationalAttainment.indexOf(option)
-  if (idx === -1) localData.value.educationalAttainment.push(option)
-  else localData.value.educationalAttainment.splice(idx, 1)
+const selectEducation = (option) => {
+  localData.value.educationalAttainment = option
   emitUpdate()
 }
 </script>
@@ -456,5 +441,117 @@ const toggleEducation = (option) => {
   .section-body {
     padding: 14px 14px 18px;
   }
+}
+
+/* ══ SELECT TRIGGER ══════════════════════════ */
+.select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8faff;
+  cursor: pointer;
+  transition:
+    border-color 0.14s,
+    background 0.14s;
+  min-height: 44px;
+}
+.select-trigger:hover {
+  border-color: #93c5fd;
+  background: #ffffff;
+}
+.select-trigger--filled {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+.select-trigger-text {
+  font-size: 13.5px;
+  color: #9ca3af;
+}
+.select-trigger--filled .select-trigger-text {
+  color: #111827;
+  font-weight: 500;
+}
+
+/* ══ CIVIL STATUS DRAWER ═════════════════════ */
+.civil-drawer {
+  border-radius: 20px 20px 0 0 !important;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.1) !important;
+}
+.drawer-inner {
+  padding: 12px 20px 32px;
+}
+.drawer-handle {
+  width: 40px;
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 99px;
+  margin: 0 auto 16px;
+}
+.drawer-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #6b7fa8;
+  margin-bottom: 12px;
+}
+.drawer-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.drawer-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #ffffff;
+  transition: all 0.14s;
+}
+.drawer-option:hover {
+  border-color: #93c5fd;
+  background: #f8faff;
+}
+.drawer-option--selected {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+.drawer-option-text {
+  font-size: 13.5px;
+  color: #111827;
+}
+.drawer-option--selected .drawer-option-text {
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.native-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8faff;
+  font-size: 13.5px;
+  color: #111827;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  appearance: auto;
+  transition:
+    border-color 0.14s,
+    background 0.14s;
+}
+.native-select:focus {
+  border-color: #3b82f6;
+  background: #ffffff;
+}
+.native-select:hover {
+  border-color: #93c5fd;
 }
 </style>

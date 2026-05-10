@@ -26,11 +26,11 @@
         </v-row>
       </div>
 
-      <!-- ── Preferred Reintegration Type (multi) ── -->
+      <!-- ── Preferred Reintegration Type ── -->
       <div class="field-group">
-        <label class="field-label" style="display: block; margin-bottom: 10px"
-          >Type of Reintegration Preferred</label
-        >
+        <label class="field-label" style="display: block; margin-bottom: 10px">
+          Type of Reintegration Preferred
+        </label>
         <v-row dense>
           <v-col cols="12" sm="6" md="4" v-for="option in reintegrationTypes" :key="option">
             <div
@@ -104,11 +104,11 @@
           </v-col>
         </v-row>
 
-        <!-- Status of Livelihood = SINGLE select -->
+        <!-- Status of Livelihood -->
         <div class="mt-6">
-          <label class="field-label" style="display: block; margin-bottom: 10px"
-            >Status of Livelihood / Business</label
-          >
+          <label class="field-label" style="display: block; margin-bottom: 10px">
+            Status of Livelihood / Business
+          </label>
           <v-row dense>
             <v-col cols="12" sm="6" md="4" v-for="status in livelihoodStatuses" :key="status">
               <div
@@ -129,11 +129,11 @@
         </div>
       </div>
 
-      <!-- ── Main Barriers (multi) ── -->
+      <!-- ── Main Barriers to Reintegration ── -->
       <div class="field-group" style="margin-bottom: 0">
-        <label class="field-label" style="display: block; margin-bottom: 10px"
-          >Main Barriers to Reintegration</label
-        >
+        <label class="field-label" style="display: block; margin-bottom: 10px">
+          Main Barriers to Reintegration
+        </label>
         <v-row dense>
           <v-col cols="12" sm="6" md="4" v-for="barrier in barriers" :key="barrier">
             <div
@@ -176,12 +176,14 @@ const reintegrationTypes = [
   'Re-migration / overseas employment',
   'Other',
 ]
+
 const livelihoodStatuses = [
   'Operating well',
   'Operating but struggling',
   'Stopped / closed',
   'Seasonal / irregular',
 ]
+
 const barriers = [
   'Lack of capital',
   'Lack of market access',
@@ -206,6 +208,7 @@ const localData = ref({
 })
 
 watch(localData, (v) => emit('update:data', { ...v }), { deep: true })
+
 const emitUpdate = () => emit('update:data', { ...localData.value })
 
 const toggleArray = (key, val) => {
@@ -219,10 +222,12 @@ const selectReintegrationPlan = (val) => {
   localData.value.hasReintegrationPlan = val
   emitUpdate()
 }
+
 const selectLivelihoodStatus = (val) => {
   localData.value.livelihoodStatus = val
   emitUpdate()
 }
+
 const selectStartedLivelihood = (val) => {
   localData.value.hasStartedLivelihood = val
   if (val === 'No') {
@@ -237,15 +242,18 @@ const selectStartedLivelihood = (val) => {
 .section-body {
   padding: 10px 24px 24px;
 }
+
 .field-group {
   margin-bottom: 14px;
 }
+
 .field-item {
   display: flex;
   flex-direction: column;
   gap: 6px;
   height: 100%;
 }
+
 .field-label {
   font-size: 11px;
   font-weight: 700;
@@ -254,6 +262,8 @@ const selectStartedLivelihood = (val) => {
   color: #6b7fa8;
   line-height: 1.4;
 }
+
+/* Modern Input */
 .modern-input :deep(.v-field) {
   border-radius: 10px;
   background: #f8faff;
@@ -261,10 +271,13 @@ const selectStartedLivelihood = (val) => {
   font-size: 13.5px;
   color: #111827;
 }
+
 .modern-input :deep(.v-field--focused) {
   border-color: #3b82f6;
   background: #ffffff;
 }
+
+/* Radio & Checkbox Cards */
 .radio-card,
 .checkbox-card {
   border: 1px solid #e5e7eb;
@@ -277,22 +290,25 @@ const selectStartedLivelihood = (val) => {
     background 0.14s;
   background: #ffffff;
 }
+
 .radio-card:hover,
 .checkbox-card:hover {
   border-color: #93c5fd;
   background: #f8faff;
 }
+
 .radio-card--selected,
 .checkbox-card--selected {
   border-color: #3b82f6;
   background: #eff6ff;
 }
-.radio-card-inner,
-.check-card-inner {
+
+.radio-card-inner {
   display: flex;
   align-items: center;
   gap: 10px;
 }
+
 .radio-dot {
   width: 14px;
   height: 14px;
@@ -301,15 +317,36 @@ const selectStartedLivelihood = (val) => {
   flex-shrink: 0;
   background: #ffffff;
 }
+
 .radio-dot--selected {
   border-color: #3b82f6;
   background: #3b82f6;
   box-shadow: inset 0 0 0 2px #ffffff;
 }
+
+.radio-label-text,
+.checkbox-label {
+  font-size: 13px;
+  color: #111827;
+}
+
+.radio-card--selected .radio-label-text,
+.checkbox-card--selected .checkbox-label {
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+/* Custom Checkbox Style */
+.check-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .check-box {
-  width: 16px;
-  height: 16px;
-  border-radius: 4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
   border: 2px solid #d1d5db;
   background: #fff;
   display: flex;
@@ -318,20 +355,13 @@ const selectStartedLivelihood = (val) => {
   flex-shrink: 0;
   transition: all 0.14s;
 }
+
 .check-box--selected {
   border-color: #3b82f6;
   background: #3b82f6;
 }
-.radio-label-text,
-.checkbox-label {
-  font-size: 13px;
-  color: #111827;
-}
-.radio-card--selected .radio-label-text,
-.checkbox-card--selected .checkbox-label {
-  color: #1d4ed8;
-  font-weight: 600;
-}
+
+/* Mobile */
 @media (max-width: 480px) {
   .section-body {
     padding: 14px 14px 18px;

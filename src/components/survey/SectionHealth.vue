@@ -40,7 +40,6 @@
           </v-col>
         </v-row>
 
-        <!-- Conditional Field -->
         <div v-if="localData.hasChronicIllness === 'Yes'" class="mt-4">
           <div class="field-item">
             <label class="field-label">If yes, specify illness/condition</label>
@@ -139,30 +138,27 @@
           <label class="field-label" style="display: block; margin-bottom: 10px">
             What psychosocial concerns are present?
           </label>
-          <v-row dense>
-            <v-col cols="12" sm="6" md="4" v-for="concern in psychosocialConcerns" :key="concern">
-              <div
-                class="checkbox-card"
-                :class="{
-                  'checkbox-card--selected': localData.psychosocialConcerns.includes(concern),
-                }"
-                @click="togglePsychosocialConcern(concern)"
-              >
-                <v-checkbox
-                  v-model="localData.psychosocialConcerns"
-                  :value="concern"
-                  hide-details
-                  density="compact"
-                  class="checkbox-inner"
-                  @click.stop
-                >
-                  <template #label>
-                    <span class="checkbox-label">{{ concern }}</span>
-                  </template>
-                </v-checkbox>
+          <div class="check-grid">
+            <div
+              v-for="concern in psychosocialConcerns"
+              :key="concern"
+              class="checkbox-card"
+              :class="{
+                'checkbox-card--selected': localData.psychosocialConcerns.includes(concern),
+              }"
+              @click.stop="togglePsychosocialConcern(concern)"
+            >
+              <div class="check-card-inner">
+                <div
+                  class="check-box"
+                  :class="{
+                    'check-box--selected': localData.psychosocialConcerns.includes(concern),
+                  }"
+                />
+                <span class="checkbox-label">{{ concern }}</span>
               </div>
-            </v-col>
-          </v-row>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -206,18 +202,17 @@
               :class="{ 'checkbox-card--selected': localData.healthAccess.includes(option) }"
               @click="toggleHealthAccess(option)"
             >
-              <v-checkbox
-                v-model="localData.healthAccess"
-                :value="option"
-                hide-details
-                density="compact"
-                class="checkbox-inner"
-                @click.stop
-              >
-                <template #label>
-                  <span class="checkbox-label">{{ option }}</span>
-                </template>
-              </v-checkbox>
+              <div class="check-card-inner">
+                <div
+                  class="check-box"
+                  :class="{ 'check-box--selected': localData.healthAccess.includes(option) }"
+                >
+                  <v-icon v-if="localData.healthAccess.includes(option)" size="11" color="white">
+                    mdi-check
+                  </v-icon>
+                </div>
+                <span class="checkbox-label">{{ option }}</span>
+              </div>
             </div>
           </v-col>
         </v-row>
@@ -263,39 +258,32 @@ const localData = ref({
 })
 
 watch(localData, (newVal) => emit('update:data', { ...newVal }), { deep: true })
-
 const emitUpdate = () => emit('update:data', { ...localData.value })
 
-// Selection handlers
 const selectChronicIllness = (val) => {
   localData.value.hasChronicIllness = val
   if (val === 'No') localData.value.chronicIllnessSpecify = ''
   emitUpdate()
 }
-
 const selectDisability = (val) => {
   localData.value.hasDisability = val
   emitUpdate()
 }
-
 const selectPsychosocial = (val) => {
   localData.value.hasPsychosocialConcerns = val
   if (val === 'No') localData.value.psychosocialConcerns = []
   emitUpdate()
 }
-
 const selectWillingness = (val) => {
   localData.value.willingForPsychosocialSupport = val
   emitUpdate()
 }
-
 const togglePsychosocialConcern = (concern) => {
   const idx = localData.value.psychosocialConcerns.indexOf(concern)
   if (idx === -1) localData.value.psychosocialConcerns.push(concern)
   else localData.value.psychosocialConcerns.splice(idx, 1)
   emitUpdate()
 }
-
 const toggleHealthAccess = (option) => {
   const idx = localData.value.healthAccess.indexOf(option)
   if (idx === -1) localData.value.healthAccess.push(option)
@@ -308,18 +296,15 @@ const toggleHealthAccess = (option) => {
 .section-body {
   padding: 10px 24px 24px;
 }
-
 .field-group {
   margin-bottom: 14px;
 }
-
 .field-item {
   display: flex;
   flex-direction: column;
   gap: 6px;
   height: 100%;
 }
-
 .field-label {
   font-size: 11px;
   font-weight: 700;
@@ -329,6 +314,7 @@ const toggleHealthAccess = (option) => {
   line-height: 1.4;
 }
 
+/* ── Modern Input ── */
 .modern-input :deep(.v-field) {
   border-radius: 10px;
   background: #f8faff;
@@ -336,14 +322,69 @@ const toggleHealthAccess = (option) => {
   font-size: 13.5px;
   color: #111827;
 }
-
 .modern-input :deep(.v-field--focused) {
   border-color: #3b82f6;
   background: #ffffff;
 }
 
-/* Radio & Checkbox Cards */
-.radio-card,
+/* ── Radio Cards ── */
+.radio-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition:
+    border-color 0.14s,
+    background 0.14s;
+  background: #ffffff;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.radio-card:hover {
+  border-color: #93c5fd;
+  background: #f8faff;
+}
+.radio-card--selected {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+.radio-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+}
+.radio-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #d1d5db;
+  flex-shrink: 0;
+  background: #ffffff;
+}
+.radio-dot--selected {
+  border-color: #3b82f6;
+  background: #3b82f6;
+  box-shadow: inset 0 0 0 2px #ffffff;
+}
+.radio-label-text {
+  font-size: 13px;
+  color: #111827;
+}
+.radio-card--selected .radio-label-text {
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+/* ── Checkbox Grid ── */
+.check-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 6px;
+}
+
+/* ── Checkbox Cards ── */
 .checkbox-card {
   border: 1px solid #e5e7eb;
   border-radius: 10px;
@@ -355,56 +396,64 @@ const toggleHealthAccess = (option) => {
     background 0.14s;
   background: #ffffff;
 }
-
-.radio-card:hover,
 .checkbox-card:hover {
   border-color: #93c5fd;
   background: #f8faff;
 }
-
-.radio-card--selected,
 .checkbox-card--selected {
   border-color: #3b82f6;
   background: #eff6ff;
 }
-
-.radio-card-inner {
+.check-card-inner {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.radio-dot {
+.check-box {
   width: 14px;
   height: 14px;
-  border-radius: 50%;
+  border-radius: 3px;
   border: 2px solid #d1d5db;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  background: #ffffff;
+  transition: all 0.14s;
 }
 
-.radio-dot--selected {
+.check-box--selected {
   border-color: #3b82f6;
   background: #3b82f6;
-  box-shadow: inset 0 0 0 2px #ffffff;
 }
-
-.radio-label-text,
+.check-box--selected::after {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 7px;
+  border: 2px solid #ffffff;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg) translate(0px, -1px);
+}
 .checkbox-label {
   font-size: 13px;
   color: #111827;
 }
 
-.radio-card--selected .radio-label-text,
 .checkbox-card--selected .checkbox-label {
   color: #1d4ed8;
   font-weight: 600;
 }
 
-/* Mobile */
+/* ── Mobile ── */
 @media (max-width: 480px) {
   .section-body {
     padding: 14px 14px 18px;
+  }
+  .check-grid {
+    grid-template-columns: 1fr 1fr;
   }
 }
 </style>

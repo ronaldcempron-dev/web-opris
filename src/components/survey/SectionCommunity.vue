@@ -14,18 +14,17 @@
               :class="{ 'checkbox-card--selected': localData.communityGroups.includes(group) }"
               @click="toggleCommunityGroup(group)"
             >
-              <v-checkbox
-                v-model="localData.communityGroups"
-                :value="group"
-                hide-details
-                density="compact"
-                class="checkbox-inner"
-                @click.stop
-              >
-                <template #label>
-                  <span class="checkbox-label">{{ group }}</span>
-                </template>
-              </v-checkbox>
+              <div class="check-card-inner">
+                <div
+                  class="check-box"
+                  :class="{ 'check-box--selected': localData.communityGroups.includes(group) }"
+                >
+                  <v-icon v-if="localData.communityGroups.includes(group)" size="11" color="white"
+                    >mdi-check</v-icon
+                  >
+                </div>
+                <span class="checkbox-label">{{ group }}</span>
+              </div>
             </div>
           </v-col>
         </v-row>
@@ -51,18 +50,22 @@
               }"
               @click="toggleParticipation(activity)"
             >
-              <v-checkbox
-                v-model="localData.willingToParticipate"
-                :value="activity"
-                hide-details
-                density="compact"
-                class="checkbox-inner"
-                @click.stop
-              >
-                <template #label>
-                  <span class="checkbox-label">{{ activity }}</span>
-                </template>
-              </v-checkbox>
+              <div class="check-card-inner">
+                <div
+                  class="check-box"
+                  :class="{
+                    'check-box--selected': localData.willingToParticipate.includes(activity),
+                  }"
+                >
+                  <v-icon
+                    v-if="localData.willingToParticipate.includes(activity)"
+                    size="11"
+                    color="white"
+                    >mdi-check</v-icon
+                  >
+                </div>
+                <span class="checkbox-label">{{ activity }}</span>
+              </div>
             </div>
           </v-col>
         </v-row>
@@ -167,6 +170,7 @@ const toggleParticipation = (activity) => {
   line-height: 1.4;
 }
 
+/* Modern Input */
 .modern-input :deep(.v-field) {
   border-radius: 10px;
   background: #f8faff;
@@ -237,6 +241,31 @@ const toggleParticipation = (activity) => {
 .checkbox-card--selected .checkbox-label {
   color: #1d4ed8;
   font-weight: 600;
+}
+
+/* Custom Checkbox Style */
+.check-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.check-box {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 2px solid #d1d5db;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.14s;
+}
+
+.check-box--selected {
+  border-color: #3b82f6;
+  background: #3b82f6;
 }
 
 /* Mobile */

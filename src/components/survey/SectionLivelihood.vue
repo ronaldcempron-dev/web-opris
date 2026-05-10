@@ -60,28 +60,23 @@
         <label class="field-label" style="display: block; margin-bottom: 10px">
           Main Local Occupations of Household Members
         </label>
-        <v-row dense>
-          <v-col cols="12" sm="6" md="4" v-for="option in occupationOptions" :key="option">
-            <div
-              class="checkbox-card"
-              :class="{ 'checkbox-card--selected': localData.mainOccupations.includes(option) }"
-              @click="toggleOccupation(option)"
-            >
-              <v-checkbox
-                v-model="localData.mainOccupations"
-                :value="option"
-                hide-details
-                density="compact"
-                class="checkbox-inner"
-                @click.stop
-              >
-                <template #label>
-                  <span class="checkbox-label">{{ option }}</span>
-                </template>
-              </v-checkbox>
+        <div class="check-grid">
+          <div
+            v-for="option in occupationOptions"
+            :key="option"
+            class="checkbox-card"
+            :class="{ 'checkbox-card--selected': localData.mainOccupations.includes(option) }"
+            @click.stop="toggleOccupation(option)"
+          >
+            <div class="check-card-inner">
+              <div
+                class="check-box"
+                :class="{ 'check-box--selected': localData.mainOccupations.includes(option) }"
+              />
+              <span class="checkbox-label">{{ option }}</span>
             </div>
-          </v-col>
-        </v-row>
+          </div>
+        </div>
       </div>
 
       <!-- ── BLOCK: Interest in Local Livelihood ── -->
@@ -128,28 +123,23 @@
         <label class="field-label" style="display: block; margin-bottom: 10px">
           Preferred Livelihood / Enterprise Options
         </label>
-        <v-row dense>
-          <v-col cols="12" sm="6" md="4" v-for="option in preferredLivelihoods" :key="option">
-            <div
-              class="checkbox-card"
-              :class="{ 'checkbox-card--selected': localData.preferredLivelihood.includes(option) }"
-              @click="togglePreferredLivelihood(option)"
-            >
-              <v-checkbox
-                v-model="localData.preferredLivelihood"
-                :value="option"
-                hide-details
-                density="compact"
-                class="checkbox-inner"
-                @click.stop
-              >
-                <template #label>
-                  <span class="checkbox-label">{{ option }}</span>
-                </template>
-              </v-checkbox>
+        <div class="check-grid">
+          <div
+            v-for="option in preferredLivelihoods"
+            :key="option"
+            class="checkbox-card"
+            :class="{ 'checkbox-card--selected': localData.preferredLivelihood.includes(option) }"
+            @click.stop="togglePreferredLivelihood(option)"
+          >
+            <div class="check-card-inner">
+              <div
+                class="check-box"
+                :class="{ 'check-box--selected': localData.preferredLivelihood.includes(option) }"
+              />
+              <span class="checkbox-label">{{ option }}</span>
             </div>
-          </v-col>
-        </v-row>
+          </div>
+        </div>
       </div>
 
       <!-- ── BLOCK: Skills Training ── -->
@@ -221,10 +211,8 @@ const localData = ref({
 })
 
 watch(localData, (newVal) => emit('update:data', { ...newVal }), { deep: true })
-
 const emitUpdate = () => emit('update:data', { ...localData.value })
 
-// Toggle helpers
 const toggleOccupation = (option) => {
   const idx = localData.value.mainOccupations.indexOf(option)
   if (idx === -1) localData.value.mainOccupations.push(option)
@@ -249,18 +237,15 @@ const selectInterest = (val) => {
 .section-body {
   padding: 10px 24px 24px;
 }
-
 .field-group {
   margin-bottom: 14px;
 }
-
 .field-item {
   display: flex;
   flex-direction: column;
   gap: 6px;
   height: 100%;
 }
-
 .field-label {
   font-size: 11px;
   font-weight: 700;
@@ -270,7 +255,7 @@ const selectInterest = (val) => {
   line-height: 1.4;
 }
 
-/* Modern Input + Textarea */
+/* ── Modern Input ── */
 .modern-input :deep(.v-field) {
   border-radius: 10px;
   background: #f8faff;
@@ -278,15 +263,13 @@ const selectInterest = (val) => {
   font-size: 13.5px;
   color: #111827;
 }
-
 .modern-input :deep(.v-field--focused) {
   border-color: #3b82f6;
   background: #ffffff;
 }
 
-/* Radio & Checkbox Cards */
-.radio-card,
-.checkbox-card {
+/* ── Radio Cards ── */
+.radio-card {
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   padding: 10px 14px;
@@ -296,26 +279,23 @@ const selectInterest = (val) => {
     border-color 0.14s,
     background 0.14s;
   background: #ffffff;
+  user-select: none;
+  -webkit-user-select: none;
 }
-
-.radio-card:hover,
-.checkbox-card:hover {
+.radio-card:hover {
   border-color: #93c5fd;
   background: #f8faff;
 }
-
-.radio-card--selected,
-.checkbox-card--selected {
+.radio-card--selected {
   border-color: #3b82f6;
   background: #eff6ff;
 }
-
 .radio-card-inner {
   display: flex;
   align-items: center;
   gap: 10px;
+  pointer-events: none;
 }
-
 .radio-dot {
   width: 14px;
   height: 14px;
@@ -324,29 +304,98 @@ const selectInterest = (val) => {
   flex-shrink: 0;
   background: #ffffff;
 }
-
 .radio-dot--selected {
   border-color: #3b82f6;
   background: #3b82f6;
   box-shadow: inset 0 0 0 2px #ffffff;
 }
+.radio-label-text {
+  font-size: 13px;
+  color: #111827;
+}
+.radio-card--selected .radio-label-text {
+  color: #1d4ed8;
+  font-weight: 600;
+}
 
-.radio-label-text,
+/* ── Checkbox Grid ── */
+.check-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 6px;
+}
+
+/* ── Checkbox Cards ── */
+.checkbox-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition:
+    border-color 0.14s,
+    background 0.14s;
+  background: #ffffff;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.checkbox-card:hover {
+  border-color: #93c5fd;
+  background: #f8faff;
+}
+.checkbox-card--selected {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+.check-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+}
+.check-box {
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+  border: 2px solid #d1d5db;
+  background: #fff;
+  flex-shrink: 0;
+  transition: all 0.14s;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.check-box--selected {
+  border-color: #3b82f6;
+  background: #3b82f6;
+}
+.check-box--selected::after {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 7px;
+  border: 2px solid #ffffff;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg) translate(0px, -1px);
+  margin: auto;
+}
 .checkbox-label {
   font-size: 13px;
   color: #111827;
 }
-
-.radio-card--selected .radio-label-text,
 .checkbox-card--selected .checkbox-label {
   color: #1d4ed8;
   font-weight: 600;
 }
 
-/* Mobile */
+/* ── Mobile ── */
 @media (max-width: 480px) {
   .section-body {
     padding: 14px 14px 18px;
+  }
+  .check-grid {
+    grid-template-columns: 1fr 1fr;
   }
 }
 </style>

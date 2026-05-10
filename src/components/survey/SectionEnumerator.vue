@@ -95,18 +95,23 @@
               }"
               @click="toggleIntervention(intervention)"
             >
-              <v-checkbox
-                v-model="localData.recommendedInterventions"
-                :value="intervention"
-                hide-details
-                density="compact"
-                class="checkbox-inner"
-                @click.stop
-              >
-                <template #label>
-                  <span class="checkbox-label">{{ intervention }}</span>
-                </template>
-              </v-checkbox>
+              <div class="check-card-inner">
+                <div
+                  class="check-box"
+                  :class="{
+                    'check-box--selected':
+                      localData.recommendedInterventions.includes(intervention),
+                  }"
+                >
+                  <v-icon
+                    v-if="localData.recommendedInterventions.includes(intervention)"
+                    size="11"
+                    color="white"
+                    >mdi-check</v-icon
+                  >
+                </div>
+                <span class="checkbox-label">{{ intervention }}</span>
+              </div>
             </div>
           </v-col>
         </v-row>
@@ -120,17 +125,12 @@
           :class="{ 'checkbox-card--selected': localData.needsFollowUp }"
           @click="toggleFollowUp"
         >
-          <v-checkbox
-            v-model="localData.needsFollowUp"
-            hide-details
-            density="compact"
-            class="checkbox-inner"
-            @click.stop
-          >
-            <template #label>
-              <span class="checkbox-label">Needs Follow-up Visit</span>
-            </template>
-          </v-checkbox>
+          <div class="check-card-inner">
+            <div class="check-box" :class="{ 'check-box--selected': localData.needsFollowUp }">
+              <v-icon v-if="localData.needsFollowUp" size="11" color="white">mdi-check</v-icon>
+            </div>
+            <span class="checkbox-label">Needs Follow-up Visit</span>
+          </div>
         </div>
       </div>
 
@@ -171,6 +171,7 @@ const socioEconomicOptions = [
 ]
 
 const housingOptions = ['Good', 'Fair', 'Poor', 'Hazard-prone']
+
 const familyFunctioningOptions = [
   'Stable',
   'Needs support',
@@ -260,6 +261,7 @@ const toggleFollowUp = () => {
   line-height: 1.4;
 }
 
+/* Modern Input */
 .modern-input :deep(.v-field) {
   border-radius: 10px;
   background: #f8faff;
@@ -330,6 +332,31 @@ const toggleFollowUp = () => {
 .checkbox-card--selected .checkbox-label {
   color: #1d4ed8;
   font-weight: 600;
+}
+
+/* Custom Checkbox Style */
+.check-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.check-box {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 2px solid #d1d5db;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.14s;
+}
+
+.check-box--selected {
+  border-color: #3b82f6;
+  background: #3b82f6;
 }
 
 /* Mobile */

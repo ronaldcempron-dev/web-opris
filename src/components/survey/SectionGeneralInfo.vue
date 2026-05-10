@@ -174,44 +174,39 @@
 
       <!-- ── BLOCK: Type of Respondent ── -->
       <div class="field-group" style="margin-bottom: 0">
-        <label class="field-label" style="display: block; margin-bottom: 10px"
-          >Type of Respondent</label
-        >
+        <label class="field-label" style="display: block; margin-bottom: 10px">
+          Type of Respondent
+        </label>
 
-        <v-radio-group
-          v-model="localData.typeOfRespondent"
-          @update:modelValue="handleTypeChange"
-          hide-details
-        >
-          <v-row dense>
-            <v-col cols="12" sm="6" md="4" v-for="option in respondentTypes" :key="option">
-              <div
-                class="radio-card"
-                :class="{ 'radio-card--selected': localData.typeOfRespondent === option }"
-                @click="selectType(option)"
-              >
-                <v-radio :value="option" hide-details class="radio-inner">
-                  <template #label>
-                    <span v-if="option !== 'Other'" class="radio-label-text">{{ option }}</span>
-                    <span v-else class="radio-label-text">Other</span>
-                  </template>
-                </v-radio>
-
-                <v-text-field
-                  v-if="option === 'Other' && localData.typeOfRespondent === 'Other'"
-                  v-model="localData.typeOfRespondentOther"
-                  placeholder="Please specify"
-                  variant="underlined"
-                  density="compact"
-                  hide-details
-                  class="other-input"
-                  @update:modelValue="emitUpdate"
-                  @click.stop
+        <v-row dense>
+          <v-col cols="12" sm="6" md="4" v-for="option in respondentTypes" :key="option">
+            <div
+              class="radio-card"
+              :class="{ 'radio-card--selected': localData.typeOfRespondent === option }"
+              @click="selectType(option)"
+            >
+              <div class="radio-card-inner">
+                <div
+                  class="radio-dot"
+                  :class="{ 'radio-dot--selected': localData.typeOfRespondent === option }"
                 />
+                <span class="radio-label-text">{{ option }}</span>
               </div>
-            </v-col>
-          </v-row>
-        </v-radio-group>
+
+              <v-text-field
+                v-if="option === 'Other' && localData.typeOfRespondent === 'Other'"
+                v-model="localData.typeOfRespondentOther"
+                placeholder="Please specify"
+                variant="underlined"
+                density="compact"
+                hide-details
+                class="other-input"
+                @update:modelValue="emitUpdate"
+                @click.stop
+              />
+            </div>
+          </v-col>
+        </v-row>
       </div>
     </div>
   </div>
@@ -418,42 +413,49 @@ const copyLng = async () => {
     background 0.14s;
   background: #ffffff;
 }
-
 .radio-card:hover {
   border-color: #93c5fd;
   background: #f8faff;
 }
-
 .radio-card--selected {
   border-color: #3b82f6;
   background: #eff6ff;
 }
-
-.radio-inner {
-  margin: 0;
+.radio-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-
+.radio-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #d1d5db;
+  flex-shrink: 0;
+  background: #ffffff;
+}
+.radio-dot--selected {
+  border-color: #3b82f6;
+  background: #3b82f6;
+  box-shadow: inset 0 0 0 2px #ffffff;
+}
 .radio-label-text {
   font-size: 13px;
   color: #111827;
   line-height: 1.4;
 }
-
 .radio-card--selected .radio-label-text {
   color: #1d4ed8;
   font-weight: 600;
 }
-
 .other-input {
   margin-top: 8px;
   font-size: 13px;
 }
-
 .other-input :deep(.v-field__input) {
   font-size: 13px;
   color: #1d4ed8;
 }
-
 /* ══ MOBILE ══════════════════════════════════ */
 @media (max-width: 480px) {
   .section-body {
