@@ -2,7 +2,7 @@
 <template>
   <div>
     <div class="section-body">
-      <!-- ── BLOCK: Reintegration Plan ── -->
+      <!-- ── Reintegration Plan ── -->
       <div class="field-group">
         <label class="field-label" style="display: block; margin-bottom: 10px">
           Does the returned OFW currently have a reintegration plan?
@@ -26,11 +26,11 @@
         </v-row>
       </div>
 
-      <!-- ── BLOCK: Preferred Reintegration Type ── -->
+      <!-- ── Preferred Reintegration Type (multi) ── -->
       <div class="field-group">
-        <label class="field-label" style="display: block; margin-bottom: 10px">
-          Type of Reintegration Preferred
-        </label>
+        <label class="field-label" style="display: block; margin-bottom: 10px"
+          >Type of Reintegration Preferred</label
+        >
         <v-row dense>
           <v-col cols="12" sm="6" md="4" v-for="option in reintegrationTypes" :key="option">
             <div
@@ -38,58 +38,47 @@
               :class="{
                 'checkbox-card--selected': localData.preferredReintegrationType.includes(option),
               }"
-              @click="toggleReintegrationType(option)"
+              @click="toggleArray('preferredReintegrationType', option)"
             >
-              <v-checkbox
-                v-model="localData.preferredReintegrationType"
-                :value="option"
-                hide-details
-                density="compact"
-                class="checkbox-inner"
-                @click.stop
-              >
-                <template #label>
-                  <span class="checkbox-label">{{ option }}</span>
-                </template>
-              </v-checkbox>
+              <div class="check-card-inner">
+                <div
+                  class="check-box"
+                  :class="{
+                    'check-box--selected': localData.preferredReintegrationType.includes(option),
+                  }"
+                >
+                  <v-icon
+                    v-if="localData.preferredReintegrationType.includes(option)"
+                    size="11"
+                    color="white"
+                    >mdi-check</v-icon
+                  >
+                </div>
+                <span class="checkbox-label">{{ option }}</span>
+              </div>
             </div>
           </v-col>
         </v-row>
       </div>
 
-      <!-- ── BLOCK: Started Livelihood ── -->
+      <!-- ── Started Livelihood ── -->
       <div class="field-group">
         <label class="field-label" style="display: block; margin-bottom: 10px">
           Has the OFW started any livelihood/business after return?
         </label>
         <v-row dense>
-          <v-col cols="6" md="3">
+          <v-col cols="6" md="3" v-for="opt in ['Yes', 'No']" :key="opt">
             <div
               class="radio-card"
-              :class="{ 'radio-card--selected': localData.hasStartedLivelihood === 'Yes' }"
-              @click="selectLivelihoodStatus('Yes')"
+              :class="{ 'radio-card--selected': localData.hasStartedLivelihood === opt }"
+              @click="selectStartedLivelihood(opt)"
             >
               <div class="radio-card-inner">
                 <div
                   class="radio-dot"
-                  :class="{ 'radio-dot--selected': localData.hasStartedLivelihood === 'Yes' }"
+                  :class="{ 'radio-dot--selected': localData.hasStartedLivelihood === opt }"
                 />
-                <span class="radio-label-text">Yes</span>
-              </div>
-            </div>
-          </v-col>
-          <v-col cols="6" md="3">
-            <div
-              class="radio-card"
-              :class="{ 'radio-card--selected': localData.hasStartedLivelihood === 'No' }"
-              @click="selectLivelihoodStatus('No')"
-            >
-              <div class="radio-card-inner">
-                <div
-                  class="radio-dot"
-                  :class="{ 'radio-dot--selected': localData.hasStartedLivelihood === 'No' }"
-                />
-                <span class="radio-label-text">No</span>
+                <span class="radio-label-text">{{ opt }}</span>
               </div>
             </div>
           </v-col>
@@ -115,59 +104,54 @@
           </v-col>
         </v-row>
 
+        <!-- Status of Livelihood = SINGLE select -->
         <div class="mt-6">
-          <label class="field-label" style="display: block; margin-bottom: 10px">
-            Status of Livelihood / Business
-          </label>
+          <label class="field-label" style="display: block; margin-bottom: 10px"
+            >Status of Livelihood / Business</label
+          >
           <v-row dense>
             <v-col cols="12" sm="6" md="4" v-for="status in livelihoodStatuses" :key="status">
               <div
-                class="checkbox-card"
-                :class="{ 'checkbox-card--selected': localData.livelihoodStatus.includes(status) }"
-                @click="toggleLivelihoodStatus(status)"
+                class="radio-card"
+                :class="{ 'radio-card--selected': localData.livelihoodStatus === status }"
+                @click="selectLivelihoodStatus(status)"
               >
-                <v-checkbox
-                  v-model="localData.livelihoodStatus"
-                  :value="status"
-                  hide-details
-                  density="compact"
-                  class="checkbox-inner"
-                  @click.stop
-                >
-                  <template #label>
-                    <span class="checkbox-label">{{ status }}</span>
-                  </template>
-                </v-checkbox>
+                <div class="radio-card-inner">
+                  <div
+                    class="radio-dot"
+                    :class="{ 'radio-dot--selected': localData.livelihoodStatus === status }"
+                  />
+                  <span class="radio-label-text">{{ status }}</span>
+                </div>
               </div>
             </v-col>
           </v-row>
         </div>
       </div>
 
-      <!-- ── BLOCK: Main Barriers to Reintegration ── -->
+      <!-- ── Main Barriers (multi) ── -->
       <div class="field-group" style="margin-bottom: 0">
-        <label class="field-label" style="display: block; margin-bottom: 10px">
-          Main Barriers to Reintegration
-        </label>
+        <label class="field-label" style="display: block; margin-bottom: 10px"
+          >Main Barriers to Reintegration</label
+        >
         <v-row dense>
           <v-col cols="12" sm="6" md="4" v-for="barrier in barriers" :key="barrier">
             <div
               class="checkbox-card"
               :class="{ 'checkbox-card--selected': localData.mainBarriers.includes(barrier) }"
-              @click="toggleBarrier(barrier)"
+              @click="toggleArray('mainBarriers', barrier)"
             >
-              <v-checkbox
-                v-model="localData.mainBarriers"
-                :value="barrier"
-                hide-details
-                density="compact"
-                class="checkbox-inner"
-                @click.stop
-              >
-                <template #label>
-                  <span class="checkbox-label">{{ barrier }}</span>
-                </template>
-              </v-checkbox>
+              <div class="check-card-inner">
+                <div
+                  class="check-box"
+                  :class="{ 'check-box--selected': localData.mainBarriers.includes(barrier) }"
+                >
+                  <v-icon v-if="localData.mainBarriers.includes(barrier)" size="11" color="white"
+                    >mdi-check</v-icon
+                  >
+                </div>
+                <span class="checkbox-label">{{ barrier }}</span>
+              </div>
             </div>
           </v-col>
         </v-row>
@@ -179,10 +163,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 
-const props = defineProps({
-  data: { type: Object, default: () => ({}) },
-})
-
+const props = defineProps({ data: { type: Object, default: () => ({}) } })
 const emit = defineEmits(['update:data'])
 
 const reintegrationTypes = [
@@ -195,14 +176,12 @@ const reintegrationTypes = [
   'Re-migration / overseas employment',
   'Other',
 ]
-
 const livelihoodStatuses = [
   'Operating well',
   'Operating but struggling',
   'Stopped / closed',
   'Seasonal / irregular',
 ]
-
 const barriers = [
   'Lack of capital',
   'Lack of market access',
@@ -221,48 +200,35 @@ const localData = ref({
   preferredReintegrationType: [],
   hasStartedLivelihood: '',
   livelihoodType: '',
-  livelihoodStatus: [],
+  livelihoodStatus: '',
   mainBarriers: [],
   ...props.data,
 })
 
-watch(localData, (newVal) => emit('update:data', { ...newVal }), { deep: true })
-
+watch(localData, (v) => emit('update:data', { ...v }), { deep: true })
 const emitUpdate = () => emit('update:data', { ...localData.value })
 
-// Toggle & Select Handlers
+const toggleArray = (key, val) => {
+  const idx = localData.value[key].indexOf(val)
+  if (idx === -1) localData.value[key].push(val)
+  else localData.value[key].splice(idx, 1)
+  emitUpdate()
+}
+
 const selectReintegrationPlan = (val) => {
   localData.value.hasReintegrationPlan = val
   emitUpdate()
 }
-
-const toggleReintegrationType = (option) => {
-  const idx = localData.value.preferredReintegrationType.indexOf(option)
-  if (idx === -1) localData.value.preferredReintegrationType.push(option)
-  else localData.value.preferredReintegrationType.splice(idx, 1)
+const selectLivelihoodStatus = (val) => {
+  localData.value.livelihoodStatus = val
   emitUpdate()
 }
-
-const selectLivelihoodStatus = (val) => {
+const selectStartedLivelihood = (val) => {
   localData.value.hasStartedLivelihood = val
   if (val === 'No') {
     localData.value.livelihoodType = ''
-    localData.value.livelihoodStatus = []
+    localData.value.livelihoodStatus = ''
   }
-  emitUpdate()
-}
-
-const toggleLivelihoodStatus = (status) => {
-  const idx = localData.value.livelihoodStatus.indexOf(status)
-  if (idx === -1) localData.value.livelihoodStatus.push(status)
-  else localData.value.livelihoodStatus.splice(idx, 1)
-  emitUpdate()
-}
-
-const toggleBarrier = (barrier) => {
-  const idx = localData.value.mainBarriers.indexOf(barrier)
-  if (idx === -1) localData.value.mainBarriers.push(barrier)
-  else localData.value.mainBarriers.splice(idx, 1)
   emitUpdate()
 }
 </script>
@@ -271,18 +237,15 @@ const toggleBarrier = (barrier) => {
 .section-body {
   padding: 10px 24px 24px;
 }
-
 .field-group {
   margin-bottom: 14px;
 }
-
 .field-item {
   display: flex;
   flex-direction: column;
   gap: 6px;
   height: 100%;
 }
-
 .field-label {
   font-size: 11px;
   font-weight: 700;
@@ -291,7 +254,6 @@ const toggleBarrier = (barrier) => {
   color: #6b7fa8;
   line-height: 1.4;
 }
-
 .modern-input :deep(.v-field) {
   border-radius: 10px;
   background: #f8faff;
@@ -299,13 +261,10 @@ const toggleBarrier = (barrier) => {
   font-size: 13.5px;
   color: #111827;
 }
-
 .modern-input :deep(.v-field--focused) {
   border-color: #3b82f6;
   background: #ffffff;
 }
-
-/* Radio & Checkbox Cards */
 .radio-card,
 .checkbox-card {
   border: 1px solid #e5e7eb;
@@ -318,25 +277,22 @@ const toggleBarrier = (barrier) => {
     background 0.14s;
   background: #ffffff;
 }
-
 .radio-card:hover,
 .checkbox-card:hover {
   border-color: #93c5fd;
   background: #f8faff;
 }
-
 .radio-card--selected,
 .checkbox-card--selected {
   border-color: #3b82f6;
   background: #eff6ff;
 }
-
-.radio-card-inner {
+.radio-card-inner,
+.check-card-inner {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-
 .radio-dot {
   width: 14px;
   height: 14px;
@@ -345,26 +301,37 @@ const toggleBarrier = (barrier) => {
   flex-shrink: 0;
   background: #ffffff;
 }
-
 .radio-dot--selected {
   border-color: #3b82f6;
   background: #3b82f6;
   box-shadow: inset 0 0 0 2px #ffffff;
 }
-
+.check-box {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 2px solid #d1d5db;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.14s;
+}
+.check-box--selected {
+  border-color: #3b82f6;
+  background: #3b82f6;
+}
 .radio-label-text,
 .checkbox-label {
   font-size: 13px;
   color: #111827;
 }
-
 .radio-card--selected .radio-label-text,
 .checkbox-card--selected .checkbox-label {
   color: #1d4ed8;
   font-weight: 600;
 }
-
-/* Mobile */
 @media (max-width: 480px) {
   .section-body {
     padding: 14px 14px 18px;

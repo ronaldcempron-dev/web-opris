@@ -22,7 +22,7 @@
         </v-row>
       </div>
 
-      <!-- ── BLOCK: Relationship to OFW ── -->
+      <!-- ── BLOCK: Relationship to OFW (single select) ── -->
       <div class="field-group">
         <label class="field-label" style="display: block; margin-bottom: 10px">
           Relationship to OFW
@@ -31,13 +31,13 @@
           <v-col cols="12" sm="6" md="4" v-for="rel in relationships" :key="rel">
             <div
               class="radio-card"
-              :class="{ 'radio-card--selected': localData.relationshipToOFW.includes(rel) }"
-              @click="toggleRelationship(rel)"
+              :class="{ 'radio-card--selected': localData.relationshipToOFW === rel }"
+              @click="selectRelationship(rel)"
             >
               <div class="radio-card-inner">
                 <div
                   class="radio-dot"
-                  :class="{ 'radio-dot--selected': localData.relationshipToOFW.includes(rel) }"
+                  :class="{ 'radio-dot--selected': localData.relationshipToOFW === rel }"
                 />
                 <span class="radio-label-text">{{ rel }}</span>
               </div>
@@ -49,7 +49,6 @@
       <!-- ── BLOCK: Personal Information ── -->
       <div class="field-group">
         <v-row dense>
-          <!-- Sex -->
           <v-col cols="12" md="4">
             <div class="field-item">
               <label class="field-label">Sex</label>
@@ -73,7 +72,6 @@
             </div>
           </v-col>
 
-          <!-- Age -->
           <v-col cols="12" md="4">
             <div class="field-item">
               <label class="field-label">Age</label>
@@ -90,7 +88,6 @@
             </div>
           </v-col>
 
-          <!-- Date of Birth -->
           <v-col cols="12" md="4">
             <div class="field-item">
               <label class="field-label">Date of Birth</label>
@@ -157,7 +154,7 @@ const relationships = ['Self (OFW)', 'Spouse', 'Parent', 'Child', 'Sibling']
 
 const localData = ref({
   name: '',
-  relationshipToOFW: [],
+  relationshipToOFW: '', // single string now
   sex: '',
   age: '',
   dateOfBirth: '',
@@ -167,16 +164,10 @@ const localData = ref({
 })
 
 watch(localData, (v) => emit('update:data', { ...v }), { deep: true })
-
 const emitUpdate = () => emit('update:data', { ...localData.value })
 
-const toggleRelationship = (rel) => {
-  const idx = localData.value.relationshipToOFW.indexOf(rel)
-  if (idx === -1) {
-    localData.value.relationshipToOFW.push(rel)
-  } else {
-    localData.value.relationshipToOFW.splice(idx, 1)
-  }
+const selectRelationship = (rel) => {
+  localData.value.relationshipToOFW = rel
   emitUpdate()
 }
 
@@ -187,24 +178,18 @@ const selectSex = (val) => {
 </script>
 
 <style scoped>
-/* ══ SECTION BODY ════════════════════════════ */
 .section-body {
   padding: 10px 24px 24px;
 }
-
-/* ══ FIELD GROUPS ════════════════════════════ */
 .field-group {
   margin-bottom: 14px;
 }
-
-/* ══ FIELD ITEMS ═════════════════════════════ */
 .field-item {
   display: flex;
   flex-direction: column;
   gap: 6px;
   height: 100%;
 }
-
 .field-label {
   font-size: 11px;
   font-weight: 700;
@@ -213,8 +198,6 @@ const selectSex = (val) => {
   color: #6b7fa8;
   line-height: 1.4;
 }
-
-/* ══ INPUTS (Text + Textarea) ════════════════ */
 .modern-input :deep(.v-field) {
   border-radius: 10px;
   background: #f8faff;
@@ -222,13 +205,10 @@ const selectSex = (val) => {
   font-size: 13.5px;
   color: #111827;
 }
-
 .modern-input :deep(.v-field--focused) {
   border-color: #3b82f6;
   background: #ffffff;
 }
-
-/* ══ RADIO / SELECTION CARDS ═════════════════ */
 .radio-card {
   border: 1px solid #e5e7eb;
   border-radius: 10px;
@@ -240,56 +220,45 @@ const selectSex = (val) => {
     background 0.14s;
   background: #ffffff;
 }
-
 .radio-card:hover {
   border-color: #93c5fd;
   background: #f8faff;
 }
-
 .radio-card--selected {
   border-color: #3b82f6;
   background: #eff6ff;
 }
-
 .radio-card-inner {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-
 .radio-dot {
   width: 14px;
   height: 14px;
   border-radius: 50%;
   border: 2px solid #d1d5db;
   flex-shrink: 0;
-  transition: all 0.14s;
   background: #ffffff;
 }
-
 .radio-dot--selected {
   border-color: #3b82f6;
   background: #3b82f6;
   box-shadow: inset 0 0 0 2px #ffffff;
 }
-
 .radio-label-text {
   font-size: 13px;
   color: #111827;
   line-height: 1.4;
 }
-
 .radio-card--selected .radio-label-text {
   color: #1d4ed8;
   font-weight: 600;
 }
-
-/* ══ MOBILE ══════════════════════════════════ */
 @media (max-width: 480px) {
   .section-body {
     padding: 14px 14px 18px;
   }
-
   .radio-card {
     padding: 8px 12px;
   }
