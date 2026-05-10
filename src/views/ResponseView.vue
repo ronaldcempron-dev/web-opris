@@ -1,3 +1,4 @@
+<!-- ResponseView.vue -->
 <template>
   <v-app theme="light" style="background: #f5f4f0">
     <!-- Shared Sidebar -->
@@ -13,7 +14,7 @@
             </v-btn>
 
             <div class="rail-title-block">
-              <span class="rail-title">OFW Family Profiling</span>
+              <span class="rail-title">OFW Profiling and Reintegation Information System</span>
               <span class="rail-divider">·</span>
               <span class="rail-sub">Responses</span>
             </div>
@@ -299,14 +300,16 @@ const viewFullReport = (item) => {
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 0 24px;
-  height: 52px;
+  padding: 10px 0 8px 0;
   box-sizing: border-box;
+  min-height: 52px;
 }
 
 .rail-menu-btn {
   color: white !important;
   flex-shrink: 0;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
 }
 
 .rail-title-block {
@@ -857,7 +860,7 @@ const viewFullReport = (item) => {
     padding: 52px 20px 0;
   }
   .progress-rail-inner {
-    padding: 0 16px;
+    padding: 9px 16px 7px 0;
   }
   .page-heading {
     padding: 28px 0 20px;
@@ -887,8 +890,9 @@ const viewFullReport = (item) => {
     padding: 52px 12px 0;
   }
   .progress-rail-inner {
-    padding: 0 12px;
-    height: 48px;
+    padding: 9px 12px 7px 0; /* was: 0 12px */
+    height: unset;
+    min-height: 48px;
   }
   .rail-title {
     font-size: 12px;
@@ -920,7 +924,7 @@ const viewFullReport = (item) => {
     padding: 52px 64px 0;
   }
   .progress-rail-inner {
-    padding: 0 48px;
+    padding: 9px 48px 7px 0;
   }
 }
 </style>

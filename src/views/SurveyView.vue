@@ -1,3 +1,4 @@
+<!-- SurveyView.vue -->
 <template>
   <v-app theme="light" style="background: #f5f4f0">
     <!-- Shared Sidebar -->
@@ -20,7 +21,7 @@
                 <v-icon>mdi-menu</v-icon>
               </v-btn>
               <div class="rail-title-block">
-                <span class="rail-title">OFW Family Profiling</span>
+                <span class="rail-title">OFW Profiling and Reintegation Information System</span>
                 <span class="rail-sub">Section {{ step }} of 19</span>
               </div>
             </div>

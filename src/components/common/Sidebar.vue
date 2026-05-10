@@ -2,15 +2,12 @@
   <v-navigation-drawer
     v-model="drawer"
     app
-    width="280"
+    width="272"
     :temporary="$vuetify.display.mobile"
     :permanent="!$vuetify.display.mobile"
     class="custom-sidebar"
-    style="background: #254a9c; border-right: none"
   >
     <div class="sidebar-inner">
-      <!-- ── BRAND HEADER ── -->
-
       <!-- ── DIVIDER ── -->
       <div class="sidebar-divider" />
 
@@ -25,10 +22,10 @@
           @click="goTo('/')"
         >
           <div class="sidebar-item-icon">
-            <v-icon size="18">mdi-file-document-outline</v-icon>
+            <v-icon size="17">mdi-file-document-outline</v-icon>
           </div>
           <span class="sidebar-item-label">Survey Form</span>
-          <div v-if="currentRoute === 'survey'" class="sidebar-item-dot" />
+          <div v-if="currentRoute === 'survey'" class="sidebar-item-pip" />
         </button>
 
         <button
@@ -37,16 +34,16 @@
           @click="goTo('/responses')"
         >
           <div class="sidebar-item-icon">
-            <v-icon size="18">mdi-table-large</v-icon>
+            <v-icon size="17">mdi-table-large</v-icon>
           </div>
           <span class="sidebar-item-label">View Responses</span>
-          <div v-if="currentRoute === 'responses'" class="sidebar-item-dot" />
+          <div v-if="currentRoute === 'responses'" class="sidebar-item-pip" />
         </button>
       </nav>
 
       <!-- ── RECENT RESPONSES ── -->
       <template v-if="showResponsesList && responses.length">
-        <div class="sidebar-divider" style="margin-top: 8px" />
+        <div class="sidebar-divider" style="margin-top: 12px" />
         <div class="sidebar-nav-label">Recent Submissions</div>
 
         <div class="responses-list">
@@ -63,15 +60,18 @@
               <span class="response-name">{{ r.respondent_name || 'Unnamed' }}</span>
               <span class="response-date">{{ formatDate(r.created_at) }}</span>
             </div>
-            <v-icon size="14" class="response-arrow">mdi-chevron-right</v-icon>
+            <v-icon size="13" class="response-arrow">mdi-chevron-right</v-icon>
           </button>
         </div>
       </template>
 
-      <!-- ── SPACER + FOOTER ── -->
+      <!-- ── FOOTER ── -->
       <div class="sidebar-footer">
         <div class="sidebar-divider" />
-        <div class="sidebar-footer-text">Department of Migrant Workers</div>
+        <div class="sidebar-footer-inner">
+          <v-icon size="13" class="footer-icon">mdi-shield-check-outline</v-icon>
+          <span class="sidebar-footer-text">Department of Migrant Workers</span>
+        </div>
       </div>
     </div>
   </v-navigation-drawer>
@@ -116,54 +116,57 @@ onMounted(() => {
 
 const currentRoute = computed(() => (route.path === '/responses' ? 'responses' : 'survey'))
 
-const goTo = (path) => {
-  router.push(path)
-}
-
-const selectResponse = (response) => {
-  emit('select', response)
-}
-
+const goTo = (path) => router.push(path)
+const selectResponse = (response) => emit('select', response)
 const formatDate = (date) =>
-  new Date(date).toLocaleString('en-PH', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
+  new Date(date).toLocaleString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })
 </script>
 
 <style scoped>
-/* ── SIDEBAR POSITION ── */
+/* ── COLOR TOKENS ──────────────────────────
+   White background + blue depth system
+   #ffffff   sidebar background
+   #e8eef8   dividers, subtle borders
+   #eff6ff   hover tint, icon background
+   #dbeafe   avatar fill, light accents
+   #93c5fd   muted text, labels, dates
+   #3b82f6   icons, interactive blue
+   #2563eb   active border
+   #1d4ed8   active item fill, brand mark
+   #0f2a5e   brand title, dark headings
+──────────────────────────────────────────── */
+
 .custom-sidebar {
   top: 52px !important;
   height: calc(100% - 52px) !important;
   z-index: 50 !important;
-  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25) !important;
+  background: #ffffff !important;
+  border-right: 1px solid #e8eef8 !important;
+  box-shadow: 4px 0 20px rgba(15, 42, 94, 0.07) !important;
 }
 
-/* ── INNER SCROLL WRAPPER ── */
+/* ── INNER ── */
 .sidebar-inner {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 0;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  scrollbar-color: #dbeafe transparent;
 }
 .sidebar-inner::-webkit-scrollbar {
-  width: 4px;
+  width: 3px;
 }
 .sidebar-inner::-webkit-scrollbar-track {
   background: transparent;
 }
 .sidebar-inner::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: #dbeafe;
   border-radius: 4px;
 }
 
-/* ── BRAND HEADER ── */
+/* ── BRAND ── */
 .sidebar-brand {
   display: flex;
   align-items: center;
@@ -171,45 +174,46 @@ const formatDate = (date) =>
   padding: 22px 20px 18px;
 }
 
-.sidebar-logos {
-  display: flex;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
-.sidebar-logo-frame {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: white;
+.brand-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #1d4ed8;
+  border: 1.5px solid #2563eb;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
-  box-sizing: border-box;
-  box-shadow: 0 0 0 2px rgba(245, 184, 0, 0.5);
+  flex-shrink: 0;
+  box-shadow: 0 2px 10px rgba(29, 78, 216, 0.25);
+}
+
+.brand-mark-text {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  color: #ffffff;
 }
 
 .sidebar-brand-text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
 }
 
 .sidebar-brand-title {
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 800;
-  color: white;
-  letter-spacing: 0.2px;
+  color: #0f2a5e;
+  letter-spacing: 0.1px;
   line-height: 1;
 }
 
 .sidebar-brand-sub {
   font-size: 10px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.45);
-  letter-spacing: 0.5px;
+  color: #93c5fd;
+  letter-spacing: 0.3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -218,96 +222,109 @@ const formatDate = (date) =>
 /* ── DIVIDER ── */
 .sidebar-divider {
   height: 1px;
-  background: rgba(255, 255, 255, 0.1);
-  margin: 0 20px 16px;
+  background: #e8eef8;
+  margin: 0 16px 14px;
 }
 
 /* ── SECTION LABEL ── */
 .sidebar-nav-label {
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 800;
-  letter-spacing: 2px;
+  letter-spacing: 2.2px;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.35);
-  padding: 0 20px 10px;
+  color: #93c5fd;
+  padding: 0 20px 8px;
 }
 
 /* ── NAV ── */
 .sidebar-nav {
-  padding: 0 12px;
+  padding: 0 10px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .sidebar-item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 11px;
   width: 100%;
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: none;
+  padding: 9px 11px;
+  border-radius: 10px;
+  border: 1px solid transparent;
   background: transparent;
-  color: rgba(255, 255, 255, 0.65);
-  font-size: 13.5px;
+  color: #3b82f6;
+  font-size: 13px;
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
   text-align: left;
   transition:
     background 0.15s,
-    color 0.15s;
+    color 0.15s,
+    border-color 0.15s;
   position: relative;
 }
 
 .sidebar-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: white;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #dbeafe;
 }
 
 .sidebar-item.active {
-  background: rgba(245, 184, 0, 0.15);
-  color: #f5b800;
+  background: #1d4ed8;
+  color: #ffffff;
   font-weight: 700;
+  border-color: #2563eb;
+  box-shadow: 0 2px 12px rgba(29, 78, 216, 0.22);
 }
 
 .sidebar-item-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.08);
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: #eff6ff;
+  color: #3b82f6;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: background 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.sidebar-item:hover .sidebar-item-icon {
+  background: #dbeafe;
+  color: #1d4ed8;
 }
 
 .sidebar-item.active .sidebar-item-icon {
-  background: rgba(245, 184, 0, 0.2);
-  color: #f5b800;
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
 }
 
 .sidebar-item-label {
   flex: 1;
+  line-height: 1;
 }
 
-/* Active indicator dot on the right */
-.sidebar-item-dot {
-  width: 6px;
-  height: 6px;
+/* Active pip — right edge */
+.sidebar-item-pip {
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: #f5b800;
+  background: #93c5fd;
   flex-shrink: 0;
 }
 
 /* ── RECENT RESPONSES ── */
 .responses-list {
-  padding: 0 12px;
+  padding: 0 10px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
 }
 
 .response-item {
@@ -315,28 +332,28 @@ const formatDate = (date) =>
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 9px 10px;
-  border-radius: 10px;
+  padding: 8px 10px;
+  border-radius: 9px;
   border: none;
   background: transparent;
   cursor: pointer;
   text-align: left;
   font-family: inherit;
-  transition: background 0.15s;
+  transition: background 0.14s;
 }
 
 .response-item:hover {
-  background: rgba(255, 255, 255, 0.07);
+  background: #eff6ff;
 }
 
 .response-avatar {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background: rgba(245, 184, 0, 0.2);
-  border: 1.5px solid rgba(245, 184, 0, 0.35);
-  color: #f5b800;
-  font-size: 12px;
+  background: #dbeafe;
+  border: 1.5px solid #93c5fd;
+  color: #1d4ed8;
+  font-size: 11px;
   font-weight: 800;
   display: flex;
   align-items: center;
@@ -353,38 +370,52 @@ const formatDate = (date) =>
 }
 
 .response-name {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.82);
+  color: #0f2a5e;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .response-date {
-  font-size: 10.5px;
-  color: rgba(255, 255, 255, 0.38);
+  font-size: 10px;
+  color: #93c5fd;
   font-weight: 400;
 }
 
 .response-arrow {
-  color: rgba(255, 255, 255, 0.25) !important;
+  color: #dbeafe !important;
   flex-shrink: 0;
 }
 
 /* ── FOOTER ── */
 .sidebar-footer {
   margin-top: auto;
-  padding-bottom: 20px;
+  padding-bottom: 18px;
+}
+
+.sidebar-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 20px;
+}
+
+.footer-icon {
+  color: #dbeafe !important;
+  flex-shrink: 0;
 }
 
 .sidebar-footer-text {
   font-size: 10px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.28);
-  text-align: center;
-  padding: 0 20px;
+  font-weight: 600;
+  color: #93c5fd;
   letter-spacing: 0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ── MOBILE ── */
