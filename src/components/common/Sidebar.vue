@@ -123,26 +123,15 @@ const formatDate = (date) =>
 </script>
 
 <style scoped>
-/* ── COLOR TOKENS ──────────────────────────
-   White background + blue depth system
-   #ffffff   sidebar background
-   #e8eef8   dividers, subtle borders
-   #eff6ff   hover tint, icon background
-   #dbeafe   avatar fill, light accents
-   #93c5fd   muted text, labels, dates
-   #3b82f6   icons, interactive blue
-   #2563eb   active border
-   #1d4ed8   active item fill, brand mark
-   #0f2a5e   brand title, dark headings
-──────────────────────────────────────────── */
-
 .custom-sidebar {
+  position: fixed !important;
   top: 52px !important;
   height: calc(100% - 52px) !important;
   z-index: 50 !important;
   background: #ffffff !important;
   border-right: 1px solid #e8eef8 !important;
   box-shadow: 4px 0 20px rgba(15, 42, 94, 0.07) !important;
+  overflow: hidden !important;
 }
 
 /* ── INNER ── */
@@ -150,20 +139,8 @@ const formatDate = (date) =>
   display: flex;
   flex-direction: column;
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden;
   overflow-x: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: #dbeafe transparent;
-}
-.sidebar-inner::-webkit-scrollbar {
-  width: 3px;
-}
-.sidebar-inner::-webkit-scrollbar-track {
-  background: transparent;
-}
-.sidebar-inner::-webkit-scrollbar-thumb {
-  background: #dbeafe;
-  border-radius: 4px;
 }
 
 /* ── BRAND ── */
@@ -416,13 +393,5 @@ const formatDate = (date) =>
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-/* ── MOBILE ── */
-@media (max-width: 768px) {
-  .custom-sidebar {
-    top: 52px !important;
-    height: calc(100% - 52px) !important;
-  }
 }
 </style>
