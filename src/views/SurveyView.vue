@@ -89,6 +89,15 @@
 
           <!-- FORM PANEL -->
           <div class="form-panel">
+            <div class="panel-rail">
+              <div class="panel-rail-left">
+                <v-icon size="18" color="rgba(255,255,255,0.85)">mdi-file-document-outline</v-icon>
+                <span class="panel-rail-title"
+                  >Section {{ step }} — {{ currentSection.title }}</span
+                >
+              </div>
+              <div class="panel-rail-badge">{{ Math.round((step / 19) * 100) }}% Complete</div>
+            </div>
             <div class="section-heading">
               <div class="section-badge">Section {{ step }}</div>
               <h2 class="section-title">{{ currentSection.title }}</h2>
@@ -856,5 +865,40 @@ const handleSubmit = async () => {
   .form-footer {
     padding: 20px 52px;
   }
+}
+
+/* ── PANEL RAIL ── */
+.panel-rail {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 24px;
+  background: #3b82f6;
+  flex-wrap: wrap;
+}
+
+.panel-rail-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.panel-rail-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+}
+
+.panel-rail-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
 }
 </style>
