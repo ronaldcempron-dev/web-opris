@@ -111,25 +111,29 @@
                       <div class="date-time">{{ formatTime(item.created_at) }}</div>
                     </td>
                     <td class="td">
-                      <div class="respondent-row">
-                        <div class="respondent-avatar">
-                          {{ avatarInitial(item.respondent_name) }}
-                        </div>
-                        <span class="respondent-name">{{ item.respondent_name || '—' }}</span>
-                      </div>
+                      <span class="respondent-name">{{ item.respondent_name || '—' }}</span>
                     </td>
                     <td class="td td--muted">{{ item.enumerator_name || '—' }}</td>
                     <td class="td td--muted">
-                      <span v-if="item.latitude" class="gps-badge">
-                        <v-icon size="11" style="margin-right: 3px">mdi-map-marker-outline</v-icon>
+                      <button
+                        v-if="item.latitude"
+                        class="gps-badge gps-badge--btn"
+                        @click.stop="openMap(item)"
+                        title="Click to view on map"
+                      >
+                        <v-icon size="12">mdi-map-marker</v-icon>
                         {{ item.latitude?.toFixed(3) }}, {{ item.longitude?.toFixed(3) }}
-                      </span>
+                      </button>
                       <span v-else class="td--empty">—</span>
                     </td>
                     <td class="td td--action" @click.stop>
-                      <button class="view-btn" @click="viewFullReport(item)">
+                      <button
+                        class="view-btn"
+                        @click="viewFullReport(item)"
+                        title="View full profile"
+                      >
                         <v-icon size="13" style="margin-right: 4px">mdi-eye-outline</v-icon>
-                        View
+                        View Full Profile
                       </button>
                     </td>
                   </tr>
@@ -172,7 +176,6 @@
     <!-- ─── FULL REPORT MODAL ─── -->
     <v-dialog v-model="reportDialog" max-width="1100" scrollable>
       <div v-if="selectedResponse" class="modal-card">
-        <!-- Modal header -->
         <div class="modal-header">
           <div class="modal-header-left">
             <div class="modal-icon-wrap">
@@ -192,14 +195,57 @@
           </button>
         </div>
 
-        <!-- Modal body -->
         <div class="modal-body">
           <ReportDetailView :response="selectedResponse" />
         </div>
 
-        <!-- Modal footer -->
         <div class="modal-footer">
           <button class="btn btn-outline" @click="reportDialog = false">Close</button>
+        </div>
+      </div>
+    </v-dialog>
+
+    <!-- ─── MAP MODAL ─── -->
+    <v-dialog v-model="mapDialog" max-width="700">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-header-left">
+            <div class="modal-icon-wrap">
+              <v-icon size="20" color="white">mdi-map-marker</v-icon>
+            </div>
+            <div>
+              <div class="modal-title">GPS Location</div>
+              <div class="modal-sub" v-if="mapTarget">
+                {{ mapTarget.respondent_name || 'Unnamed' }}
+                <span class="modal-sub-sep">·</span>
+                {{ mapTarget.latitude?.toFixed(6) }}, {{ mapTarget.longitude?.toFixed(6) }}
+              </div>
+            </div>
+          </div>
+          <button class="modal-close" @click="mapDialog = false">
+            <v-icon size="18">mdi-close</v-icon>
+          </button>
+        </div>
+
+        <div class="map-body" v-if="mapTarget">
+          <iframe
+            :src="`https://maps.google.com/maps?q=${mapTarget.latitude},${mapTarget.longitude}&z=16&output=embed`"
+            width="100%"
+            height="420"
+            style="border: none; display: block"
+            allowfullscreen
+            loading="lazy"
+          />
+        </div>
+
+        <div class="modal-footer">
+          <a>
+            :href="`https://www.google.com/maps?q=${mapTarget?.latitude},${mapTarget?.longitude}`"
+            target="_blank" class="btn btn-primary" style="text-decoration: none" >
+            <v-icon size="14" style="margin-right: 5px">mdi-open-in-new</v-icon>
+            Open in Google Maps
+          </a>
+          <button class="btn btn-outline" @click="mapDialog = false">Close</button>
         </div>
       </div>
     </v-dialog>
@@ -221,6 +267,14 @@ const selectedResponse = ref(null)
 const currentPage = ref(1)
 const perPage = 10
 
+const mapDialog = ref(false)
+const mapTarget = ref(null)
+
+const openMap = (item) => {
+  mapTarget.value = item
+  mapDialog.value = true
+}
+
 const fetchResponses = async () => {
   loading.value = true
   const { data } = await supabase
@@ -233,7 +287,6 @@ const fetchResponses = async () => {
 
 onMounted(fetchResponses)
 
-// Reset page on search
 watch(search, () => {
   currentPage.value = 1
 })
@@ -281,9 +334,7 @@ const viewFullReport = (item) => {
   box-sizing: border-box;
 }
 
-/* ══ STICKY RAIL ══════════════════════════
-   Original blue — unchanged from before
-═══════════════════════════════════════════ */
+/* ══ STICKY RAIL ══════════════════════════ */
 .progress-rail {
   position: fixed;
   top: 0;
@@ -413,11 +464,6 @@ const viewFullReport = (item) => {
   min-width: 80px;
 }
 
-.stat-card--gold {
-  background: rgba(245, 184, 0, 0.1);
-  border-color: rgba(245, 184, 0, 0.35);
-}
-
 .stat-num {
   font-size: 28px;
   font-weight: 900;
@@ -434,9 +480,7 @@ const viewFullReport = (item) => {
   color: #9ca3af;
 }
 
-/* ══ TABLE PANEL ═════════════════════════
-   White card — the 10%
-═══════════════════════════════════════════ */
+/* ══ TABLE PANEL ═════════════════════════ */
 .table-panel {
   background: white;
   border-radius: 20px;
@@ -444,7 +488,6 @@ const viewFullReport = (item) => {
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
 }
 
-/* Panel header — lighter blue */
 .panel-header {
   display: flex;
   align-items: center;
@@ -467,25 +510,27 @@ const viewFullReport = (item) => {
   color: white;
 }
 
-/* Search */
+/* ── SEARCH — white style ── */
 .search-wrap {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
   border-radius: 10px;
   padding: 7px 12px;
   min-width: 260px;
-  transition: border-color 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 .search-wrap:focus-within {
-  border-color: #f5b800;
-  background: rgba(255, 255, 255, 0.11);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
 .search-icon {
-  color: rgba(255, 255, 255, 0.4) !important;
+  color: #9ca3af !important;
   flex-shrink: 0;
 }
 
@@ -495,25 +540,25 @@ const viewFullReport = (item) => {
   outline: none;
   background: transparent;
   font-size: 13px;
-  color: white;
+  color: #111827;
   font-family: inherit;
 }
 .search-input::placeholder {
-  color: rgba(255, 255, 255, 0.35);
+  color: #9ca3af;
 }
 
 .search-clear {
   border: none;
   background: transparent;
   cursor: pointer;
-  color: rgba(255, 255, 255, 0.4);
+  color: #9ca3af;
   display: flex;
   align-items: center;
   padding: 0;
   transition: color 0.12s;
 }
 .search-clear:hover {
-  color: white;
+  color: #374151;
 }
 
 /* ══ TABLE ═══════════════════════════════ */
@@ -605,28 +650,6 @@ const viewFullReport = (item) => {
   margin-top: 2px;
 }
 
-/* Respondent with avatar initial */
-.respondent-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.respondent-avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: rgba(59, 130, 246, 0.12);
-  border: 1.5px solid rgba(59, 130, 246, 0.25);
-  color: #3b82f6;
-  font-size: 12px;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
 .respondent-name {
   font-weight: 600;
   font-size: 13px;
@@ -638,33 +661,70 @@ const viewFullReport = (item) => {
   display: inline-flex;
   align-items: center;
   font-size: 11px;
-  color: #6b7fa8;
-  background: #f0f5ff;
+  color: #1d4ed8;
+  background: #eff6ff;
   border-radius: 6px;
-  padding: 3px 7px;
+  padding: 4px 9px;
+  border: 1.5px solid #bfdbfe;
+  gap: 4px;
 }
 
-/* View button — lighter blue accent */
+.gps-badge--btn {
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  transition:
+    background 0.14s,
+    border-color 0.14s,
+    color 0.14s,
+    box-shadow 0.14s;
+  position: relative;
+}
+
+.gps-badge--btn::after {
+  content: '↗';
+  font-size: 10px;
+  color: #93c5fd;
+  margin-left: 3px;
+  transition: color 0.14s;
+}
+
+.gps-badge--btn:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: white;
+  box-shadow: 0 2px 10px rgba(29, 78, 216, 0.3);
+}
+
+.gps-badge--btn:hover::after {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* View button */
 .view-btn {
   display: inline-flex;
   align-items: center;
-  background: rgba(59, 130, 246, 0.1);
-  border: 1.5px solid rgba(59, 130, 246, 0.25);
+  background: #eff6ff;
+  border: 1.5px solid #bfdbfe;
   border-radius: 8px;
   padding: 5px 12px;
   font-size: 12px;
   font-weight: 700;
-  color: #3b82f6;
+  color: #1d4ed8;
   font-family: inherit;
   cursor: pointer;
   transition:
     background 0.14s,
-    border-color 0.14s;
+    border-color 0.14s,
+    color 0.14s,
+    box-shadow 0.14s;
   white-space: nowrap;
 }
 .view-btn:hover {
-  background: rgba(59, 130, 246, 0.18);
-  border-color: #3b82f6;
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: white;
+  box-shadow: 0 2px 10px rgba(29, 78, 216, 0.3);
 }
 
 /* ══ PAGINATION ══════════════════════════ */
@@ -824,13 +884,19 @@ const viewFullReport = (item) => {
 .modal-footer {
   display: flex;
   justify-content: flex-end;
+  gap: 10px;
   padding: 14px 28px;
   border-top: 1px solid #eef1f8;
   background: #fafbff;
   flex-shrink: 0;
 }
 
-/* Shared button */
+.map-body {
+  background: #e5e7eb;
+  line-height: 0;
+  flex-shrink: 0;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -852,6 +918,13 @@ const viewFullReport = (item) => {
 .btn-outline:hover {
   border-color: #9ca3af;
   background: #f9fafb;
+}
+.btn-primary {
+  background: #1d4ed8;
+  color: white;
+}
+.btn-primary:hover {
+  background: #1e40af;
 }
 
 /* ══ TABLET ══════════════════════════════ */
@@ -890,7 +963,7 @@ const viewFullReport = (item) => {
     padding: 52px 12px 0;
   }
   .progress-rail-inner {
-    padding: 9px 12px 7px 0; /* was: 0 12px */
+    padding: 9px 12px 7px 0;
     height: unset;
     min-height: 48px;
   }

@@ -42,7 +42,7 @@
       </nav>
 
       <!-- ── RECENT RESPONSES ── -->
-      <template v-if="showResponsesList && responses.length">
+      <!-- <template v-if="showResponsesList && responses.length">
         <div class="sidebar-divider" style="margin-top: 12px" />
         <div class="sidebar-nav-label">Recent Submissions</div>
 
@@ -63,7 +63,7 @@
             <v-icon size="13" class="response-arrow">mdi-chevron-right</v-icon>
           </button>
         </div>
-      </template>
+      </template> -->
 
       <!-- ── FOOTER ── -->
       <div class="sidebar-footer">
