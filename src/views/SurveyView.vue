@@ -105,7 +105,7 @@
             </div>
 
             <div class="section-body">
-              <v-stepper-window v-model="step">
+              <v-stepper-window v-model="step" :key="formKey">
                 <v-stepper-window-item :value="1">
                   <SectionGeneralInfo
                     :data="formData.general"
@@ -254,8 +254,14 @@
               <button v-if="step < 20" class="btn btn-primary" @click="nextStep">
                 <span class="btn-text">Next</span> →
               </button>
-              <button v-else class="btn btn-submit" :disabled="submitting" @click="handleSubmit">
-                {{ submitting ? 'Submitting…' : 'Submit' }}
+              <button
+                v-else
+                class="btn btn-submit"
+                :disabled="submitting"
+                @click="confirmDialog = true"
+              >
+                <v-icon size="16" style="margin-right: 6px">mdi-send-check</v-icon>
+                {{ submitting ? 'Submitting…' : 'Submit Survey' }}
               </button>
             </div>
           </div>
@@ -267,6 +273,43 @@
       </div>
       <!-- /survey-layout -->
     </v-main>
+
+    <!-- ─── CONFIRM DIALOG ─── -->
+    <v-dialog v-model="confirmDialog" max-width="460" persistent>
+      <div class="feedback-card feedback-card--confirm">
+        <div class="feedback-icon-wrap feedback-icon-wrap--confirm">
+          <v-icon size="36" color="white">mdi-help-circle</v-icon>
+        </div>
+        <h2 class="feedback-title">Submit Survey?</h2>
+        <p class="feedback-sub">
+          Please confirm that all information entered is correct before submitting. This action
+          cannot be undone.
+        </p>
+        <div class="feedback-details feedback-details--confirm">
+          <div class="feedback-detail-row">
+            <v-icon size="15" color="#92400e">mdi-account-outline</v-icon>
+            <span>{{ formData.respondent?.name || 'No respondent name entered' }}</span>
+          </div>
+          <div class="feedback-detail-row">
+            <v-icon size="15" color="#92400e">mdi-clipboard-list-outline</v-icon>
+            <span>20 sections · All responses will be saved</span>
+          </div>
+        </div>
+        <div class="feedback-btn-row">
+          <button class="feedback-btn feedback-btn--outline" @click="confirmDialog = false">
+            Go Back
+          </button>
+          <button
+            class="feedback-btn feedback-btn--confirm"
+            :disabled="submitting"
+            @click="confirmAndSubmit"
+          >
+            <v-icon size="16" style="margin-right: 6px">mdi-send-check</v-icon>
+            {{ submitting ? 'Submitting…' : 'Yes, Submit' }}
+          </button>
+        </div>
+      </div>
+    </v-dialog>
 
     <!-- ─── SUCCESS DIALOG ─── -->
     <v-dialog v-model="successDialog" max-width="480" persistent>
@@ -281,24 +324,27 @@
         <div class="feedback-details">
           <div class="feedback-detail-row">
             <v-icon size="15" color="#16a34a">mdi-account-outline</v-icon>
-            <span>{{ formData.respondent?.name || 'Respondent' }}</span>
+            <span>{{ submittedRespondentName }}</span>
           </div>
-          <div class="feedback-detail-row" v-if="formData.general?.latitude">
+          <div class="feedback-detail-row" v-if="submittedLatitude">
             <v-icon size="15" color="#16a34a">mdi-map-marker-outline</v-icon>
-            <span>
-              {{ formData.general?.latitude?.toFixed(5) }},
-              {{ formData.general?.longitude?.toFixed(5) }}
-            </span>
+            <span>{{ submittedLatitude }}, {{ submittedLongitude }}</span>
           </div>
           <div class="feedback-detail-row">
             <v-icon size="15" color="#16a34a">mdi-calendar-outline</v-icon>
             <span>{{ submittedAt }}</span>
           </div>
         </div>
-        <button class="feedback-btn feedback-btn--success" @click="successDialog = false">
-          <v-icon size="16" style="margin-right: 6px">mdi-check</v-icon>
-          Done
-        </button>
+        <div class="feedback-btn-row">
+          <button class="feedback-btn feedback-btn--outline" @click="handleDone">
+            <v-icon size="16" style="margin-right: 6px">mdi-check</v-icon>
+            Done
+          </button>
+          <button class="feedback-btn feedback-btn--success" @click="handleSubmitAnother">
+            <v-icon size="16" style="margin-right: 6px">mdi-plus-circle-outline</v-icon>
+            Submit Another
+          </button>
+        </div>
       </div>
     </v-dialog>
 
@@ -364,7 +410,7 @@ import SectionOpenEnded from '@/components/survey/SectionOpenEnded.vue'
 import SectionEnumerator from '@/components/survey/SectionEnumerator.vue'
 import SectionConsent from '@/components/survey/SectionConsent.vue'
 
-const { formData } = useSurveyForm()
+const { formData, resetForm: composableReset } = useSurveyForm()
 const { smAndDown } = useDisplay()
 
 const step = ref(1)
@@ -373,12 +419,20 @@ const drawer = ref(true)
 const navScroll = ref(null)
 const activePill = ref(null)
 const formPanel = ref(null)
+const surveyBody = ref(null)
 const router = useRouter()
 
+const confirmDialog = ref(false)
 const successDialog = ref(false)
 const errorDialog = ref(false)
 const errorMessage = ref('')
 const submittedAt = ref('')
+const formKey = ref(0) // incrementing this forces all section components to remount
+// Snapshot the submitted values so the success card still shows them
+// even after the form data has been cleared.
+const submittedRespondentName = ref('')
+const submittedLatitude = ref(null)
+const submittedLongitude = ref(null)
 
 const logoSize = computed(() => (smAndDown.value ? 44 : 60))
 
@@ -406,6 +460,49 @@ const breadcrumbItems = [
 ]
 
 const currentSection = computed(() => breadcrumbItems[step.value - 1])
+
+// ── Reset form data ──
+// We replace every key's value with a fresh empty structure using Object.assign
+// so Vue's reactivity system sees the change and re-renders all child sections.
+const getEmptyFormData = () => ({
+  general: {},
+  respondent: {},
+  household: {},
+  ofwProfile: {},
+  migration: {},
+  presentStatus: {},
+  socioEconomic: {},
+  livelihood: {},
+  education: {},
+  health: {},
+  assistance: {},
+  problems: {},
+  reintegration: {},
+  needs: {},
+  risk: {},
+  community: {},
+  financial: {},
+  openEnded: {},
+  enumerator: {},
+  consent: {},
+})
+
+const resetForm = () => {
+  if (typeof composableReset === 'function') {
+    composableReset()
+  } else {
+    // Force reactivity by replacing each key with a fresh empty object
+    const empty = getEmptyFormData()
+    Object.keys(empty).forEach((key) => {
+      Object.assign(formData[key], {})
+      // Delete all existing keys so stale data is gone
+      Object.keys(formData[key]).forEach((k) => delete formData[key][k])
+    })
+  }
+  // Increment key to force all section components to fully remount,
+  // so their localData refs re-initialize from the now-empty props.data
+  formKey.value++
+}
 
 // ── Scroll to top ──
 // surveyBody is our own plain div — walk up from it to find the first
@@ -465,10 +562,22 @@ const doSubmit = async () => {
 
     if (error) throw error
 
+    // Snapshot displayed values before clearing the form
+    submittedRespondentName.value = formData.respondent?.name || 'Respondent'
+    submittedLatitude.value = formData.general?.latitude
+      ? formData.general.latitude.toFixed(5)
+      : null
+    submittedLongitude.value = formData.general?.longitude
+      ? formData.general.longitude.toFixed(5)
+      : null
     submittedAt.value = new Date().toLocaleString('en-PH', {
       dateStyle: 'medium',
       timeStyle: 'short',
     })
+
+    // Clear all form data immediately after successful submission
+    resetForm()
+
     successDialog.value = true
   } catch (err) {
     console.error(err)
@@ -479,11 +588,35 @@ const doSubmit = async () => {
   }
 }
 
-const handleSubmit = () => doSubmit()
+// Opens the confirmation dialog
+const handleSubmit = () => {
+  confirmDialog.value = true
+}
+
+// Called when user confirms inside the confirm dialog
+const confirmAndSubmit = () => {
+  confirmDialog.value = false
+  doSubmit()
+}
 
 const retrySubmit = () => {
   errorDialog.value = false
   doSubmit()
+}
+
+// ── Post-success actions ──
+// "Done" — just close the dialog; form is already reset
+const handleDone = () => {
+  successDialog.value = false
+  step.value = 1
+  scrollToTop()
+}
+
+// "Submit Another" — close dialog, go to step 1, form already reset
+const handleSubmitAnother = () => {
+  successDialog.value = false
+  step.value = 1
+  scrollToTop()
 }
 </script>
 
@@ -892,9 +1025,14 @@ const retrySubmit = () => {
 .btn-submit {
   background: #15803d;
   color: white;
+  padding: 12px 28px;
+  font-size: 15px;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(21, 128, 61, 0.35);
 }
 .btn-submit:hover:not(:disabled) {
   background: #166534;
+  box-shadow: 0 6px 18px rgba(21, 128, 61, 0.45);
 }
 .btn-submit:disabled {
   opacity: 0.6;
@@ -936,6 +1074,11 @@ const retrySubmit = () => {
 .feedback-icon-wrap--success {
   background: linear-gradient(135deg, #16a34a, #22c55e);
   box-shadow: 0 8px 24px rgba(22, 163, 74, 0.35);
+}
+
+.feedback-icon-wrap--confirm {
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+  box-shadow: 0 8px 24px rgba(217, 119, 6, 0.35);
 }
 
 .feedback-icon-wrap--error {
@@ -1017,6 +1160,27 @@ const retrySubmit = () => {
     background 0.15s,
     opacity 0.15s;
   width: 100%;
+}
+
+.feedback-btn--confirm {
+  background: #d97706;
+  color: white;
+}
+.feedback-btn--confirm:hover:not(:disabled) {
+  background: #b45309;
+}
+.feedback-btn--confirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.feedback-details--confirm {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.feedback-details--confirm .feedback-detail-row {
+  color: #92400e;
 }
 
 .feedback-btn--success {
