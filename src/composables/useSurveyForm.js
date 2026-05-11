@@ -8,16 +8,19 @@ export function useSurveyForm() {
       timeOfInterview: '',
       enumeratorName: '',
       barangay: '',
-      municipality: '',
-      province: '',
+      municipalityCity: '', // was: municipality
+      provinceRegion: '', // was: province
       householdControlNumber: '',
-      typeOfRespondent: [], // multi-select checkboxes
+      typeOfRespondent: '',
+      typeOfRespondentOther: '',
+      latitude: null,
+      longitude: null,
     },
 
     // II. Respondent Identification
     respondent: {
       name: '',
-      relationshipToOFW: '',
+      relationshipToOFW: [],
       sex: '',
       age: '',
       dateOfBirth: '',
@@ -26,7 +29,7 @@ export function useSurveyForm() {
       contactNumber: '',
       alternativeContact: '',
       email: '',
-      homeAddress: '',
+      completeHomeAddress: '', // was: homeAddress
     },
 
     // III. Household Demographic Profile
@@ -39,7 +42,7 @@ export function useSurveyForm() {
       numSenior: 0,
       numPWD: 0,
       numPregnant: 0,
-      roster: [], // [{name, sex, age, civilStatus, relationToOFW, education, occupation, monthlyIncome, remarks}]
+      roster: [],
     },
 
     // IV. OFW Profile
@@ -97,7 +100,7 @@ export function useSurveyForm() {
       avgMonthlyIncome: '',
       monthlyRemittance: '',
       remittanceFrequency: '',
-      remittanceUses: [], // multi
+      remittanceUses: [],
       hasSavings: false,
       hasDebts: false,
       totalDebt: '',
@@ -149,7 +152,7 @@ export function useSurveyForm() {
       migrationRelatedIssues: [],
     },
 
-    // XIII. Reintegration Status & Readiness (Returned OFWs)
+    // XIII. Reintegration Status & Readiness
     reintegration: {
       hasPlan: '',
       preferredType: '',
@@ -209,7 +212,7 @@ export function useSurveyForm() {
     },
   })
 
-  const resetForm = () => Object.assign(formData, JSON.parse(JSON.stringify(formData))) // deep reset
+  const resetForm = () => Object.assign(formData, JSON.parse(JSON.stringify(formData)))
 
   return { formData, resetForm }
 }

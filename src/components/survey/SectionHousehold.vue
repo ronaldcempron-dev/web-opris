@@ -1,229 +1,252 @@
 <!-- src/components/survey/SectionHousehold.vue -->
 <template>
   <div>
-    <h2 class="text-h5 font-weight-bold mb-6 text-primary">III. Household Demographic Profile</h2>
-
-    <v-row dense>
-      <!-- Name of Household Head -->
-      <v-col cols="12" md="6">
-        <v-text-field
-          v-model="localData.householdHeadName"
-          label="Name of Household Head"
-          variant="outlined"
-          density="comfortable"
-          @update:modelValue="emitUpdate"
-        />
-      </v-col>
-
-      <!-- Relationship of Respondent to Household Head -->
-      <v-col cols="12" md="6">
-        <v-text-field
-          v-model="localData.relationshipToHead"
-          label="Relationship of Respondent to Household Head"
-          variant="outlined"
-          density="comfortable"
-          @update:modelValue="emitUpdate"
-        />
-      </v-col>
-
-      <!-- Total Numbers -->
-      <v-col cols="12" md="3">
-        <v-text-field
-          v-model.number="localData.totalHouseholdMembers"
-          label="Total Number of Household Members"
-          type="number"
-          variant="outlined"
-          density="comfortable"
-          @update:modelValue="emitUpdate"
-        />
-      </v-col>
-
-      <v-col cols="12" md="3">
-        <v-text-field
-          v-model.number="localData.totalDependents"
-          label="Total Number of Dependents"
-          type="number"
-          variant="outlined"
-          density="comfortable"
-          @update:modelValue="emitUpdate"
-        />
-      </v-col>
-
-      <v-col cols="12" md="3">
-        <v-text-field
-          v-model.number="localData.children017"
-          label="Number of Children (0-17 years old)"
-          type="number"
-          variant="outlined"
-          density="comfortable"
-          @update:modelValue="emitUpdate"
-        />
-      </v-col>
-
-      <v-col cols="12" md="3">
-        <v-text-field
-          v-model.number="localData.seniorCitizens"
-          label="Number of Senior Citizens (60+)"
-          type="number"
-          variant="outlined"
-          density="comfortable"
-          @update:modelValue="emitUpdate"
-        />
-      </v-col>
-
-      <v-col cols="12" md="4">
-        <v-text-field
-          v-model.number="localData.personsWithDisability"
-          label="Number of Persons with Disability (PWDs)"
-          type="number"
-          variant="outlined"
-          density="comfortable"
-          @update:modelValue="emitUpdate"
-        />
-      </v-col>
-
-      <v-col cols="12" md="4">
-        <v-text-field
-          v-model.number="localData.pregnantLactating"
-          label="Number of Pregnant/Lactating Women"
-          type="number"
-          variant="outlined"
-          density="comfortable"
-          @update:modelValue="emitUpdate"
-        />
-      </v-col>
-    </v-row>
-
-    <!-- HOUSEHOLD ROSTER TABLE -->
-    <div class="mt-10">
-      <div class="d-flex align-center justify-space-between mb-4">
-        <label class="text-body-1 font-weight-medium">Household Roster Table</label>
-        <v-btn
-          color="primary"
-          size="small"
-          variant="outlined"
-          prepend-icon="mdi-plus"
-          @click="addRosterRow"
-        >
-          Add Member
-        </v-btn>
+    <div class="section-body">
+      <!-- ── BLOCK: Household Head ── -->
+      <div class="field-group">
+        <v-row dense>
+          <v-col cols="12" md="6">
+            <div class="field-item">
+              <label class="field-label">Name of Household Head</label>
+              <v-text-field
+                v-model="localData.householdHeadName"
+                placeholder="Full name"
+                variant="outlined"
+                density="comfortable"
+                hide-details
+                class="modern-input"
+                @update:modelValue="emitUpdate"
+              />
+            </div>
+          </v-col>
+          <v-col cols="12" md="6">
+            <div class="field-item">
+              <label class="field-label">Relationship of Respondent to Household Head</label>
+              <v-text-field
+                v-model="localData.relationshipToHead"
+                placeholder="e.g. Spouse, Son, Daughter"
+                variant="outlined"
+                density="comfortable"
+                hide-details
+                class="modern-input"
+                @update:modelValue="emitUpdate"
+              />
+            </div>
+          </v-col>
+        </v-row>
       </div>
 
-      <v-simple-table dense class="border rounded-xl">
-        <thead>
-          <tr>
-            <th class="text-left">No.</th>
-            <th class="text-left">Name</th>
-            <th class="text-left">Sex</th>
-            <th class="text-left">Age</th>
-            <th class="text-left">Civil Status</th>
-            <th class="text-left">Relationship to OFW</th>
-            <th class="text-left">Educational Attainment</th>
-            <th class="text-left">Occupation/Schooling</th>
-            <th class="text-left">Monthly Income</th>
-            <th class="text-left">Remarks</th>
-            <th style="width: 48px"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(row, index) in localData.roster" :key="index">
-            <td class="text-caption font-weight-medium">{{ index + 1 }}</td>
-            <td>
+      <!-- ── BLOCK: Household Composition ── -->
+      <div class="field-group">
+        <v-row dense>
+          <v-col cols="12" md="3">
+            <div class="field-item">
+              <label class="field-label">Total Household Members</label>
               <v-text-field
-                v-model="row.name"
-                density="compact"
-                variant="plain"
-                hide-details
-                @input="emitUpdate"
-              />
-            </td>
-            <td>
-              <v-select
-                v-model="row.sex"
-                :items="['Male', 'Female']"
-                density="compact"
-                variant="plain"
-                hide-details
-                @update:modelValue="emitUpdate"
-              />
-            </td>
-            <td>
-              <v-text-field
-                v-model.number="row.age"
+                v-model.number="localData.totalHouseholdMembers"
                 type="number"
-                density="compact"
-                variant="plain"
+                placeholder="0"
+                variant="outlined"
+                density="comfortable"
                 hide-details
-                @input="emitUpdate"
-              />
-            </td>
-            <td>
-              <v-select
-                v-model="row.civilStatus"
-                :items="civilStatuses"
-                density="compact"
-                variant="plain"
-                hide-details
+                class="modern-input"
                 @update:modelValue="emitUpdate"
               />
-            </td>
-            <td>
+            </div>
+          </v-col>
+          <v-col cols="12" md="3">
+            <div class="field-item">
+              <label class="field-label">Total Dependents</label>
               <v-text-field
-                v-model="row.relationshipToOFW"
-                density="compact"
-                variant="plain"
+                v-model.number="localData.totalDependents"
+                type="number"
+                placeholder="0"
+                variant="outlined"
+                density="comfortable"
                 hide-details
-                @input="emitUpdate"
+                class="modern-input"
+                @update:modelValue="emitUpdate"
               />
-            </td>
-            <td>
+            </div>
+          </v-col>
+          <v-col cols="12" md="3">
+            <div class="field-item">
+              <label class="field-label">Children (0-17 years old)</label>
               <v-text-field
-                v-model="row.educationalAttainment"
-                density="compact"
-                variant="plain"
+                v-model.number="localData.children017"
+                type="number"
+                placeholder="0"
+                variant="outlined"
+                density="comfortable"
                 hide-details
-                @input="emitUpdate"
+                class="modern-input"
+                @update:modelValue="emitUpdate"
               />
-            </td>
-            <td>
+            </div>
+          </v-col>
+          <v-col cols="12" md="3">
+            <div class="field-item">
+              <label class="field-label">Senior Citizens (60+)</label>
               <v-text-field
-                v-model="row.occupation"
-                density="compact"
-                variant="plain"
+                v-model.number="localData.seniorCitizens"
+                type="number"
+                placeholder="0"
+                variant="outlined"
+                density="comfortable"
                 hide-details
-                @input="emitUpdate"
+                class="modern-input"
+                @update:modelValue="emitUpdate"
               />
-            </td>
-            <td>
+            </div>
+          </v-col>
+          <v-col cols="12" md="4">
+            <div class="field-item">
+              <label class="field-label">Persons with Disability (PWDs)</label>
               <v-text-field
-                v-model="row.monthlyIncome"
-                density="compact"
-                variant="plain"
+                v-model.number="localData.personsWithDisability"
+                type="number"
+                placeholder="0"
+                variant="outlined"
+                density="comfortable"
                 hide-details
-                @input="emitUpdate"
+                class="modern-input"
+                @update:modelValue="emitUpdate"
               />
-            </td>
-            <td>
+            </div>
+          </v-col>
+          <v-col cols="12" md="4">
+            <div class="field-item">
+              <label class="field-label">Pregnant / Lactating Women</label>
               <v-text-field
-                v-model="row.remarks"
-                density="compact"
-                variant="plain"
+                v-model.number="localData.pregnantLactating"
+                type="number"
+                placeholder="0"
+                variant="outlined"
+                density="comfortable"
                 hide-details
-                @input="emitUpdate"
+                class="modern-input"
+                @update:modelValue="emitUpdate"
               />
-            </td>
-            <td>
-              <v-btn
-                icon="mdi-delete-outline"
-                size="x-small"
-                variant="plain"
-                color="error"
-                @click="removeRosterRow(index)"
-              />
-            </td>
-          </tr>
-        </tbody>
-      </v-simple-table>
+            </div>
+          </v-col>
+        </v-row>
+      </div>
+
+      <!-- ── BLOCK: Household Roster ── -->
+      <div class="field-group" style="margin-bottom: 0">
+        <div class="d-flex align-center justify-space-between mb-4">
+          <label class="field-label" style="font-size: 13px; margin-bottom: 0"
+            >HOUSEHOLD ROSTER TABLE</label
+          >
+          <v-btn
+            color="#0f2a5e"
+            size="small"
+            variant="outlined"
+            prepend-icon="mdi-plus"
+            class="add-btn"
+            @click="addRosterRow"
+            >Add Member</v-btn
+          >
+        </div>
+
+        <div class="roster-scroll">
+          <table class="roster-table">
+            <thead>
+              <tr>
+                <th style="width: 36px">#</th>
+                <th style="min-width: 140px">Name</th>
+                <th style="min-width: 100px">Sex</th>
+                <th style="min-width: 60px">Age</th>
+                <th style="min-width: 120px">Civil Status</th>
+                <th style="min-width: 140px">Rel. to OFW</th>
+                <th style="min-width: 150px">Education</th>
+                <th style="min-width: 140px">Occupation</th>
+                <th style="min-width: 110px">Monthly Income</th>
+                <th style="min-width: 120px">Remarks</th>
+                <th style="width: 40px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(row, index) in localData.roster" :key="index">
+                <td class="td-num">{{ index + 1 }}</td>
+                <td>
+                  <input
+                    class="cell-input"
+                    v-model="row.name"
+                    placeholder="Full name"
+                    @input="emitUpdate"
+                  />
+                </td>
+                <td>
+                  <select class="cell-select" v-model="row.sex" @change="emitUpdate">
+                    <option value="">—</option>
+                    <option>Male</option>
+                    <option>Female</option>
+                  </select>
+                </td>
+                <td>
+                  <input
+                    class="cell-input"
+                    type="number"
+                    v-model.number="row.age"
+                    placeholder="0"
+                    @input="emitUpdate"
+                  />
+                </td>
+                <td>
+                  <select class="cell-select" v-model="row.civilStatus" @change="emitUpdate">
+                    <option value="">—</option>
+                    <option v-for="s in civilStatuses" :key="s">{{ s }}</option>
+                  </select>
+                </td>
+                <td>
+                  <input
+                    class="cell-input"
+                    v-model="row.relationshipToOFW"
+                    placeholder="e.g. Spouse"
+                    @input="emitUpdate"
+                  />
+                </td>
+                <td>
+                  <input
+                    class="cell-input"
+                    v-model="row.educationalAttainment"
+                    placeholder="e.g. College"
+                    @input="emitUpdate"
+                  />
+                </td>
+                <td>
+                  <input
+                    class="cell-input"
+                    v-model="row.occupation"
+                    placeholder="e.g. Farmer"
+                    @input="emitUpdate"
+                  />
+                </td>
+                <td>
+                  <input
+                    class="cell-input"
+                    v-model="row.monthlyIncome"
+                    placeholder="e.g. 8000"
+                    @input="emitUpdate"
+                  />
+                </td>
+                <td>
+                  <input
+                    class="cell-input"
+                    v-model="row.remarks"
+                    placeholder="Notes"
+                    @input="emitUpdate"
+                  />
+                </td>
+                <td>
+                  <button class="del-btn" @click="removeRosterRow(index)" title="Remove">✕</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -231,13 +254,22 @@
 <script setup>
 import { ref, watch } from 'vue'
 
-const props = defineProps({
-  data: { type: Object, default: () => ({}) },
-})
-
+const props = defineProps({ data: { type: Object, default: () => ({}) } })
 const emit = defineEmits(['update:data'])
 
 const civilStatuses = ['Single', 'Married', 'Widowed', 'Separated', 'Live-in', 'Other']
+
+const blankRow = () => ({
+  name: '',
+  sex: '',
+  age: null,
+  civilStatus: '',
+  relationshipToOFW: '',
+  educationalAttainment: '',
+  occupation: '',
+  monthlyIncome: '',
+  remarks: '',
+})
 
 const localData = ref({
   householdHeadName: '',
@@ -248,71 +280,169 @@ const localData = ref({
   seniorCitizens: null,
   personsWithDisability: null,
   pregnantLactating: null,
-  roster: [
-    {
-      name: '',
-      sex: '',
-      age: null,
-      civilStatus: '',
-      relationshipToOFW: '',
-      educationalAttainment: '',
-      occupation: '',
-      monthlyIncome: '',
-      remarks: '',
-    },
-  ],
+  roster: [blankRow()],
   ...props.data,
 })
 
-// Ensure roster always has at least one row
 if (!localData.value.roster || localData.value.roster.length === 0) {
-  localData.value.roster = [
-    {
-      name: '',
-      sex: '',
-      age: null,
-      civilStatus: '',
-      relationshipToOFW: '',
-      educationalAttainment: '',
-      occupation: '',
-      monthlyIncome: '',
-      remarks: '',
-    },
-  ]
+  localData.value.roster = [blankRow()]
 }
 
 const addRosterRow = () => {
-  localData.value.roster.push({
-    name: '',
-    sex: '',
-    age: null,
-    civilStatus: '',
-    relationshipToOFW: '',
-    educationalAttainment: '',
-    occupation: '',
-    monthlyIncome: '',
-    remarks: '',
-  })
+  localData.value.roster.push(blankRow())
   emitUpdate()
 }
-
-const removeRosterRow = (index) => {
+const removeRosterRow = (i) => {
   if (localData.value.roster.length > 1) {
-    localData.value.roster.splice(index, 1)
+    localData.value.roster.splice(i, 1)
     emitUpdate()
   }
 }
-
-// Two-way binding
-watch(
-  localData,
-  (newVal) => {
-    emit('update:data', { ...newVal })
-  },
-  { deep: true },
-)
-
-const emitUpdate = () => {
-  emit('update:data', { ...localData.value })
-}
+const emitUpdate = () => emit('update:data', { ...localData.value })
+watch(localData, emitUpdate, { deep: true })
 </script>
+
+<style scoped>
+.section-body {
+  padding: 10px 24px 24px;
+}
+.field-group {
+  margin-bottom: 14px;
+}
+.field-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 100%;
+}
+.field-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6b7fa8;
+  line-height: 1.4;
+}
+.modern-input :deep(.v-field) {
+  border-radius: 10px;
+  background: #f8faff;
+  border-color: #e2e8f0;
+  font-size: 13.5px;
+  color: #111827;
+}
+.modern-input :deep(.v-field--focused) {
+  border-color: #3b82f6;
+  background: #ffffff;
+}
+.add-btn {
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* ── Roster Table ── */
+.roster-scroll {
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+.roster-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: #fff;
+}
+.roster-table thead tr {
+  background: #f8faff;
+}
+.roster-table th {
+  padding: 10px 8px;
+  text-align: left;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6b7fa8;
+  white-space: nowrap;
+  border-bottom: 2px solid #e2e8f0;
+}
+.roster-table td {
+  padding: 6px 6px;
+  vertical-align: middle;
+  border-bottom: 1px solid #f3f4f6;
+}
+.roster-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.roster-table tbody tr:hover {
+  background: #f8faff;
+}
+.td-num {
+  font-size: 11px;
+  color: #9ca3af;
+  font-weight: 600;
+  text-align: center;
+}
+
+.cell-input {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 5px 7px;
+  font-size: 13px;
+  color: #111827;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+.cell-input:focus {
+  border-color: #3b82f6;
+  background: #fff;
+}
+.cell-input::placeholder {
+  color: #c4c9d4;
+}
+
+.cell-select {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 5px 4px;
+  font-size: 13px;
+  color: #111827;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.cell-select:focus {
+  border-color: #3b82f6;
+  background: #fff;
+}
+
+.del-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #f87171;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.14s;
+}
+.del-btn:hover {
+  background: #fef2f2;
+}
+
+@media (max-width: 480px) {
+  .section-body {
+    padding: 14px 14px 18px;
+  }
+}
+</style>
