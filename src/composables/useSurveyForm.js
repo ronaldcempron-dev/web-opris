@@ -210,6 +210,17 @@ export function useSurveyForm() {
       recommendedInterventions: [],
       narrativeRemarks: '',
     },
+
+    // XX. Consent & Data Privacy
+    consent: {
+      consentAgreement: '',
+      respondentName: '',
+      respondentDate: '',
+      respondentSignature: '',
+      enumeratorName: '',
+      enumeratorDate: '',
+      enumeratorSignature: '',
+    },
   })
 
   const resetForm = () => Object.assign(formData, JSON.parse(JSON.stringify(formData)))
