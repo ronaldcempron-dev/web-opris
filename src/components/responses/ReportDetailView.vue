@@ -9,9 +9,9 @@
             <v-icon size="14" class="meta-icon">mdi-calendar-outline</v-icon>
             Submitted {{ formatDate(response.created_at) }}
             <span v-if="response.enumerator_name" class="meta-sep">·</span>
-            <v-icon v-if="response.enumerator_name" size="14" class="meta-icon"
-              >mdi-account-outline</v-icon
-            >
+            <v-icon v-if="response.enumerator_name" size="14" class="meta-icon">
+              mdi-account-outline
+            </v-icon>
             <span v-if="response.enumerator_name">{{ response.enumerator_name }}</span>
           </div>
 
@@ -31,15 +31,12 @@
             </span>
             <span class="hero-chip hero-chip--blue">
               <v-icon size="12" style="margin-right: 4px">mdi-check-circle-outline</v-icon>
-              {{ filledSections }} / 19 Sections
+              {{ filledSections }} / 20 Sections
             </span>
           </div>
         </div>
-        <!-- .hero-meta-panel -->
       </div>
-      <!-- .hero-info -->
     </div>
-    <!-- .hero-card -->
 
     <!-- ─── SECTION TOC PILLS ─── -->
     <div class="section-toc">
@@ -63,51 +60,153 @@
         </div>
         <div class="section-num">{{ s.num }}</div>
         <div class="section-title-text">{{ s.title }}</div>
-        <v-icon size="18" class="chevron" :class="{ open: openSections[s.key] }"
-          >mdi-chevron-down</v-icon
-        >
+        <v-icon size="18" class="chevron" :class="{ open: openSections[s.key] }">
+          mdi-chevron-down
+        </v-icon>
       </div>
 
       <transition name="slide">
         <div v-show="openSections[s.key]" class="section-body">
-          <div v-if="!s.data || !Object.keys(s.data).length" class="no-data">
-            <v-icon size="16" style="margin-right: 6px; color: #9ca3af"
-              >mdi-information-outline</v-icon
-            >
-            No data recorded for this section.
-          </div>
-          <template v-else>
-            <div v-for="(value, field) in s.data" :key="field" class="field-row">
-              <div class="field-label">{{ formatLabel(field) }}</div>
-
-              <!-- Array → chips -->
-              <div v-if="Array.isArray(value) && value.length" class="field-value">
-                <div class="chip-list">
-                  <span class="chip" v-for="(v, i) in value" :key="i">{{ v }}</span>
+          <!-- ── Special render: Consent section ── -->
+          <template v-if="s.key === 'consent'">
+            <div v-if="!s.data || !Object.keys(s.data).length" class="no-data">
+              <v-icon size="16" style="margin-right: 6px; color: #9ca3af">
+                mdi-information-outline
+              </v-icon>
+              No data recorded for this section.
+            </div>
+            <template v-else>
+              <!-- Consent Agreement -->
+              <div class="field-row">
+                <div class="field-label">Consent Agreement</div>
+                <div class="field-value">
+                  <span
+                    class="chip"
+                    :class="s.data.consentAgreement === 'agree' ? 'chip-yes' : 'chip-no'"
+                  >
+                    <v-icon size="12" style="margin-right: 3px">
+                      {{ s.data.consentAgreement === 'agree' ? 'mdi-check' : 'mdi-close' }}
+                    </v-icon>
+                    {{
+                      s.data.consentAgreement === 'agree'
+                        ? 'Voluntarily Agreed'
+                        : s.data.consentAgreement === 'disagree'
+                          ? 'Did Not Agree'
+                          : '—'
+                    }}
+                  </span>
                 </div>
               </div>
 
-              <!-- Boolean -->
-              <div v-else-if="typeof value === 'boolean'" class="field-value">
-                <span class="chip" :class="value ? 'chip-yes' : 'chip-no'">
-                  <v-icon size="12" style="margin-right: 3px">
-                    {{ value ? 'mdi-check' : 'mdi-close' }}
-                  </v-icon>
-                  {{ value ? 'Yes' : 'No' }}
-                </span>
+              <!-- Respondent Name -->
+              <div class="field-row">
+                <div class="field-label">Respondent Name</div>
+                <div class="field-value" :class="{ empty: !s.data.respondentName }">
+                  {{ s.data.respondentName || '—' }}
+                </div>
               </div>
 
-              <!-- Empty -->
-              <div
-                v-else-if="value === null || value === undefined || value === ''"
-                class="field-value empty"
-              >
-                —
+              <!-- Respondent Date -->
+              <div class="field-row">
+                <div class="field-label">Respondent Date</div>
+                <div class="field-value" :class="{ empty: !s.data.respondentDate }">
+                  {{ s.data.respondentDate || '—' }}
+                </div>
               </div>
 
-              <!-- Plain text -->
-              <div v-else class="field-value">{{ value }}</div>
+              <!-- Respondent Signature -->
+              <div class="field-row">
+                <div class="field-label">Respondent Signature</div>
+                <div class="field-value">
+                  <template v-if="s.data.respondentSignature">
+                    <div class="signature-preview-wrap">
+                      <img
+                        :src="s.data.respondentSignature"
+                        alt="Respondent Signature"
+                        class="signature-preview"
+                      />
+                    </div>
+                  </template>
+                  <span v-else class="empty">—</span>
+                </div>
+              </div>
+
+              <!-- Enumerator Name -->
+              <div class="field-row">
+                <div class="field-label">Enumerator Name</div>
+                <div class="field-value" :class="{ empty: !s.data.enumeratorName }">
+                  {{ s.data.enumeratorName || '—' }}
+                </div>
+              </div>
+
+              <!-- Enumerator Date -->
+              <div class="field-row">
+                <div class="field-label">Enumerator Date</div>
+                <div class="field-value" :class="{ empty: !s.data.enumeratorDate }">
+                  {{ s.data.enumeratorDate || '—' }}
+                </div>
+              </div>
+
+              <!-- Enumerator Signature -->
+              <div class="field-row">
+                <div class="field-label">Enumerator Signature</div>
+                <div class="field-value">
+                  <template v-if="s.data.enumeratorSignature">
+                    <div class="signature-preview-wrap">
+                      <img
+                        :src="s.data.enumeratorSignature"
+                        alt="Enumerator Signature"
+                        class="signature-preview"
+                      />
+                    </div>
+                  </template>
+                  <span v-else class="empty">—</span>
+                </div>
+              </div>
+            </template>
+          </template>
+
+          <!-- ── Default render: all other sections ── -->
+          <template v-else>
+            <div v-if="!s.data || !Object.keys(s.data).length" class="no-data">
+              <v-icon size="16" style="margin-right: 6px; color: #9ca3af">
+                mdi-information-outline
+              </v-icon>
+              No data recorded for this section.
             </div>
+            <template v-else>
+              <div v-for="(value, field) in s.data" :key="field" class="field-row">
+                <div class="field-label">{{ formatLabel(field) }}</div>
+
+                <!-- Array → chips -->
+                <div v-if="Array.isArray(value) && value.length" class="field-value">
+                  <div class="chip-list">
+                    <span class="chip" v-for="(v, i) in value" :key="i">{{ v }}</span>
+                  </div>
+                </div>
+
+                <!-- Boolean -->
+                <div v-else-if="typeof value === 'boolean'" class="field-value">
+                  <span class="chip" :class="value ? 'chip-yes' : 'chip-no'">
+                    <v-icon size="12" style="margin-right: 3px">
+                      {{ value ? 'mdi-check' : 'mdi-close' }}
+                    </v-icon>
+                    {{ value ? 'Yes' : 'No' }}
+                  </span>
+                </div>
+
+                <!-- Empty -->
+                <div
+                  v-else-if="value === null || value === undefined || value === ''"
+                  class="field-value empty"
+                >
+                  —
+                </div>
+
+                <!-- Plain text -->
+                <div v-else class="field-value">{{ value }}</div>
+              </div>
+            </template>
           </template>
         </div>
       </transition>
@@ -172,6 +271,7 @@ const sectionOrder = [
     title: "Enumerator's Assessment",
     icon: 'mdi-clipboard-text-outline',
   },
+  { key: 'consent', num: 'XX', title: 'Consent & Data Privacy', icon: 'mdi-shield-lock-outline' },
 ]
 
 const openSections = reactive(Object.fromEntries(sectionOrder.map((s) => [s.key, false])))
@@ -217,13 +317,6 @@ const formatLabel = (key) =>
 </script>
 
 <style scoped>
-/*
-  Palette (mirrors App.vue)
-  60% Navy  → #0a1f4e / #0f2a5e / #1a3a78
-  30% Gold  → #f5b800 / #e6a800
-  10% White → #ffffff / #f0f5ff
-*/
-
 /* ══ HERO CARD ══════════════════════════════ */
 .hero-card {
   background: #ffffff;
@@ -251,7 +344,6 @@ const formatLabel = (key) =>
   line-height: 1.2;
 }
 
-/* ── Meta panel — now just padding since hero is already white ── */
 .hero-meta-panel {
   background: #ffffff;
   border-radius: 12px;
@@ -325,13 +417,13 @@ const formatLabel = (key) =>
 }
 
 .toc-pill {
-  border: 1.5px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid #e2e8f0;
+  background: #f8faff;
   border-radius: 20px;
   padding: 4px 11px;
   font-size: 11px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.45);
+  color: #6b7fa8;
   cursor: pointer;
   transition: all 0.14s ease;
   font-family: inherit;
@@ -339,15 +431,20 @@ const formatLabel = (key) =>
 }
 
 .toc-pill:hover {
-  border-color: #3b82f6;
-  color: #3b82f6;
-  background: rgba(59, 130, 246, 0.1);
+  border-color: #1d4ed8;
+  color: #1d4ed8;
+  background: #eff6ff;
 }
 
 .toc-pill.has-data {
-  border-color: rgba(59, 130, 246, 0.4);
-  color: #3b82f6;
-  background: rgba(59, 130, 246, 0.1);
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+  background: #eff6ff;
+}
+
+.toc-pill.has-data:hover {
+  border-color: #1d4ed8;
+  background: #dbeafe;
 }
 
 /* ══ SECTION BLOCK ══════════════════════════ */
@@ -360,7 +457,6 @@ const formatLabel = (key) =>
   box-shadow: 0 2px 8px rgba(10, 31, 78, 0.06);
 }
 
-/* Section header — white */
 .section-header {
   display: flex;
   align-items: center;
@@ -499,6 +595,23 @@ const formatLabel = (key) =>
   padding: 8px 0;
 }
 
+/* ── Signature Preview ── */
+.signature-preview-wrap {
+  background: #f8faff;
+  border: 1.5px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: inline-block;
+  max-width: 320px;
+}
+
+.signature-preview {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  max-height: 100px;
+}
+
 /* ══ SLIDE TRANSITION ════════════════════════ */
 .slide-enter-active,
 .slide-leave-active {
@@ -523,7 +636,6 @@ const formatLabel = (key) =>
   .hero-meta-panel {
     padding: 14px 16px;
   }
-
   .field-row {
     flex-direction: column;
     gap: 4px;
@@ -536,17 +648,18 @@ const formatLabel = (key) =>
   .field-value {
     font-size: 13px;
   }
-
   .section-header {
     padding: 12px 14px;
   }
   .section-body {
     padding: 12px 14px 16px;
   }
-
   .toc-pill {
     font-size: 10px;
     padding: 3px 9px;
+  }
+  .signature-preview-wrap {
+    max-width: 100%;
   }
 }
 
@@ -555,7 +668,6 @@ const formatLabel = (key) =>
   .hero-meta-panel {
     padding: 16px 18px;
   }
-
   .field-label {
     min-width: 140px;
   }

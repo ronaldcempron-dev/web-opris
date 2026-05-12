@@ -22,24 +22,24 @@
               </v-btn>
               <div class="rail-title-block">
                 <span class="rail-title">OFW Profiling and Reintegation Information System</span>
-                <span class="rail-sub">Section {{ step }} of 19</span>
+                <span class="rail-sub">Section {{ step }} of 20</span>
               </div>
             </div>
 
             <v-spacer />
 
             <div style="min-width: 90px; display: flex; justify-content: flex-end">
-              <div class="rail-pct">{{ Math.round((step / 19) * 100) }}%</div>
+              <div class="rail-pct">{{ Math.round((step / 20) * 100) }}%</div>
             </div>
           </div>
 
           <div class="rail-bar-track">
-            <div class="rail-bar-fill" :style="{ width: `${(step / 19) * 100}%` }" />
+            <div class="rail-bar-fill" :style="{ width: `${(step / 20) * 100}%` }" />
           </div>
         </div>
 
         <!-- ─── MAIN BODY ─── -->
-        <div class="survey-body">
+        <div class="survey-body" ref="surveyBody">
           <!-- HEADER -->
           <header class="survey-header">
             <div class="header-logos-row">
@@ -79,7 +79,7 @@
                     if (item.step === step) activePill = el
                   }
                 "
-                @click="step = item.step"
+                @click="goToStep(item.step)"
               >
                 <span class="snav-num">{{ item.step }}</span>
                 <span class="snav-label">{{ item.title }}</span>
@@ -88,23 +88,24 @@
           </div>
 
           <!-- FORM PANEL -->
-          <div class="form-panel">
+          <div class="form-panel" ref="formPanel">
             <div class="panel-rail">
               <div class="panel-rail-left">
                 <v-icon size="18" color="rgba(255,255,255,0.85)">mdi-file-document-outline</v-icon>
-                <span class="panel-rail-title"
-                  >Section {{ step }} — {{ currentSection.title }}</span
-                >
+                <span class="panel-rail-title">
+                  Section {{ step }} — {{ currentSection.title }}
+                </span>
               </div>
-              <div class="panel-rail-badge">{{ Math.round((step / 19) * 100) }}% Complete</div>
+              <div class="panel-rail-badge">{{ Math.round((step / 20) * 100) }}% Complete</div>
             </div>
+
             <div class="section-heading">
               <div class="section-badge">Section {{ step }}</div>
               <h2 class="section-title">{{ currentSection.title }}</h2>
             </div>
 
             <div class="section-body">
-              <v-stepper-window v-model="step">
+              <v-stepper-window v-model="step" :key="formKey">
                 <v-stepper-window-item :value="1">
                   <SectionGeneralInfo
                     :data="formData.general"
@@ -219,12 +220,18 @@
                     @update:data="(val) => Object.assign(formData.enumerator, val)"
                   />
                 </v-stepper-window-item>
+                <v-stepper-window-item :value="20">
+                  <SectionConsent
+                    :data="formData.consent"
+                    @update:data="(val) => Object.assign(formData.consent, val)"
+                  />
+                </v-stepper-window-item>
               </v-stepper-window>
             </div>
 
             <!-- FOOTER -->
             <div class="form-footer">
-              <button v-if="step > 1" class="btn btn-outline" @click="step--">
+              <button v-if="step > 1" class="btn btn-outline" @click="prevStep">
                 ← <span class="btn-text">Previous</span>
               </button>
               <div v-else class="btn-placeholder" />
@@ -232,24 +239,29 @@
               <!-- Dots: tablet + desktop -->
               <div class="footer-dots-wrap">
                 <span
-                  v-for="n in 19"
+                  v-for="n in 20"
                   :key="n"
                   class="dot"
                   :class="{ active: n === step, past: n < step }"
-                  @click="step = n"
+                  @click="goToStep(n)"
                   :title="`Section ${n}`"
                 />
               </div>
 
               <!-- Step counter: mobile only -->
-              <div class="mobile-step-counter">{{ step }} / 19</div>
+              <div class="mobile-step-counter">{{ step }} / 20</div>
 
-              <button v-if="step < 19" class="btn btn-primary" @click="step++">
+              <button v-if="step < 20" class="btn btn-primary" @click="nextStep">
                 <span class="btn-text">Next</span> →
               </button>
-              <button v-else class="btn btn-submit" :disabled="submitting" @click="handleSubmit">
-                <v-icon size="15" style="margin-right: 4px">mdi-map-marker-check</v-icon>
-                {{ submitting ? 'Submitting…' : 'Submit' }}
+              <button
+                v-else
+                class="btn btn-submit"
+                :disabled="submitting"
+                @click="confirmDialog = true"
+              >
+                <v-icon size="16" style="margin-right: 6px">mdi-send-check</v-icon>
+                {{ submitting ? 'Submitting…' : 'Submit Survey' }}
               </button>
             </div>
           </div>
@@ -261,6 +273,109 @@
       </div>
       <!-- /survey-layout -->
     </v-main>
+
+    <!-- ─── CONFIRM DIALOG ─── -->
+    <v-dialog v-model="confirmDialog" max-width="460" persistent>
+      <div class="feedback-card feedback-card--confirm">
+        <div class="feedback-icon-wrap feedback-icon-wrap--confirm">
+          <v-icon size="36" color="white">mdi-help-circle</v-icon>
+        </div>
+        <h2 class="feedback-title">Submit Survey?</h2>
+        <p class="feedback-sub">
+          Please confirm that all information entered is correct before submitting. This action
+          cannot be undone.
+        </p>
+        <div class="feedback-details feedback-details--confirm">
+          <div class="feedback-detail-row">
+            <v-icon size="15" color="#92400e">mdi-account-outline</v-icon>
+            <span>{{ formData.respondent?.name || 'No respondent name entered' }}</span>
+          </div>
+          <div class="feedback-detail-row">
+            <v-icon size="15" color="#92400e">mdi-clipboard-list-outline</v-icon>
+            <span>20 sections · All responses will be saved</span>
+          </div>
+        </div>
+        <div class="feedback-btn-row">
+          <button class="feedback-btn feedback-btn--outline" @click="confirmDialog = false">
+            Go Back
+          </button>
+          <button
+            class="feedback-btn feedback-btn--confirm"
+            :disabled="submitting"
+            @click="confirmAndSubmit"
+          >
+            <v-icon size="16" style="margin-right: 6px">mdi-send-check</v-icon>
+            {{ submitting ? 'Submitting…' : 'Yes, Submit' }}
+          </button>
+        </div>
+      </div>
+    </v-dialog>
+
+    <!-- ─── SUCCESS DIALOG ─── -->
+    <v-dialog v-model="successDialog" max-width="480" persistent>
+      <div class="feedback-card feedback-card--success">
+        <div class="feedback-icon-wrap feedback-icon-wrap--success">
+          <v-icon size="36" color="white">mdi-check-circle</v-icon>
+        </div>
+        <h2 class="feedback-title">Survey Submitted!</h2>
+        <p class="feedback-sub">
+          The OFW profiling form has been successfully submitted and saved to the system.
+        </p>
+        <div class="feedback-details">
+          <div class="feedback-detail-row">
+            <v-icon size="15" color="#16a34a">mdi-account-outline</v-icon>
+            <span>{{ submittedRespondentName }}</span>
+          </div>
+          <div class="feedback-detail-row" v-if="submittedLatitude">
+            <v-icon size="15" color="#16a34a">mdi-map-marker-outline</v-icon>
+            <span>{{ submittedLatitude }}, {{ submittedLongitude }}</span>
+          </div>
+          <div class="feedback-detail-row">
+            <v-icon size="15" color="#16a34a">mdi-calendar-outline</v-icon>
+            <span>{{ submittedAt }}</span>
+          </div>
+        </div>
+        <div class="feedback-btn-row">
+          <button class="feedback-btn feedback-btn--outline" @click="handleDone">
+            <v-icon size="16" style="margin-right: 6px">mdi-check</v-icon>
+            Done
+          </button>
+          <button class="feedback-btn feedback-btn--success" @click="handleSubmitAnother">
+            <v-icon size="16" style="margin-right: 6px">mdi-plus-circle-outline</v-icon>
+            Submit Another
+          </button>
+        </div>
+      </div>
+    </v-dialog>
+
+    <!-- ─── ERROR DIALOG ─── -->
+    <v-dialog v-model="errorDialog" max-width="480">
+      <div class="feedback-card feedback-card--error">
+        <div class="feedback-icon-wrap feedback-icon-wrap--error">
+          <v-icon size="36" color="white">mdi-alert-circle</v-icon>
+        </div>
+        <h2 class="feedback-title">Submission Failed</h2>
+        <p class="feedback-sub">
+          Something went wrong while submitting the survey. Please check your connection and try
+          again.
+        </p>
+        <div class="feedback-error-box" v-if="errorMessage">
+          <v-icon size="13" style="margin-right: 6px; flex-shrink: 0"
+            >mdi-information-outline</v-icon
+          >
+          {{ errorMessage }}
+        </div>
+        <div class="feedback-btn-row">
+          <button class="feedback-btn feedback-btn--outline" @click="errorDialog = false">
+            Cancel
+          </button>
+          <button class="feedback-btn feedback-btn--error" @click="retrySubmit">
+            <v-icon size="16" style="margin-right: 6px">mdi-refresh</v-icon>
+            Try Again
+          </button>
+        </div>
+      </div>
+    </v-dialog>
   </v-app>
 </template>
 
@@ -268,7 +383,6 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import { useDisplay } from 'vuetify'
 import { useSurveyForm } from '@/composables/useSurveyForm'
-import { getCurrentPosition } from '@/services/geolocation'
 import { supabase } from '@/services/supabase'
 import { useRouter } from 'vue-router'
 
@@ -294,8 +408,9 @@ import SectionCommunity from '@/components/survey/SectionCommunity.vue'
 import SectionFinancial from '@/components/survey/SectionFinancial.vue'
 import SectionOpenEnded from '@/components/survey/SectionOpenEnded.vue'
 import SectionEnumerator from '@/components/survey/SectionEnumerator.vue'
+import SectionConsent from '@/components/survey/SectionConsent.vue'
 
-const { formData } = useSurveyForm()
+const { formData, resetForm: composableReset } = useSurveyForm()
 const { smAndDown } = useDisplay()
 
 const step = ref(1)
@@ -303,13 +418,23 @@ const submitting = ref(false)
 const drawer = ref(true)
 const navScroll = ref(null)
 const activePill = ref(null)
+const formPanel = ref(null)
+const surveyBody = ref(null)
 const router = useRouter()
 
-const logoSize = computed(() => (smAndDown.value ? 44 : 60))
+const confirmDialog = ref(false)
+const successDialog = ref(false)
+const errorDialog = ref(false)
+const errorMessage = ref('')
+const submittedAt = ref('')
+const formKey = ref(0) // incrementing this forces all section components to remount
+// Snapshot the submitted values so the success card still shows them
+// even after the form data has been cleared.
+const submittedRespondentName = ref('')
+const submittedLatitude = ref(null)
+const submittedLongitude = ref(null)
 
-const goTo = (path) => {
-  router.push(path)
-}
+const logoSize = computed(() => (smAndDown.value ? 44 : 60))
 
 const breadcrumbItems = [
   { title: 'General Information', step: 1 },
@@ -331,11 +456,91 @@ const breadcrumbItems = [
   { title: 'Financial Literacy', step: 17 },
   { title: 'Open-Ended Questions', step: 18 },
   { title: "Enumerator's Assessment", step: 19 },
+  { title: 'Consent & Data Privacy', step: 20 },
 ]
 
 const currentSection = computed(() => breadcrumbItems[step.value - 1])
 
-// Auto-scroll active pill into view
+// ── Reset form data ──
+// We replace every key's value with a fresh empty structure using Object.assign
+// so Vue's reactivity system sees the change and re-renders all child sections.
+const getEmptyFormData = () => ({
+  general: {},
+  respondent: {},
+  household: {},
+  ofwProfile: {},
+  migration: {},
+  presentStatus: {},
+  socioEconomic: {},
+  livelihood: {},
+  education: {},
+  health: {},
+  assistance: {},
+  problems: {},
+  reintegration: {},
+  needs: {},
+  risk: {},
+  community: {},
+  financial: {},
+  openEnded: {},
+  enumerator: {},
+  consent: {},
+})
+
+const resetForm = () => {
+  if (typeof composableReset === 'function') {
+    composableReset()
+  } else {
+    // Force reactivity by replacing each key with a fresh empty object
+    const empty = getEmptyFormData()
+    Object.keys(empty).forEach((key) => {
+      Object.assign(formData[key], {})
+      // Delete all existing keys so stale data is gone
+      Object.keys(formData[key]).forEach((k) => delete formData[key][k])
+    })
+  }
+  // Increment key to force all section components to fully remount,
+  // so their localData refs re-initialize from the now-empty props.data
+  formKey.value++
+}
+
+// ── Scroll to top ──
+// surveyBody is our own plain div — walk up from it to find the first
+// ancestor that is actually scrollable, then reset it to 0.
+const scrollToTop = async () => {
+  await nextTick()
+  if (!surveyBody.value) return
+  let el = surveyBody.value.parentElement
+  while (el) {
+    const overflowY = window.getComputedStyle(el).overflowY
+    const isScrollable =
+      (overflowY === 'auto' || overflowY === 'scroll') && el.scrollHeight > el.clientHeight
+    if (isScrollable) {
+      el.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+    if (el === document.body) break
+    el = el.parentElement
+  }
+  // Final fallback
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+// ── Navigation helpers ──
+const goToStep = async (n) => {
+  step.value = n
+  await scrollToTop()
+}
+
+const nextStep = () => {
+  if (step.value < 20) goToStep(step.value + 1)
+}
+
+const prevStep = () => {
+  if (step.value > 1) goToStep(step.value - 1)
+}
+
+// ── Auto-scroll active pill into view ──
 watch(step, async () => {
   await nextTick()
   if (activePill.value) {
@@ -343,41 +548,77 @@ watch(step, async () => {
   }
 })
 
-const handleSubmit = async () => {
+// ── Submit ──
+const doSubmit = async () => {
   submitting.value = true
-
   try {
-    // Get GPS
-    const geo = await getCurrentPosition()
-
-    console.log('FORM DATA:', JSON.stringify(formData, null, 2))
-
     const { error } = await supabase.from('responses').insert({
-      // Save all answers as a deep copy
       answers: JSON.parse(JSON.stringify(formData)),
-
-      // GPS
-      latitude: geo.latitude,
-      longitude: geo.longitude,
-
-      // Extra columns
+      latitude: formData.general?.latitude || null,
+      longitude: formData.general?.longitude || null,
       enumerator_name: formData.general?.enumeratorName || '',
       respondent_name: formData.respondent?.name || '',
     })
 
     if (error) throw error
 
-    alert('🎉 Survey submitted successfully!\n📍 GPS Location captured!')
+    // Snapshot displayed values before clearing the form
+    submittedRespondentName.value = formData.respondent?.name || 'Respondent'
+    submittedLatitude.value = formData.general?.latitude
+      ? formData.general.latitude.toFixed(5)
+      : null
+    submittedLongitude.value = formData.general?.longitude
+      ? formData.general.longitude.toFixed(5)
+      : null
+    submittedAt.value = new Date().toLocaleString('en-PH', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    })
+
+    // Clear all form data immediately after successful submission
+    resetForm()
+
+    successDialog.value = true
   } catch (err) {
     console.error(err)
-    alert('❌ ' + err.message)
+    errorMessage.value = err.message || 'Unknown error occurred.'
+    errorDialog.value = true
   } finally {
     submitting.value = false
   }
 }
-</script>
 
-<!-- !! KEEP YOUR EXISTING <style scoped> BLOCK HERE — UNCHANGED !! -->
+// Opens the confirmation dialog
+const handleSubmit = () => {
+  confirmDialog.value = true
+}
+
+// Called when user confirms inside the confirm dialog
+const confirmAndSubmit = () => {
+  confirmDialog.value = false
+  doSubmit()
+}
+
+const retrySubmit = () => {
+  errorDialog.value = false
+  doSubmit()
+}
+
+// ── Post-success actions ──
+// "Done" — just close the dialog; form is already reset
+const handleDone = () => {
+  successDialog.value = false
+  step.value = 1
+  scrollToTop()
+}
+
+// "Submit Another" — close dialog, go to step 1, form already reset
+const handleSubmitAnother = () => {
+  successDialog.value = false
+  step.value = 1
+  scrollToTop()
+}
+</script>
 
 <style scoped>
 /* ══ LAYOUT ══════════════════════════════ */
@@ -398,7 +639,7 @@ const handleSubmit = async () => {
   box-sizing: border-box;
 }
 
-/* ─── STICKY TOP RAIL - FIXED ALIGNMENT ─── */
+/* ─── STICKY TOP RAIL ─── */
 .progress-rail {
   position: fixed;
   top: 0;
@@ -422,7 +663,6 @@ const handleSubmit = async () => {
   gap: 12px;
 }
 
-/* Left side - locked together */
 .left-rail {
   display: flex;
   align-items: center;
@@ -461,7 +701,6 @@ const handleSubmit = async () => {
   white-space: nowrap;
 }
 
-/* Right side */
 .rail-pct {
   font-size: 12px;
   font-weight: 700;
@@ -624,6 +863,40 @@ const handleSubmit = async () => {
   overflow: hidden;
 }
 
+.panel-rail {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 24px;
+  background: #3b82f6;
+  flex-wrap: wrap;
+}
+
+.panel-rail-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.panel-rail-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+}
+
+.panel-rail-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+}
+
 .section-heading {
   display: flex;
   align-items: center;
@@ -752,9 +1025,14 @@ const handleSubmit = async () => {
 .btn-submit {
   background: #15803d;
   color: white;
+  padding: 12px 28px;
+  font-size: 15px;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(21, 128, 61, 0.35);
 }
 .btn-submit:hover:not(:disabled) {
   background: #166534;
+  box-shadow: 0 6px 18px rgba(21, 128, 61, 0.45);
 }
 .btn-submit:disabled {
   opacity: 0.6;
@@ -768,6 +1046,168 @@ const handleSubmit = async () => {
   color: #9ca3af;
   text-transform: uppercase;
   margin-bottom: 20px;
+}
+
+/* ══ FEEDBACK DIALOGS ════════════════════ */
+.feedback-card {
+  background: white;
+  border-radius: 20px;
+  padding: 36px 32px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  overflow: hidden;
+}
+
+.feedback-icon-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.feedback-icon-wrap--success {
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  box-shadow: 0 8px 24px rgba(22, 163, 74, 0.35);
+}
+
+.feedback-icon-wrap--confirm {
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+  box-shadow: 0 8px 24px rgba(217, 119, 6, 0.35);
+}
+
+.feedback-icon-wrap--error {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.35);
+}
+
+.feedback-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f2a5e;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.feedback-sub {
+  font-size: 13.5px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.65;
+  max-width: 340px;
+}
+
+.feedback-details {
+  background: #f0fdf4;
+  border: 1.5px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 14px 18px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+.feedback-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #166534;
+  font-weight: 500;
+}
+
+.feedback-error-box {
+  background: #fef2f2;
+  border: 1.5px solid #fecaca;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 12.5px;
+  color: #b91c1c;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  text-align: left;
+  line-height: 1.5;
+}
+
+.feedback-btn-row {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.feedback-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  padding: 11px 24px;
+  cursor: pointer;
+  border: none;
+  transition:
+    background 0.15s,
+    opacity 0.15s;
+  width: 100%;
+}
+
+.feedback-btn--confirm {
+  background: #d97706;
+  color: white;
+}
+.feedback-btn--confirm:hover:not(:disabled) {
+  background: #b45309;
+}
+.feedback-btn--confirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.feedback-details--confirm {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.feedback-details--confirm .feedback-detail-row {
+  color: #92400e;
+}
+
+.feedback-btn--success {
+  background: #16a34a;
+  color: white;
+}
+.feedback-btn--success:hover {
+  background: #166534;
+}
+
+.feedback-btn--error {
+  background: #dc2626;
+  color: white;
+}
+.feedback-btn--error:hover {
+  background: #b91c1c;
+}
+
+.feedback-btn--outline {
+  background: white;
+  border: 1.5px solid #e5e7eb;
+  color: #374151;
+  width: auto;
+}
+.feedback-btn--outline:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
 }
 
 /* ══ RESPONSIVE ══════════════════════════ */
@@ -793,6 +1233,9 @@ const handleSubmit = async () => {
   }
   .form-footer {
     padding: 14px 24px;
+  }
+  .feedback-card {
+    padding: 28px 20px 22px;
   }
 }
 
@@ -841,6 +1284,12 @@ const handleSubmit = async () => {
   .btn-text {
     display: none;
   }
+  .feedback-btn-row {
+    flex-direction: column;
+  }
+  .feedback-btn--outline {
+    width: 100%;
+  }
 }
 
 @media (min-width: 1200px) {
@@ -865,40 +1314,5 @@ const handleSubmit = async () => {
   .form-footer {
     padding: 20px 52px;
   }
-}
-
-/* ── PANEL RAIL ── */
-.panel-rail {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 16px 24px;
-  background: #3b82f6;
-  flex-wrap: wrap;
-}
-
-.panel-rail-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.panel-rail-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: white;
-}
-
-.panel-rail-badge {
-  display: inline-flex;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.15);
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
-  border-radius: 20px;
-  padding: 4px 12px;
-  font-size: 12px;
-  font-weight: 700;
-  color: white;
 }
 </style>
