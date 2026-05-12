@@ -8,33 +8,18 @@
           Does any household member have a chronic illness?
         </label>
         <v-row dense>
-          <v-col cols="6" md="3">
+          <v-col cols="6" md="3" v-for="opt in ['Yes', 'No']" :key="opt">
             <div
               class="radio-card"
-              :class="{ 'radio-card--selected': localData.hasChronicIllness === 'Yes' }"
-              @click="selectChronicIllness('Yes')"
+              :class="{ 'radio-card--selected': localData.hasChronicIllness === opt }"
+              @click="selectChronicIllness(opt)"
             >
               <div class="radio-card-inner">
                 <div
                   class="radio-dot"
-                  :class="{ 'radio-dot--selected': localData.hasChronicIllness === 'Yes' }"
+                  :class="{ 'radio-dot--selected': localData.hasChronicIllness === opt }"
                 />
-                <span class="radio-label-text">Yes</span>
-              </div>
-            </div>
-          </v-col>
-          <v-col cols="6" md="3">
-            <div
-              class="radio-card"
-              :class="{ 'radio-card--selected': localData.hasChronicIllness === 'No' }"
-              @click="selectChronicIllness('No')"
-            >
-              <div class="radio-card-inner">
-                <div
-                  class="radio-dot"
-                  :class="{ 'radio-dot--selected': localData.hasChronicIllness === 'No' }"
-                />
-                <span class="radio-label-text">No</span>
+                <span class="radio-label-text">{{ opt }}</span>
               </div>
             </div>
           </v-col>
@@ -62,33 +47,18 @@
           Does any household member have a disability?
         </label>
         <v-row dense>
-          <v-col cols="6" md="3">
+          <v-col cols="6" md="3" v-for="opt in ['Yes', 'No']" :key="opt">
             <div
               class="radio-card"
-              :class="{ 'radio-card--selected': localData.hasDisability === 'Yes' }"
-              @click="selectDisability('Yes')"
+              :class="{ 'radio-card--selected': localData.hasDisability === opt }"
+              @click="selectDisability(opt)"
             >
               <div class="radio-card-inner">
                 <div
                   class="radio-dot"
-                  :class="{ 'radio-dot--selected': localData.hasDisability === 'Yes' }"
+                  :class="{ 'radio-dot--selected': localData.hasDisability === opt }"
                 />
-                <span class="radio-label-text">Yes</span>
-              </div>
-            </div>
-          </v-col>
-          <v-col cols="6" md="3">
-            <div
-              class="radio-card"
-              :class="{ 'radio-card--selected': localData.hasDisability === 'No' }"
-              @click="selectDisability('No')"
-            >
-              <div class="radio-card-inner">
-                <div
-                  class="radio-dot"
-                  :class="{ 'radio-dot--selected': localData.hasDisability === 'No' }"
-                />
-                <span class="radio-label-text">No</span>
+                <span class="radio-label-text">{{ opt }}</span>
               </div>
             </div>
           </v-col>
@@ -101,39 +71,25 @@
           Does the family experience any psychosocial or emotional concerns related to migration?
         </label>
         <v-row dense>
-          <v-col cols="6" md="3">
+          <v-col cols="6" md="3" v-for="opt in ['Yes', 'No']" :key="opt">
             <div
               class="radio-card"
-              :class="{ 'radio-card--selected': localData.hasPsychosocialConcerns === 'Yes' }"
-              @click="selectPsychosocial('Yes')"
+              :class="{ 'radio-card--selected': localData.hasPsychosocialConcerns === opt }"
+              @click="selectPsychosocial(opt)"
             >
               <div class="radio-card-inner">
                 <div
                   class="radio-dot"
-                  :class="{ 'radio-dot--selected': localData.hasPsychosocialConcerns === 'Yes' }"
+                  :class="{
+                    'radio-dot--selected': localData.hasPsychosocialConcerns === opt,
+                  }"
                 />
-                <span class="radio-label-text">Yes</span>
-              </div>
-            </div>
-          </v-col>
-          <v-col cols="6" md="3">
-            <div
-              class="radio-card"
-              :class="{ 'radio-card--selected': localData.hasPsychosocialConcerns === 'No' }"
-              @click="selectPsychosocial('No')"
-            >
-              <div class="radio-card-inner">
-                <div
-                  class="radio-dot"
-                  :class="{ 'radio-dot--selected': localData.hasPsychosocialConcerns === 'No' }"
-                />
-                <span class="radio-label-text">No</span>
+                <span class="radio-label-text">{{ opt }}</span>
               </div>
             </div>
           </v-col>
         </v-row>
 
-        <!-- Conditional Psychosocial Concerns -->
         <div v-if="localData.hasPsychosocialConcerns === 'Yes'" class="mt-6">
           <label class="field-label" style="display: block; margin-bottom: 10px">
             What psychosocial concerns are present?
@@ -146,7 +102,7 @@
               :class="{
                 'checkbox-card--selected': localData.psychosocialConcerns.includes(concern),
               }"
-              @click.stop="togglePsychosocialConcern(concern)"
+              @click="togglePsychosocialConcern(concern)"
             >
               <div class="check-card-inner">
                 <div
@@ -154,7 +110,14 @@
                   :class="{
                     'check-box--selected': localData.psychosocialConcerns.includes(concern),
                   }"
-                />
+                >
+                  <v-icon
+                    v-if="localData.psychosocialConcerns.includes(concern)"
+                    size="11"
+                    color="white"
+                    >mdi-check</v-icon
+                  >
+                </div>
                 <span class="checkbox-label">{{ concern }}</span>
               </div>
             </div>
@@ -207,9 +170,9 @@
                   class="check-box"
                   :class="{ 'check-box--selected': localData.healthAccess.includes(option) }"
                 >
-                  <v-icon v-if="localData.healthAccess.includes(option)" size="11" color="white">
-                    mdi-check
-                  </v-icon>
+                  <v-icon v-if="localData.healthAccess.includes(option)" size="11" color="white"
+                    >mdi-check</v-icon
+                  >
                 </div>
                 <span class="checkbox-label">{{ option }}</span>
               </div>
@@ -227,9 +190,9 @@ import { ref, watch } from 'vue'
 const props = defineProps({
   data: { type: Object, default: () => ({}) },
 })
-
 const emit = defineEmits(['update:data'])
 
+// ── Options ──────────────────────────────────────────
 const psychosocialConcerns = [
   'Anxiety/stress',
   'Depression/sadness',
@@ -243,23 +206,38 @@ const psychosocialConcerns = [
   'Trauma from abuse/exploitation',
   'Other',
 ]
-
 const accessOptions = ['Easy access', 'Limited access', 'No regular access']
 
+// ── Safety helpers ────────────────────────────────────
+const toArray = (val) => {
+  if (Array.isArray(val)) return val
+  if (!val || val === '' || val === false) return []
+  return [val]
+}
+const toBoolString = (val) => {
+  if (val === false || val === null || val === undefined) return ''
+  return val
+}
+
+// ── Local state (safe initialization) ────────────────
 const localData = ref({
-  hasChronicIllness: '',
-  chronicIllnessSpecify: '',
-  hasDisability: '',
-  hasPsychosocialConcerns: '',
-  psychosocialConcerns: [],
-  willingForPsychosocialSupport: '',
-  healthAccess: [],
-  ...props.data,
+  hasChronicIllness: toBoolString(props.data?.hasChronicIllness ?? props.data?.chronicIllness),
+  chronicIllnessSpecify: props.data?.chronicIllnessSpecify || props.data?.illnessSpecify || '',
+  hasDisability: toBoolString(props.data?.hasDisability ?? props.data?.disability),
+  hasPsychosocialConcerns: toBoolString(
+    props.data?.hasPsychosocialConcerns ?? props.data?.psychosocialConcerns,
+  ),
+  psychosocialConcerns: toArray(props.data?.psychosocialConcerns ?? props.data?.concernsList),
+  willingForPsychosocialSupport: toBoolString(
+    props.data?.willingForPsychosocialSupport ?? props.data?.willingForCounseling,
+  ),
+  healthAccess: toArray(props.data?.healthAccess),
 })
 
 watch(localData, (newVal) => emit('update:data', { ...newVal }), { deep: true })
 const emitUpdate = () => emit('update:data', { ...localData.value })
 
+// ── Handlers ─────────────────────────────────────────
 const selectChronicIllness = (val) => {
   localData.value.hasChronicIllness = val
   if (val === 'No') localData.value.chronicIllnessSpecify = ''
@@ -313,8 +291,6 @@ const toggleHealthAccess = (option) => {
   color: #6b7fa8;
   line-height: 1.4;
 }
-
-/* ── Modern Input ── */
 .modern-input :deep(.v-field) {
   border-radius: 10px;
   background: #f8faff;
@@ -326,9 +302,8 @@ const toggleHealthAccess = (option) => {
   border-color: #3b82f6;
   background: #ffffff;
 }
-
-/* ── Radio Cards ── */
-.radio-card {
+.radio-card,
+.checkbox-card {
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   padding: 10px 14px;
@@ -341,15 +316,18 @@ const toggleHealthAccess = (option) => {
   user-select: none;
   -webkit-user-select: none;
 }
-.radio-card:hover {
+.radio-card:hover,
+.checkbox-card:hover {
   border-color: #93c5fd;
   background: #f8faff;
 }
-.radio-card--selected {
+.radio-card--selected,
+.checkbox-card--selected {
   border-color: #3b82f6;
   background: #eff6ff;
 }
-.radio-card-inner {
+.radio-card-inner,
+.check-card-inner {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -368,52 +346,10 @@ const toggleHealthAccess = (option) => {
   background: #3b82f6;
   box-shadow: inset 0 0 0 2px #ffffff;
 }
-.radio-label-text {
-  font-size: 13px;
-  color: #111827;
-}
-.radio-card--selected .radio-label-text {
-  color: #1d4ed8;
-  font-weight: 600;
-}
-
-/* ── Checkbox Grid ── */
-.check-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 6px;
-}
-
-/* ── Checkbox Cards ── */
-.checkbox-card {
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 10px 14px;
-  margin-bottom: 6px;
-  cursor: pointer;
-  transition:
-    border-color 0.14s,
-    background 0.14s;
-  background: #ffffff;
-}
-.checkbox-card:hover {
-  border-color: #93c5fd;
-  background: #f8faff;
-}
-.checkbox-card--selected {
-  border-color: #3b82f6;
-  background: #eff6ff;
-}
-.check-card-inner {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
 .check-box {
-  width: 14px;
-  height: 14px;
-  border-radius: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
   border: 2px solid #d1d5db;
   background: #fff;
   display: flex;
@@ -422,32 +358,25 @@ const toggleHealthAccess = (option) => {
   flex-shrink: 0;
   transition: all 0.14s;
 }
-
 .check-box--selected {
   border-color: #3b82f6;
   background: #3b82f6;
 }
-.check-box--selected::after {
-  content: '';
-  display: block;
-  width: 4px;
-  height: 7px;
-  border: 2px solid #ffffff;
-  border-top: none;
-  border-left: none;
-  transform: rotate(45deg) translate(0px, -1px);
-}
+.radio-label-text,
 .checkbox-label {
   font-size: 13px;
   color: #111827;
 }
-
+.radio-card--selected .radio-label-text,
 .checkbox-card--selected .checkbox-label {
   color: #1d4ed8;
   font-weight: 600;
 }
-
-/* ── Mobile ── */
+.check-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 6px;
+}
 @media (max-width: 480px) {
   .section-body {
     padding: 14px 14px 18px;
