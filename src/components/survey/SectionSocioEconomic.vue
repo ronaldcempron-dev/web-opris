@@ -4,9 +4,9 @@
     <div class="section-body">
       <!-- ── Housing Type (single) ── -->
       <div class="field-group">
-        <label class="field-label" style="display: block; margin-bottom: 10px"
-          >Type of Housing Unit</label
-        >
+        <label class="field-label" style="display: block; margin-bottom: 10px">
+          Type of Housing Unit
+        </label>
         <v-row dense>
           <v-col cols="12" sm="6" md="4" v-for="option in housingTypes" :key="option">
             <div
@@ -28,9 +28,9 @@
 
       <!-- ── House Construction (multi) ── -->
       <div class="field-group">
-        <label class="field-label" style="display: block; margin-bottom: 10px"
-          >Type of House Construction</label
-        >
+        <label class="field-label" style="display: block; margin-bottom: 10px">
+          Type of House Construction
+        </label>
         <v-row dense>
           <v-col cols="12" sm="6" md="4" v-for="option in constructionTypes" :key="option">
             <div
@@ -59,10 +59,11 @@
 
       <!-- ── Basic Utilities ── -->
       <div class="field-group">
-        <label class="field-label" style="display: block; margin-bottom: 12px"
-          >Access to Basic Utilities</label
-        >
+        <label class="field-label" style="display: block; margin-bottom: 12px">
+          Access to Basic Utilities
+        </label>
 
+        <!-- Electricity -->
         <div class="field-item" style="margin-bottom: 16px">
           <label class="field-label">Electricity</label>
           <v-row dense>
@@ -84,10 +85,11 @@
           </v-row>
         </div>
 
+        <!-- Water Source -->
         <div class="mb-5">
-          <label class="field-label" style="display: block; margin-bottom: 10px"
-            >Water Source</label
-          >
+          <label class="field-label" style="display: block; margin-bottom: 10px">
+            Water Source
+          </label>
           <v-row dense>
             <v-col cols="12" sm="6" md="4" v-for="option in waterSources" :key="option">
               <div
@@ -111,10 +113,11 @@
           </v-row>
         </div>
 
+        <!-- Toilet Facility -->
         <div>
-          <label class="field-label" style="display: block; margin-bottom: 10px"
-            >Toilet Facility</label
-          >
+          <label class="field-label" style="display: block; margin-bottom: 10px">
+            Toilet Facility
+          </label>
           <v-row dense>
             <v-col cols="12" sm="6" md="4" v-for="option in toiletFacilities" :key="option">
               <div
@@ -141,20 +144,24 @@
 
       <!-- ── Primary Income Source (multi) ── -->
       <div class="field-group">
-        <label class="field-label" style="display: block; margin-bottom: 10px"
-          >Primary Source of Household Income</label
-        >
+        <label class="field-label" style="display: block; margin-bottom: 10px">
+          Primary Source of Household Income
+        </label>
         <v-row dense>
           <v-col cols="12" sm="6" md="4" v-for="option in incomeSources" :key="option">
             <div
               class="checkbox-card"
-              :class="{ 'checkbox-card--selected': localData.primaryIncomeSource.includes(option) }"
+              :class="{
+                'checkbox-card--selected': localData.primaryIncomeSource.includes(option),
+              }"
               @click="toggleArray('primaryIncomeSource', option)"
             >
               <div class="check-card-inner">
                 <div
                   class="check-box"
-                  :class="{ 'check-box--selected': localData.primaryIncomeSource.includes(option) }"
+                  :class="{
+                    'check-box--selected': localData.primaryIncomeSource.includes(option),
+                  }"
                 >
                   <v-icon
                     v-if="localData.primaryIncomeSource.includes(option)"
@@ -172,9 +179,9 @@
 
       <!-- ── Average Monthly Income (single) ── -->
       <div class="field-group">
-        <label class="field-label" style="display: block; margin-bottom: 10px"
-          >Average Monthly Household Income (All Sources)</label
-        >
+        <label class="field-label" style="display: block; margin-bottom: 10px">
+          Average Monthly Household Income (All Sources)
+        </label>
         <v-row dense>
           <v-col cols="12" sm="6" md="4" v-for="option in incomeBrackets" :key="option">
             <div
@@ -196,9 +203,9 @@
 
       <!-- ── Remittance Amount (multi) ── -->
       <div class="field-group">
-        <label class="field-label" style="display: block; margin-bottom: 10px"
-          >Estimated Monthly OFW Remittance</label
-        >
+        <label class="field-label" style="display: block; margin-bottom: 10px">
+          Estimated Monthly OFW Remittance
+        </label>
         <v-row dense>
           <v-col cols="12" sm="6" md="4" v-for="option in remittanceAmounts" :key="option">
             <div
@@ -209,7 +216,9 @@
               <div class="check-card-inner">
                 <div
                   class="check-box"
-                  :class="{ 'check-box--selected': localData.monthlyRemittance.includes(option) }"
+                  :class="{
+                    'check-box--selected': localData.monthlyRemittance.includes(option),
+                  }"
                 >
                   <v-icon
                     v-if="localData.monthlyRemittance.includes(option)"
@@ -227,20 +236,24 @@
 
       <!-- ── Remittance Frequency (multi) ── -->
       <div class="field-group">
-        <label class="field-label" style="display: block; margin-bottom: 10px"
-          >Frequency of Remittance</label
-        >
+        <label class="field-label" style="display: block; margin-bottom: 10px">
+          Frequency of Remittance
+        </label>
         <v-row dense>
-          <v-col cols="12" sm="6" md="4" v-for="option in remittanceFrequency" :key="option">
+          <v-col cols="12" sm="6" md="4" v-for="option in remittanceFrequencies" :key="option">
             <div
               class="checkbox-card"
-              :class="{ 'checkbox-card--selected': localData.remittanceFrequency.includes(option) }"
+              :class="{
+                'checkbox-card--selected': localData.remittanceFrequency.includes(option),
+              }"
               @click="toggleArray('remittanceFrequency', option)"
             >
               <div class="check-card-inner">
                 <div
                   class="check-box"
-                  :class="{ 'check-box--selected': localData.remittanceFrequency.includes(option) }"
+                  :class="{
+                    'check-box--selected': localData.remittanceFrequency.includes(option),
+                  }"
                 >
                   <v-icon
                     v-if="localData.remittanceFrequency.includes(option)"
@@ -258,9 +271,9 @@
 
       <!-- ── Remittance Uses (multi) ── -->
       <div class="field-group">
-        <label class="field-label" style="display: block; margin-bottom: 10px"
-          >Main Uses of Remittances</label
-        >
+        <label class="field-label" style="display: block; margin-bottom: 10px">
+          Main Uses of Remittances
+        </label>
         <v-row dense>
           <v-col cols="12" sm="6" md="4" v-for="option in remittanceUses" :key="option">
             <div
@@ -287,11 +300,12 @@
       <!-- ── Savings & Debts ── -->
       <div class="field-group" style="margin-bottom: 0">
         <v-row dense>
+          <!-- Has Savings -->
           <v-col cols="12" md="6">
             <div class="field-item">
-              <label class="field-label" style="margin-bottom: 10px; display: block"
-                >Does the household have savings?</label
-              >
+              <label class="field-label" style="margin-bottom: 10px; display: block">
+                Does the household have savings?
+              </label>
               <v-row dense>
                 <v-col cols="6" v-for="opt in ['Yes', 'No']" :key="opt">
                   <div
@@ -311,11 +325,13 @@
               </v-row>
             </div>
           </v-col>
+
+          <!-- Has Debts -->
           <v-col cols="12" md="6">
             <div class="field-item">
-              <label class="field-label" style="margin-bottom: 10px; display: block"
-                >Does the household have debts/loans?</label
-              >
+              <label class="field-label" style="margin-bottom: 10px; display: block">
+                Does the household have debts/loans?
+              </label>
               <v-row dense>
                 <v-col cols="6" v-for="opt in ['Yes', 'No']" :key="opt">
                   <div
@@ -337,23 +353,28 @@
           </v-col>
         </v-row>
 
+        <!-- Debt Details (conditional) -->
         <div v-if="localData.hasDebts === 'Yes'" class="mt-6">
           <v-row dense>
             <v-col cols="12" md="6">
-              <label class="field-label" style="display: block; margin-bottom: 10px"
-                >Estimated Total Debt</label
-              >
+              <label class="field-label" style="display: block; margin-bottom: 10px">
+                Estimated Total Debt
+              </label>
               <v-row dense>
                 <v-col cols="12" sm="6" v-for="option in debtAmounts" :key="option">
                   <div
                     class="checkbox-card"
-                    :class="{ 'checkbox-card--selected': localData.totalDebt.includes(option) }"
+                    :class="{
+                      'checkbox-card--selected': localData.totalDebt.includes(option),
+                    }"
                     @click="toggleArray('totalDebt', option)"
                   >
                     <div class="check-card-inner">
                       <div
                         class="check-box"
-                        :class="{ 'check-box--selected': localData.totalDebt.includes(option) }"
+                        :class="{
+                          'check-box--selected': localData.totalDebt.includes(option),
+                        }"
                       >
                         <v-icon v-if="localData.totalDebt.includes(option)" size="11" color="white"
                           >mdi-check</v-icon
@@ -365,21 +386,26 @@
                 </v-col>
               </v-row>
             </v-col>
+
             <v-col cols="12" md="6">
-              <label class="field-label" style="display: block; margin-bottom: 10px"
-                >Main Reason for Debt</label
-              >
+              <label class="field-label" style="display: block; margin-bottom: 10px">
+                Main Reason for Debt
+              </label>
               <v-row dense>
                 <v-col cols="12" sm="6" v-for="reason in debtReasons" :key="reason">
                   <div
                     class="checkbox-card"
-                    :class="{ 'checkbox-card--selected': localData.debtReason.includes(reason) }"
+                    :class="{
+                      'checkbox-card--selected': localData.debtReason.includes(reason),
+                    }"
                     @click="toggleArray('debtReason', reason)"
                   >
                     <div class="check-card-inner">
                       <div
                         class="check-box"
-                        :class="{ 'check-box--selected': localData.debtReason.includes(reason) }"
+                        :class="{
+                          'check-box--selected': localData.debtReason.includes(reason),
+                        }"
                       >
                         <v-icon v-if="localData.debtReason.includes(reason)" size="11" color="white"
                           >mdi-check</v-icon
@@ -404,6 +430,7 @@ import { ref, watch } from 'vue'
 const props = defineProps({ data: { type: Object, default: () => ({}) } })
 const emit = defineEmits(['update:data'])
 
+// ── Options ──────────────────────────────────────────
 const housingTypes = ['Owned', 'Rented', 'Rent-free with consent', 'Informal settler / makeshift']
 const constructionTypes = ['Concrete', 'Semi-concrete', 'Wood', 'Light materials / makeshift']
 const waterSources = [
@@ -440,7 +467,7 @@ const remittanceAmounts = [
   'P20,001 – P50,000',
   'Above P50,000',
 ]
-const remittanceFrequency = [
+const remittanceFrequencies = [
   'Weekly',
   'Twice a month',
   'Monthly',
@@ -472,34 +499,52 @@ const debtReasons = [
   'Other',
 ]
 
+// ── Safety helper: always returns an array ────────────
+const toArray = (val) => {
+  if (Array.isArray(val)) return val
+  if (!val || val === '' || val === false) return []
+  return [val]
+}
+
+// ── Safety helper: boolean/false → empty string ───────
+const toBoolString = (val) => {
+  if (val === false || val === null || val === undefined) return ''
+  return val
+}
+
+// ── Local state (safe initialization) ────────────────
 const localData = ref({
-  housingUnit: '',
-  houseConstruction: [],
-  electricity: '',
-  waterSource: [],
-  toiletFacility: [],
-  primaryIncomeSource: [],
-  averageMonthlyIncome: '',
-  monthlyRemittance: [],
-  remittanceFrequency: [],
-  remittanceUses: [],
-  hasSavings: '',
-  hasDebts: '',
-  totalDebt: [],
-  debtReason: [],
-  ...props.data,
+  housingUnit: toBoolString(props.data?.housingUnit ?? props.data?.housingType),
+  houseConstruction: toArray(props.data?.houseConstruction),
+  electricity: toBoolString(props.data?.electricity),
+  waterSource: toArray(props.data?.waterSource),
+  toiletFacility: toArray(props.data?.toiletFacility),
+  primaryIncomeSource: toArray(props.data?.primaryIncomeSource),
+  averageMonthlyIncome: toBoolString(
+    props.data?.averageMonthlyIncome ?? props.data?.avgMonthlyIncome,
+  ),
+  monthlyRemittance: toArray(props.data?.monthlyRemittance),
+  remittanceFrequency: toArray(props.data?.remittanceFrequency),
+  remittanceUses: toArray(props.data?.remittanceUses),
+  hasSavings: toBoolString(props.data?.hasSavings),
+  hasDebts: toBoolString(props.data?.hasDebts),
+  totalDebt: toArray(props.data?.totalDebt),
+  debtReason: toArray(props.data?.debtReason),
 })
 
 watch(localData, (v) => emit('update:data', { ...v }), { deep: true })
 const emitUpdate = () => emit('update:data', { ...localData.value })
 
+// ── Toggle array fields ───────────────────────────────
 const toggleArray = (key, value) => {
-  const idx = localData.value[key].indexOf(value)
-  if (idx === -1) localData.value[key].push(value)
-  else localData.value[key].splice(idx, 1)
+  const arr = localData.value[key]
+  const idx = arr.indexOf(value)
+  if (idx === -1) arr.push(value)
+  else arr.splice(idx, 1)
   emitUpdate()
 }
 
+// ── Single-select handlers ────────────────────────────
 const selectHousingUnit = (val) => {
   localData.value.housingUnit = val
   emitUpdate()
@@ -558,6 +603,7 @@ const selectDebts = (val) => {
     border-color 0.14s,
     background 0.14s;
   background: #ffffff;
+  user-select: none;
 }
 .radio-card:hover,
 .checkbox-card:hover {
@@ -574,6 +620,7 @@ const selectDebts = (val) => {
   display: flex;
   align-items: center;
   gap: 10px;
+  pointer-events: none;
 }
 .radio-dot {
   width: 14px;
