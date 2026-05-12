@@ -16,7 +16,9 @@
 
       <!-- ── NAV ITEMS ── -->
       <nav class="sidebar-nav">
+        <!-- Enumerator only -->
         <button
+          v-if="auth.role === 'enumerator'"
           class="sidebar-item"
           :class="{ active: currentRoute === 'survey' }"
           @click="goTo('/')"
@@ -28,17 +30,32 @@
           <div v-if="currentRoute === 'survey'" class="sidebar-item-pip" />
         </button>
 
-        <button
-          class="sidebar-item"
-          :class="{ active: currentRoute === 'responses' }"
-          @click="goTo('/responses')"
-        >
-          <div class="sidebar-item-icon">
-            <v-icon size="17">mdi-table-large</v-icon>
-          </div>
-          <span class="sidebar-item-label">View Responses</span>
-          <div v-if="currentRoute === 'responses'" class="sidebar-item-pip" />
-        </button>
+        <!-- Admin only -->
+        <template v-if="auth.role === 'admin'">
+          <button
+            class="sidebar-item"
+            :class="{ active: currentRoute === 'responses' }"
+            @click="goTo('/responses')"
+          >
+            <div class="sidebar-item-icon">
+              <v-icon size="17">mdi-table-large</v-icon>
+            </div>
+            <span class="sidebar-item-label">View Responses</span>
+            <div v-if="currentRoute === 'responses'" class="sidebar-item-pip" />
+          </button>
+
+          <button
+            class="sidebar-item"
+            :class="{ active: currentRoute === 'reports' }"
+            @click="goTo('/reports')"
+          >
+            <div class="sidebar-item-icon">
+              <v-icon size="17">mdi-chart-bar</v-icon>
+            </div>
+            <span class="sidebar-item-label">Reports &amp; Analytics</span>
+            <div v-if="currentRoute === 'reports'" class="sidebar-item-pip" />
+          </button>
+        </template>
       </nav>
 
       <!-- ── RECENT RESPONSES ── -->
@@ -68,6 +85,25 @@
       <!-- ── FOOTER ── -->
       <div class="sidebar-footer">
         <div class="sidebar-divider" />
+        <!-- Show logged-in user's name -->
+        <div v-if="auth.profile" class="sidebar-user">
+          <div class="user-avatar">
+            {{ (auth.profile.full_name || 'U')[0].toUpperCase() }}
+          </div>
+          <div class="user-info">
+            <span class="user-name">{{ auth.profile.full_name }}</span>
+            <span class="user-role">{{
+              auth.role === 'admin' ? 'Administrator' : 'Enumerator'
+            }}</span>
+          </div>
+        </div>
+        <!-- Logout -->
+        <button class="sidebar-item logout-btn" @click="handleLogout">
+          <div class="sidebar-item-icon">
+            <v-icon size="17">mdi-logout</v-icon>
+          </div>
+          <span class="sidebar-item-label">Sign Out</span>
+        </button>
         <div class="sidebar-footer-inner">
           <v-icon size="13" class="footer-icon">mdi-shield-check-outline</v-icon>
           <span class="sidebar-footer-text">Department of Migrant Workers</span>
@@ -82,6 +118,21 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { supabase } from '@/services/supabase'
 import { useDisplay } from 'vuetify'
+
+import { useAuthStore } from '@/stores/auth'
+const auth = useAuthStore()
+
+const handleLogout = async () => {
+  await auth.logout()
+  router.push('/login')
+}
+
+// Update this computed to include reports
+const currentRoute = computed(() => {
+  if (route.path === '/responses') return 'responses'
+  if (route.path === '/reports') return 'reports'
+  return 'survey'
+})
 
 const { mobile } = useDisplay()
 const router = useRouter()
@@ -114,7 +165,7 @@ onMounted(() => {
   if (props.showResponsesList) fetchResponses()
 })
 
-const currentRoute = computed(() => (route.path === '/responses' ? 'responses' : 'survey'))
+// const currentRoute = computed(() => (route.path === '/responses' ? 'responses' : 'survey'))
 
 const goTo = (path) => router.push(path)
 const selectResponse = (response) => emit('select', response)
@@ -393,5 +444,65 @@ const formatDate = (date) =>
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px 12px;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #1d4ed8;
+  color: white;
+  font-size: 13px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.user-name {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0f2a5e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-role {
+  font-size: 10px;
+  color: #93c5fd;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.logout-btn {
+  margin: 0 10px 10px;
+  color: #ef4444 !important;
+}
+
+.logout-btn .sidebar-item-icon {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.logout-btn:hover {
+  background: #fef2f2 !important;
+  border-color: #fecaca !important;
 }
 </style>
