@@ -1,15 +1,16 @@
+// src/composables/useSurveyForm.js
 import { reactive } from 'vue'
 
 export function useSurveyForm() {
   const formData = reactive({
-    // I. General Information
+    // ── I. General Information ─────────────────────────────
     general: {
       dateOfInterview: '',
       timeOfInterview: '',
       enumeratorName: '',
       barangay: '',
-      municipalityCity: '', // was: municipality
-      provinceRegion: '', // was: province
+      municipalityCity: '',
+      provinceRegion: '',
       householdControlNumber: '',
       typeOfRespondent: '',
       typeOfRespondentOther: '',
@@ -17,10 +18,10 @@ export function useSurveyForm() {
       longitude: null,
     },
 
-    // II. Respondent Identification
+    // ── II. Respondent Identification ──────────────────────
     respondent: {
       name: '',
-      relationshipToOFW: [],
+      relationshipToOFW: '', // single string (SectionRespondent uses radio, not array)
       sex: '',
       age: '',
       dateOfBirth: '',
@@ -29,189 +30,194 @@ export function useSurveyForm() {
       contactNumber: '',
       alternativeContact: '',
       email: '',
-      completeHomeAddress: '', // was: homeAddress
+      completeHomeAddress: '',
     },
 
-    // III. Household Demographic Profile
+    // ── III. Household Demographic Profile ─────────────────
     household: {
-      headName: '',
-      respondentRelationToHead: '',
-      totalMembers: 0,
-      totalDependents: 0,
-      numChildren: 0,
-      numSenior: 0,
-      numPWD: 0,
-      numPregnant: 0,
+      householdHeadName: '', // SectionHousehold saves as householdHeadName
+      relationshipToHead: '', // SectionHousehold saves as relationshipToHead
+      totalHouseholdMembers: null, // SectionHousehold saves as totalHouseholdMembers
+      totalDependents: null,
+      children017: null, // SectionHousehold saves as children017
+      seniorCitizens: null, // SectionHousehold saves as seniorCitizens
+      personsWithDisability: null, // SectionHousehold saves as personsWithDisability
+      pregnantLactating: null, // SectionHousehold saves as pregnantLactating
       roster: [],
     },
 
-    // IV. OFW Profile
+    // ── IV. OFW Profile ────────────────────────────────────
     ofwProfile: {
-      name: '',
+      nameOfOFW: '', // SectionOFWProfile saves as nameOfOFW
       sex: '',
-      age: '',
+      age: null,
       civilStatus: '',
-      education: '',
+      educationalAttainment: '', // SectionOFWProfile saves as educationalAttainment
       technicalSkills: '',
       passportNumber: '',
-      dmwRegistration: '',
-      owaStatus: '',
-      philHealthStatus: '',
+      dmwRegistrationNumber: '', // SectionOFWProfile saves as dmwRegistrationNumber
+      owwaStatus: '', // SectionOFWProfile saves as owwaStatus
+      philhealthStatus: '', // SectionOFWProfile saves as philhealthStatus
       sssStatus: '',
-      pagIbigStatus: '',
+      pagibigStatus: '', // SectionOFWProfile saves as pagibigStatus
     },
 
-    // V. Migration History / Employment Abroad
+    // ── V. Migration History ───────────────────────────────
     migration: {
       currentStatus: '',
-      country: '',
-      city: '',
+      countryDestination: '', // SectionMigration saves as countryDestination
+      cityArea: '', // SectionMigration saves as cityArea
       jobTitle: '',
-      industry: '',
+      industrySector: [], // SectionMigration saves as industrySector (array)
+      otherIndustry: '',
       deploymentType: '',
       documentationStatus: '',
       recruitmentChannel: '',
       recruitmentAgency: '',
-      dateFirstDeployment: '',
-      dateLatestDeployment: '',
-      yearsWorkedAbroad: '',
-      contractsCompleted: '',
-      reasonForGoing: [],
+      firstDeploymentDate: '', // SectionMigration saves as firstDeploymentDate
+      latestDeploymentDate: '', // SectionMigration saves as latestDeploymentDate
+      yearsWorkedAbroad: null,
+      contractsCompleted: null,
+      averageContractDuration: '', // SectionMigration saves as averageContractDuration
+      reasonForGoing: [], // array
     },
 
-    // VI. Present Status of OFW
+    // ── VI. Present Status of OFW ──────────────────────────
     presentStatus: {
       presentLocation: '',
-      employmentStatus: '',
+      abroadEmploymentStatus: [], // SectionPresentStatus saves as abroadEmploymentStatus
       reasonForReturn: [],
       dateOfReturn: '',
       currentLivelihood: [],
-      planningToGoAbroadAgain: '',
+      planningToGoAbroad: '', // SectionPresentStatus saves as planningToGoAbroad
     },
 
-    // VII. Household Socio-Economic Profile
+    // ── VII. Socio-Economic Profile ────────────────────────
     socioEconomic: {
-      housingType: '',
-      houseConstruction: '',
-      electricity: false,
-      waterSource: '',
-      toiletFacility: '',
-      primaryIncomeSource: '',
-      avgMonthlyIncome: '',
-      monthlyRemittance: '',
-      remittanceFrequency: '',
+      housingUnit: '', // SectionSocioEconomic saves as housingUnit
+      houseConstruction: [], // array (not string)
+      electricity: '', // string 'Yes'/'No' (not boolean)
+      waterSource: [], // array (not string)
+      toiletFacility: [], // array (not string)
+      primaryIncomeSource: [], // array (not string)
+      averageMonthlyIncome: '', // SectionSocioEconomic saves as averageMonthlyIncome
+      monthlyRemittance: [], // array (not string)
+      remittanceFrequency: [], // array (not string)
       remittanceUses: [],
-      hasSavings: false,
-      hasDebts: false,
-      totalDebt: '',
+      hasSavings: '', // string 'Yes'/'No' (not boolean)
+      hasDebts: '', // string 'Yes'/'No' (not boolean)
+      totalDebt: [], // array (not string)
       debtReason: [],
     },
 
-    // VIII. Employment & Livelihood Status
+    // ── VIII. Livelihood Status ────────────────────────────
     livelihood: {
-      employedMembers: 0,
-      unemployedMembers: 0,
-      underemployedMembers: 0,
+      employedMembers: null,
+      unemployedMembers: null,
+      underemployedMembers: null,
       mainOccupations: [],
-      interestedInLocalLivelihood: false,
+      interestedInLivelihood: '', // SectionLivelihood saves as interestedInLivelihood
       preferredLivelihood: [],
       skillsTrainingNeeded: '',
     },
 
-    // IX. Education Status of Children
+    // ── IX. Education Status ───────────────────────────────
     education: {
-      allChildrenEnrolled: false,
-      outOfSchoolCount: 0,
-      reasonsForDropout: [],
+      allChildrenEnrolled: '', // string 'Yes'/'No' (not boolean)
+      numberOutOfSchool: null, // SectionEducation saves as numberOutOfSchool
+      nonEnrollmentReasons: [], // SectionEducation saves as nonEnrollmentReasons
       educationalNeeds: [],
+      notApplicable: false,
     },
 
-    // X. Health & Psychosocial Status
+    // ── X. Health & Psychosocial Status ───────────────────
     health: {
-      chronicIllness: false,
-      illnessSpecify: '',
-      disability: false,
-      psychosocialConcerns: false,
-      concernsList: [],
-      willingForCounseling: '',
-      healthAccess: '',
+      hasChronicIllness: '', // string 'Yes'/'No' (not boolean)
+      chronicIllnessSpecify: '', // SectionHealth saves as chronicIllnessSpecify
+      hasDisability: '', // string 'Yes'/'No' (not boolean)
+      hasPsychosocialConcerns: '', // string 'Yes'/'No' (not boolean)
+      psychosocialConcerns: [], // array of selected concerns
+      willingForPsychosocialSupport: '', // SectionHealth saves as willingForPsychosocialSupport
+      healthAccess: [], // array (not string)
     },
 
-    // XI. Social Protection & Government Assistance
+    // ── XI. Social Protection & Assistance ────────────────
     assistance: {
-      receivedFrom: [],
+      receivedAssistanceFrom: [], // SectionAssistance saves as receivedAssistanceFrom
       typeOfAssistance: [],
-      sufficient: '',
-      awareOfReintegration: false,
+      assistanceSufficient: '', // SectionAssistance saves as assistanceSufficient
+      awareOfReintegrationPrograms: '', // SectionAssistance saves as awareOfReintegrationPrograms
     },
 
-    // XII. Present Problems & Issues
+    // ── XII. Problems & Issues ─────────────────────────────
     problems: {
       majorProblems: [],
-      mostUrgent: '',
-      migrationRelatedIssues: [],
+      mostUrgentConcern: '', // SectionProblems saves as mostUrgentConcern
+      migrationIssues: [], // SectionProblems saves as migrationIssues
     },
 
-    // XIII. Reintegration Status & Readiness
+    // ── XIII. Reintegration Status ─────────────────────────
     reintegration: {
-      hasPlan: '',
-      preferredType: '',
-      startedBusiness: false,
-      businessType: '',
-      businessStatus: '',
-      barriers: [],
+      hasReintegrationPlan: '', // SectionReintegration saves as hasReintegrationPlan
+      preferredReintegrationType: [], // SectionReintegration saves as preferredReintegrationType (array)
+      hasStartedLivelihood: '', // SectionReintegration saves as hasStartedLivelihood
+      livelihoodType: '', // SectionReintegration saves as livelihoodType
+      livelihoodStatus: '', // SectionReintegration saves as livelihoodStatus
+      mainBarriers: [], // SectionReintegration saves as mainBarriers (array)
     },
 
-    // XIV. Training, Employment, & Livelihood Needs
+    // ── XIV. Training, Employment & Needs ─────────────────
     needs: {
       immediateAssistance: [],
       preferredSkillsTraining: [],
-      preferredEmploymentSector: '',
-      willingCooperative: '',
-      interestedFamilyCircle: '',
+      preferredLocalEmployment: '', // SectionNeeds saves as preferredLocalEmployment
+      willingToJoinCooperative: '', // SectionNeeds saves as willingToJoinCooperative
+      interestedInFamilyCircle: '', // SectionNeeds saves as interestedInFamilyCircle
     },
 
-    // XV. Case-Specific Risk Screening
+    // ── XV. Risk Screening ─────────────────────────────────
     risk: {
       ongoingCase: [],
-      needsUrgentReferral: false,
-      referralTo: [],
+      needsUrgentReferral: '', // string 'Yes'/'No' (not boolean)
+      referredTo: [], // SectionRisk saves as referredTo (array)
       priorityLevel: '',
     },
 
-    // XVI. Community Participation & Support Networks
+    // ── XVI. Community Participation ───────────────────────
     community: {
-      memberOfGroups: [],
+      communityGroups: [], // SectionCommunity saves as communityGroups
       willingToParticipate: [],
+      otherParticipation: '', // SectionCommunity saves as otherParticipation
     },
 
-    // XVII. Financial Literacy & Asset Building
+    // ── XVII. Financial Literacy ───────────────────────────
     financial: {
-      keepsBudget: false,
-      hasSavingsProduct: [],
-      attendedLiteracySessions: false,
-      wantsCoaching: false,
+      keepsFamilyBudget: '', // string 'Yes'/'No' (SectionFinancial saves as keepsFamilyBudget)
+      savingsProducts: [], // SectionFinancial saves as savingsProducts (array)
+      attendedFinancialLiteracy: '', // string 'Yes'/'No' (SectionFinancial saves as attendedFinancialLiteracy)
+      wantsFinancialCoaching: '', // string 'Yes'/'No' (SectionFinancial saves as wantsFinancialCoaching)
     },
 
-    // XVIII. Open-Ended Questions
+    // ── XVIII. Open-Ended Questions ────────────────────────
     openEnded: {
       changesFromMigration: '',
       biggestChallenges: '',
-      supportNeeded: '',
+      mostNeededSupport: '', // SectionOpenEnded saves as mostNeededSupport
       futurePlans: '',
       otherComments: '',
     },
 
-    // XIX. Enumerator's Assessment
+    // ── XIX. Enumerator's Assessment ──────────────────────
     enumerator: {
       socioEconomicStatus: '',
       housingCondition: '',
       familyFunctioning: '',
       recommendedInterventions: [],
+      needsFollowUp: false, // SectionEnumerator saves as needsFollowUp (boolean)
       narrativeRemarks: '',
     },
 
-    // XX. Consent & Data Privacy
+    // ── XX. Consent & Data Privacy ─────────────────────────
     consent: {
       consentAgreement: '',
       respondentName: '',
@@ -223,7 +229,233 @@ export function useSurveyForm() {
     },
   })
 
-  const resetForm = () => Object.assign(formData, JSON.parse(JSON.stringify(formData)))
+  // ── Reset: wipe every field back to its initial empty value ──
+  const resetForm = () => {
+    // General
+    Object.assign(formData.general, {
+      dateOfInterview: '',
+      timeOfInterview: '',
+      enumeratorName: '',
+      barangay: '',
+      municipalityCity: '',
+      provinceRegion: '',
+      householdControlNumber: '',
+      typeOfRespondent: '',
+      typeOfRespondentOther: '',
+      latitude: null,
+      longitude: null,
+    })
+
+    // Respondent
+    Object.assign(formData.respondent, {
+      name: '',
+      relationshipToOFW: '',
+      sex: '',
+      age: '',
+      dateOfBirth: '',
+      civilStatus: '',
+      religion: '',
+      contactNumber: '',
+      alternativeContact: '',
+      email: '',
+      completeHomeAddress: '',
+    })
+
+    // Household
+    Object.assign(formData.household, {
+      householdHeadName: '',
+      relationshipToHead: '',
+      totalHouseholdMembers: null,
+      totalDependents: null,
+      children017: null,
+      seniorCitizens: null,
+      personsWithDisability: null,
+      pregnantLactating: null,
+      roster: [],
+    })
+
+    // OFW Profile
+    Object.assign(formData.ofwProfile, {
+      nameOfOFW: '',
+      sex: '',
+      age: null,
+      civilStatus: '',
+      educationalAttainment: '',
+      technicalSkills: '',
+      passportNumber: '',
+      dmwRegistrationNumber: '',
+      owwaStatus: '',
+      philhealthStatus: '',
+      sssStatus: '',
+      pagibigStatus: '',
+    })
+
+    // Migration
+    Object.assign(formData.migration, {
+      currentStatus: '',
+      countryDestination: '',
+      cityArea: '',
+      jobTitle: '',
+      industrySector: [],
+      otherIndustry: '',
+      deploymentType: '',
+      documentationStatus: '',
+      recruitmentChannel: '',
+      recruitmentAgency: '',
+      firstDeploymentDate: '',
+      latestDeploymentDate: '',
+      yearsWorkedAbroad: null,
+      contractsCompleted: null,
+      averageContractDuration: '',
+      reasonForGoing: [],
+    })
+
+    // Present Status
+    Object.assign(formData.presentStatus, {
+      presentLocation: '',
+      abroadEmploymentStatus: [],
+      reasonForReturn: [],
+      dateOfReturn: '',
+      currentLivelihood: [],
+      planningToGoAbroad: '',
+    })
+
+    // Socio-Economic
+    Object.assign(formData.socioEconomic, {
+      housingUnit: '',
+      houseConstruction: [],
+      electricity: '',
+      waterSource: [],
+      toiletFacility: [],
+      primaryIncomeSource: [],
+      averageMonthlyIncome: '',
+      monthlyRemittance: [],
+      remittanceFrequency: [],
+      remittanceUses: [],
+      hasSavings: '',
+      hasDebts: '',
+      totalDebt: [],
+      debtReason: [],
+    })
+
+    // Livelihood
+    Object.assign(formData.livelihood, {
+      employedMembers: null,
+      unemployedMembers: null,
+      underemployedMembers: null,
+      mainOccupations: [],
+      interestedInLivelihood: '',
+      preferredLivelihood: [],
+      skillsTrainingNeeded: '',
+    })
+
+    // Education
+    Object.assign(formData.education, {
+      allChildrenEnrolled: '',
+      numberOutOfSchool: null,
+      nonEnrollmentReasons: [],
+      educationalNeeds: [],
+      notApplicable: false,
+    })
+
+    // Health
+    Object.assign(formData.health, {
+      hasChronicIllness: '',
+      chronicIllnessSpecify: '',
+      hasDisability: '',
+      hasPsychosocialConcerns: '',
+      psychosocialConcerns: [],
+      willingForPsychosocialSupport: '',
+      healthAccess: [],
+    })
+
+    // Assistance
+    Object.assign(formData.assistance, {
+      receivedAssistanceFrom: [],
+      typeOfAssistance: [],
+      assistanceSufficient: '',
+      awareOfReintegrationPrograms: '',
+    })
+
+    // Problems
+    Object.assign(formData.problems, {
+      majorProblems: [],
+      mostUrgentConcern: '',
+      migrationIssues: [],
+    })
+
+    // Reintegration
+    Object.assign(formData.reintegration, {
+      hasReintegrationPlan: '',
+      preferredReintegrationType: [],
+      hasStartedLivelihood: '',
+      livelihoodType: '',
+      livelihoodStatus: '',
+      mainBarriers: [],
+    })
+
+    // Needs
+    Object.assign(formData.needs, {
+      immediateAssistance: [],
+      preferredSkillsTraining: [],
+      preferredLocalEmployment: '',
+      willingToJoinCooperative: '',
+      interestedInFamilyCircle: '',
+    })
+
+    // Risk
+    Object.assign(formData.risk, {
+      ongoingCase: [],
+      needsUrgentReferral: '',
+      referredTo: [],
+      priorityLevel: '',
+    })
+
+    // Community
+    Object.assign(formData.community, {
+      communityGroups: [],
+      willingToParticipate: [],
+      otherParticipation: '',
+    })
+
+    // Financial
+    Object.assign(formData.financial, {
+      keepsFamilyBudget: '',
+      savingsProducts: [],
+      attendedFinancialLiteracy: '',
+      wantsFinancialCoaching: '',
+    })
+
+    // Open-Ended
+    Object.assign(formData.openEnded, {
+      changesFromMigration: '',
+      biggestChallenges: '',
+      mostNeededSupport: '',
+      futurePlans: '',
+      otherComments: '',
+    })
+
+    // Enumerator
+    Object.assign(formData.enumerator, {
+      socioEconomicStatus: '',
+      housingCondition: '',
+      familyFunctioning: '',
+      recommendedInterventions: [],
+      needsFollowUp: false,
+      narrativeRemarks: '',
+    })
+
+    // Consent
+    Object.assign(formData.consent, {
+      consentAgreement: '',
+      respondentName: '',
+      respondentDate: '',
+      respondentSignature: '',
+      enumeratorName: '',
+      enumeratorDate: '',
+      enumeratorSignature: '',
+    })
+  }
 
   return { formData, resetForm }
 }
