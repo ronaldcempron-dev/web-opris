@@ -1,10 +1,9 @@
 <template>
   <v-navigation-drawer
     v-model="drawer"
-    app
     width="272"
-    :temporary="$vuetify.display.mobile"
-    :permanent="!$vuetify.display.mobile"
+    :temporary="isMobile"
+    :permanent="!isMobile"
     class="custom-sidebar"
   >
     <div class="sidebar-inner">
@@ -58,34 +57,10 @@
         </template>
       </nav>
 
-      <!-- ── RECENT RESPONSES ── -->
-      <!-- <template v-if="showResponsesList && responses.length">
-        <div class="sidebar-divider" style="margin-top: 12px" />
-        <div class="sidebar-nav-label">Recent Submissions</div>
-
-        <div class="responses-list">
-          <button
-            v-for="r in responses"
-            :key="r.id"
-            class="response-item"
-            @click="selectResponse(r)"
-          >
-            <div class="response-avatar">
-              {{ (r.respondent_name || '?')[0].toUpperCase() }}
-            </div>
-            <div class="response-info">
-              <span class="response-name">{{ r.respondent_name || 'Unnamed' }}</span>
-              <span class="response-date">{{ formatDate(r.created_at) }}</span>
-            </div>
-            <v-icon size="13" class="response-arrow">mdi-chevron-right</v-icon>
-          </button>
-        </div>
-      </template> -->
-
       <!-- ── FOOTER ── -->
       <div class="sidebar-footer">
         <div class="sidebar-divider" />
-        <!-- Show logged-in user's name -->
+        <!-- Logged-in user -->
         <div v-if="auth.profile" class="sidebar-user">
           <div class="user-avatar">
             {{ (auth.profile.full_name || 'U')[0].toUpperCase() }}
@@ -114,29 +89,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { supabase } from '@/services/supabase'
 import { useDisplay } from 'vuetify'
-
 import { useAuthStore } from '@/stores/auth'
+
 const auth = useAuthStore()
-
-const handleLogout = async () => {
-  await auth.logout()
-  router.push('/login')
-}
-
-// Update this computed to include reports
-const currentRoute = computed(() => {
-  if (route.path === '/responses') return 'responses'
-  if (route.path === '/reports') return 'reports'
-  return 'survey'
-})
-
-const { mobile } = useDisplay()
 const router = useRouter()
 const route = useRoute()
+const { mobile } = useDisplay()
 
 const props = defineProps({
   modelValue: { type: Boolean, default: true },
@@ -145,13 +107,82 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'select'])
 
+// ── Stable mobile detection ──────────────────────────────
+// We use a ref instead of directly binding $vuetify.display.mobile
+// so it doesn't thrash when the browser suspends the tab.
+const isMobile = ref(false)
+
+let resizeTimer = null
+const updateMobile = () => {
+  // Debounce so rapid resize events don't thrash the drawer mode
+  clearTimeout(resizeTimer)
+  resizeTimer = setTimeout(() => {
+    isMobile.value = window.innerWidth < 960
+  }, 150)
+}
+
+// ── Drawer state ─────────────────────────────────────────
 const drawer = computed({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val),
 })
 
-const responses = ref([])
+// ── Tab visibility fix ───────────────────────────────────
+// When the user switches back to this tab, Vuetify's overlay/scrim
+// can get stuck in a broken state. We force-close any orphaned scrims.
+const handleVisibilityChange = () => {
+  if (document.visibilityState === 'visible') {
+    // Remove any stuck Vuetify overlay scrims
+    document.querySelectorAll('.v-overlay__scrim').forEach((el) => {
+      // Only remove scrims that aren't attached to an open dialog
+      const overlay = el.closest('.v-overlay')
+      if (overlay && !overlay.classList.contains('v-dialog')) {
+        overlay.style.display = 'none'
+        setTimeout(() => {
+          overlay.style.display = ''
+        }, 0)
+      }
+    })
 
+    // On desktop, ensure the drawer stays open after returning to tab
+    if (!isMobile.value && !props.modelValue) {
+      emit('update:modelValue', true)
+    }
+  }
+}
+
+// ── Lifecycle ────────────────────────────────────────────
+onMounted(() => {
+  // Set initial mobile state based on window size (not Vuetify reactivity)
+  isMobile.value = window.innerWidth < 960
+
+  window.addEventListener('resize', updateMobile)
+  document.addEventListener('visibilitychange', handleVisibilityChange)
+})
+
+onUnmounted(() => {
+  clearTimeout(resizeTimer)
+  window.removeEventListener('resize', updateMobile)
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
+})
+
+// ── Route & navigation ───────────────────────────────────
+const currentRoute = computed(() => {
+  if (route.path === '/responses') return 'responses'
+  if (route.path === '/reports') return 'reports'
+  return 'survey'
+})
+
+const goTo = (path) => router.push(path)
+
+// ── Auth ─────────────────────────────────────────────────
+const handleLogout = async () => {
+  await auth.logout()
+  router.push('/login')
+}
+
+// ── Responses list (kept for future use) ─────────────────
+const responses = ref([])
 const fetchResponses = async () => {
   const { data } = await supabase
     .from('responses')
@@ -165,9 +196,6 @@ onMounted(() => {
   if (props.showResponsesList) fetchResponses()
 })
 
-// const currentRoute = computed(() => (route.path === '/responses' ? 'responses' : 'survey'))
-
-const goTo = (path) => router.push(path)
 const selectResponse = (response) => emit('select', response)
 const formatDate = (date) =>
   new Date(date).toLocaleString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -185,7 +213,6 @@ const formatDate = (date) =>
   overflow: hidden !important;
 }
 
-/* ── INNER ── */
 .sidebar-inner {
   display: flex;
   flex-direction: column;
@@ -194,7 +221,6 @@ const formatDate = (date) =>
   overflow-x: hidden;
 }
 
-/* ── BRAND ── */
 .sidebar-brand {
   display: flex;
   align-items: center;
@@ -247,14 +273,12 @@ const formatDate = (date) =>
   text-overflow: ellipsis;
 }
 
-/* ── DIVIDER ── */
 .sidebar-divider {
   height: 1px;
   background: #e8eef8;
   margin: 0 16px 14px;
 }
 
-/* ── SECTION LABEL ── */
 .sidebar-nav-label {
   font-size: 9px;
   font-weight: 800;
@@ -264,7 +288,6 @@ const formatDate = (date) =>
   padding: 0 20px 8px;
 }
 
-/* ── NAV ── */
 .sidebar-nav {
   padding: 0 10px;
   display: flex;
@@ -338,7 +361,6 @@ const formatDate = (date) =>
   line-height: 1;
 }
 
-/* Active pip — right edge */
 .sidebar-item-pip {
   width: 5px;
   height: 5px;
@@ -347,7 +369,6 @@ const formatDate = (date) =>
   flex-shrink: 0;
 }
 
-/* ── RECENT RESPONSES ── */
 .responses-list {
   padding: 0 10px;
   display: flex;
@@ -417,7 +438,6 @@ const formatDate = (date) =>
   flex-shrink: 0;
 }
 
-/* ── FOOTER ── */
 .sidebar-footer {
   margin-top: auto;
   padding-bottom: 18px;

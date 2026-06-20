@@ -1,4 +1,4 @@
-<!-- ResponsesView.vue -->
+<!-- ResponseView.vue -->
 <template>
   <v-app theme="light" style="background: #f5f4f0">
     <Sidebar v-model="drawer" :show-responses-list="true" @select="viewFullReport" />
@@ -17,6 +17,22 @@
               <span class="rail-sub">Responses</span>
             </div>
             <v-spacer />
+
+            <!-- Export filter toggle -->
+            <label class="export-toggle">
+              <input type="checkbox" v-model="exportFilteredOnly" />
+              <span>Filtered only</span>
+            </label>
+
+            <button
+              class="rail-export-btn"
+              @click="exportCSV"
+              :disabled="loading || filteredResponses.length === 0"
+            >
+              <v-icon size="15" style="margin-right: 5px">mdi-file-download-outline</v-icon>
+              Export CSV
+            </button>
+
             <button class="rail-refresh-btn" @click="fetchResponses" :disabled="loading">
               <v-icon size="15" style="margin-right: 5px">mdi-refresh</v-icon>
               {{ loading ? 'Loading…' : 'Refresh' }}
@@ -113,14 +129,23 @@
                       <span v-else class="td--empty">—</span>
                     </td>
                     <td class="td td--action" @click.stop>
-                      <button
-                        class="view-btn"
-                        @click="viewFullReport(item)"
-                        title="View full profile"
-                      >
-                        <v-icon size="13" style="margin-right: 4px">mdi-eye-outline</v-icon>
-                        View
-                      </button>
+                      <div class="action-btn-group">
+                        <button
+                          class="view-btn"
+                          @click="viewFullReport(item)"
+                          title="View full profile"
+                        >
+                          <v-icon size="13" style="margin-right: 4px">mdi-eye-outline</v-icon>
+                          View
+                        </button>
+                        <button
+                          class="delete-btn"
+                          @click="confirmDelete(item)"
+                          title="Delete this response"
+                        >
+                          <v-icon size="14">mdi-trash-can-outline</v-icon>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 </tbody>
@@ -181,10 +206,60 @@
         </div>
 
         <div class="modal-footer">
+          <button class="btn btn-danger" @click="confirmDelete(selectedResponse)">
+            <v-icon size="14" style="margin-right: 6px">mdi-trash-can-outline</v-icon>
+            Delete
+          </button>
+          <v-spacer />
           <button class="btn btn-outline" @click="reportDialog = false">Close</button>
           <button class="btn btn-print" @click="printReport(selectedResponse)">
             <v-icon size="14" style="margin-right: 6px">mdi-printer-outline</v-icon>
             Print / Export PDF
+          </button>
+        </div>
+      </div>
+    </v-dialog>
+
+    <!-- ─── DELETE CONFIRM MODAL ─── -->
+    <v-dialog v-model="deleteDialog" max-width="440">
+      <div class="modal-card">
+        <div class="modal-header modal-header--danger">
+          <div class="modal-header-left">
+            <div class="modal-icon-wrap modal-icon-wrap--danger">
+              <v-icon size="20" color="white">mdi-alert-outline</v-icon>
+            </div>
+            <div>
+              <div class="modal-title">Delete Response?</div>
+              <div class="modal-sub">This action cannot be undone</div>
+            </div>
+          </div>
+          <button class="modal-close" @click="deleteDialog = false">
+            <v-icon size="18">mdi-close</v-icon>
+          </button>
+        </div>
+
+        <div class="delete-body">
+          <p class="delete-text">
+            You're about to permanently delete the response submitted by
+            <strong>{{ deleteTarget?.respondent_name || 'Unnamed Respondent' }}</strong>
+            on {{ deleteTarget ? formatDateShort(deleteTarget.created_at) : '' }}.
+          </p>
+          <p class="delete-warning">
+            <v-icon size="14" style="margin-right: 5px">mdi-information-outline</v-icon>
+            All data for this entry will be removed permanently.
+          </p>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline" @click="deleteDialog = false" :disabled="deleting">
+            Cancel
+          </button>
+          <button class="btn btn-danger" @click="executeDelete" :disabled="deleting">
+            <v-icon v-if="!deleting" size="14" style="margin-right: 6px"
+              >mdi-trash-can-outline</v-icon
+            >
+            <v-icon v-else size="14" style="margin-right: 6px" class="spin">mdi-loading</v-icon>
+            {{ deleting ? 'Deleting…' : 'Yes, Delete' }}
           </button>
         </div>
       </div>
@@ -232,6 +307,16 @@
         </div>
       </div>
     </v-dialog>
+
+    <!-- ─── TOAST ─── -->
+    <transition name="toast">
+      <div v-if="toast.show" class="toast" :class="`toast--${toast.type}`">
+        <v-icon size="16" style="margin-right: 8px">
+          {{ toast.type === 'success' ? 'mdi-check-circle-outline' : 'mdi-alert-circle-outline' }}
+        </v-icon>
+        {{ toast.message }}
+      </div>
+    </transition>
   </v-app>
 </template>
 
@@ -252,6 +337,21 @@ const perPage = 10
 const mapDialog = ref(false)
 const mapTarget = ref(null)
 
+// ── Export state ──────────────────────────────────────
+const exportFilteredOnly = ref(false)
+
+// ── Delete state ───────────────────────────────────────
+const deleteDialog = ref(false)
+const deleteTarget = ref(null)
+const deleting = ref(false)
+
+// ── Toast state ────────────────────────────────────────
+const toast = ref({ show: false, message: '', type: 'success' })
+const showToast = (message, type = 'success') => {
+  toast.value = { show: true, message, type }
+  setTimeout(() => (toast.value.show = false), 3000)
+}
+
 const openMap = (item) => {
   mapTarget.value = item
   mapDialog.value = true
@@ -268,6 +368,7 @@ const fetchResponses = async () => {
 }
 
 onMounted(fetchResponses)
+
 watch(search, () => {
   currentPage.value = 1
 })
@@ -296,6 +397,119 @@ const formatTime = (date) =>
 const viewFullReport = (item) => {
   selectedResponse.value = item
   reportDialog.value = true
+}
+
+// ── Delete logic ───────────────────────────────────────
+const confirmDelete = (item) => {
+  deleteTarget.value = item
+  deleteDialog.value = true
+}
+
+const executeDelete = async () => {
+  if (!deleteTarget.value) return
+  deleting.value = true
+
+  const { error } = await supabase.from('responses').delete().eq('id', deleteTarget.value.id)
+
+  deleting.value = false
+
+  if (error) {
+    showToast('Failed to delete response. Please try again.', 'error')
+    return
+  }
+
+  // Remove from local state
+  responses.value = responses.value.filter((r) => r.id !== deleteTarget.value.id)
+
+  // Close any open modals referencing the deleted item
+  if (selectedResponse.value?.id === deleteTarget.value.id) {
+    reportDialog.value = false
+    selectedResponse.value = null
+  }
+
+  showToast('Response deleted successfully.')
+  deleteDialog.value = false
+  deleteTarget.value = null
+
+  // Adjust pagination if current page is now empty
+  if (paginatedResponses.value.length === 0 && currentPage.value > 1) {
+    currentPage.value--
+  }
+}
+
+// ── CSV Export ─────────────────────────────────────────
+const csvEscape = (val) => {
+  if (val === null || val === undefined) return ''
+  const str = String(val)
+  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+    return `"${str.replace(/"/g, '""')}"`
+  }
+  return str
+}
+
+const exportCSV = () => {
+  const dataToExport = exportFilteredOnly.value ? filteredResponses.value : responses.value
+
+  if (dataToExport.length === 0) {
+    showToast('No data to export.', 'error')
+    return
+  }
+
+  const headers = [
+    '#',
+    'Date Submitted',
+    'Time Submitted',
+    'Respondent Name',
+    'Enumerator Name',
+    'Barangay',
+    'Municipality / City',
+    'Province / Region',
+    'Type of Respondent',
+    'Household Control No.',
+    'Latitude',
+    'Longitude',
+  ]
+
+  const rows = dataToExport.map((item, idx) => {
+    const g = item.answers?.general || {}
+    return [
+      idx + 1,
+      formatDateShort(item.created_at),
+      formatTime(item.created_at),
+      item.respondent_name || '',
+      item.enumerator_name || '',
+      g.barangay || '',
+      g.municipalityCity || '',
+      g.provinceRegion || '',
+      g.typeOfRespondent || '',
+      g.householdControlNumber || '',
+      item.latitude ?? '',
+      item.longitude ?? '',
+    ]
+  })
+
+  const csvContent = [
+    headers.map(csvEscape).join(','),
+    ...rows.map((row) => row.map(csvEscape).join(',')),
+  ].join('\r\n')
+
+  // Add BOM for proper UTF-8 handling in Excel
+  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+
+  const scope = exportFilteredOnly.value ? 'filtered' : 'all'
+  const timestamp = new Date().toISOString().slice(0, 10)
+  link.href = url
+  link.download = `OPRIS_responses_${scope}_${timestamp}.csv`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+
+  showToast(
+    `Exported ${dataToExport.length} response${dataToExport.length !== 1 ? 's' : ''} to CSV.`,
+  )
 }
 
 // ── Print / Export PDF ────────────────────────────────
@@ -353,7 +567,6 @@ const printReport = (response) => {
   const en = a.enumerator || {}
   const co = a.consent || {}
 
-  // Roster table
   const rosterHtml = (() => {
     const roster = Array.isArray(hh.roster) ? hh.roster.filter((m) => m.name) : []
     if (!roster.length) return ''
@@ -386,7 +599,6 @@ const printReport = (response) => {
     </tr>`
   })()
 
-  // Signature rows
   const sigRow = (label, src) =>
     src
       ? `<tr><td class="label">${label}</td><td class="value"><img src="${src}" class="sig-img" alt="${label}"/></td></tr>`
@@ -416,276 +628,56 @@ const printReport = (response) => {
   <title>OFW Profiling Report — ${response.respondent_name || 'Unnamed'}</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      font-size: 11px;
-      color: #111827;
-      background: #ffffff;
-    }
-
-    /* ── COVER ── */
-    .cover {
-      background: #0f2a5e;
-      color: white;
-      padding: 32px 40px 26px;
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 24px;
-    }
+    body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; color: #111827; background: #ffffff; }
+    .cover { background: #0f2a5e; color: white; padding: 32px 40px 26px; display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
     .cover-left { flex: 1; }
-    .cover-agency {
-      font-size: 9.5px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      opacity: 0.65;
-      margin-bottom: 8px;
-    }
-    .cover-title {
-      font-size: 20px;
-      font-weight: 900;
-      line-height: 1.3;
-      margin-bottom: 14px;
-    }
-    .cover-meta {
-      font-size: 11px;
-      opacity: 0.85;
-      line-height: 2;
-    }
+    .cover-agency { font-size: 9.5px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; opacity: 0.65; margin-bottom: 8px; }
+    .cover-title { font-size: 20px; font-weight: 900; line-height: 1.3; margin-bottom: 14px; }
+    .cover-meta { font-size: 11px; opacity: 0.85; line-height: 2; }
     .cover-meta strong { opacity: 1; font-weight: 700; }
-    .cover-gps {
-      margin-top: 8px;
-      font-size: 10px;
-      opacity: 0.6;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .cover-right {
-      text-align: right;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      opacity: 0.5;
-      flex-shrink: 0;
-      line-height: 2;
-    }
-    .cover-badge {
-      display: inline-block;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 20px;
-      padding: 4px 14px;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      margin-top: 14px;
-      text-transform: uppercase;
-    }
-
-    /* ── PRINT BAR (hidden on print) ── */
-    .print-bar {
-      background: #eff6ff;
-      border-bottom: 2px solid #bfdbfe;
-      padding: 14px 40px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-    }
-    .print-bar-text {
-      font-size: 12px;
-      color: #1d4ed8;
-      font-weight: 600;
-    }
-    .print-bar-sub {
-      font-size: 10.5px;
-      color: #6b7fa8;
-      margin-top: 2px;
-    }
-    .print-btn {
-      background: linear-gradient(135deg, #1d4ed8, #3b82f6);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 10px 24px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: inherit;
-      white-space: nowrap;
-      box-shadow: 0 4px 14px rgba(29,78,216,0.3);
-      transition: opacity 0.15s;
-    }
+    .cover-right { text-align: right; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.5; flex-shrink: 0; line-height: 2; }
+    .cover-badge { display: inline-block; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 4px 14px; font-size: 10px; font-weight: 700; letter-spacing: 1px; margin-top: 14px; text-transform: uppercase; }
+    .print-bar { background: #eff6ff; border-bottom: 2px solid #bfdbfe; padding: 14px 40px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .print-bar-text { font-size: 12px; color: #1d4ed8; font-weight: 600; }
+    .print-bar-sub { font-size: 10.5px; color: #6b7fa8; margin-top: 2px; }
+    .print-btn { background: linear-gradient(135deg, #1d4ed8, #3b82f6); color: white; border: none; border-radius: 10px; padding: 10px 24px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; box-shadow: 0 4px 14px rgba(29,78,216,0.3); transition: opacity 0.15s; }
     .print-btn:hover { opacity: 0.88; }
     @media print { .print-bar { display: none !important; } }
-
-    /* ── BODY ── */
     .body { padding: 28px 40px 48px; }
-
-    /* ── SECTION ── */
-    .section {
-      margin-bottom: 16px;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      overflow: hidden;
-      page-break-inside: avoid;
-    }
-    .section-header {
-      background: #1d4ed8;
-      color: white;
-      padding: 8px 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-    .section-num {
-      background: rgba(255,255,255,0.18);
-      border-radius: 4px;
-      padding: 2px 9px;
-      font-size: 9px;
-      font-weight: 800;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-      flex-shrink: 0;
-    }
-    .section-title {
-      font-size: 11.5px;
-      font-weight: 700;
-      letter-spacing: 0.2px;
-    }
-
-    /* ── TABLE ── */
+    .section { margin-bottom: 16px; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; page-break-inside: avoid; }
+    .section-header { background: #1d4ed8; color: white; padding: 8px 16px; display: flex; align-items: center; gap: 10px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .section-num { background: rgba(255,255,255,0.18); border-radius: 4px; padding: 2px 9px; font-size: 9px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; flex-shrink: 0; }
+    .section-title { font-size: 11.5px; font-weight: 700; letter-spacing: 0.2px; }
     table { width: 100%; border-collapse: collapse; }
     tr { border-bottom: 1px solid #f3f4f6; }
     tr:last-child { border-bottom: none; }
     tr:nth-child(even) td.label { background: #fafbff; }
     td { padding: 8px 14px; vertical-align: top; line-height: 1.65; }
-    td.label {
-      width: 210px;
-      min-width: 210px;
-      font-size: 9.5px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #6b7fa8;
-      background: #fafbff;
-    }
+    td.label { width: 210px; min-width: 210px; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7fa8; background: #fafbff; }
     td.value { font-size: 11px; color: #111827; }
     .empty { color: #c4ccd9; font-style: italic; }
-
-    /* ── CHIPS ── */
-    .chip {
-      display: inline-block;
-      background: #eff6ff;
-      color: #1d4ed8;
-      border: 1px solid #bfdbfe;
-      border-radius: 20px;
-      padding: 2px 9px;
-      font-size: 10px;
-      font-weight: 600;
-      margin: 2px 2px 2px 0;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-
-    /* ── ROSTER TABLE ── */
-    .roster-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 10px;
-      margin-top: 6px;
-      border: 1px solid #e5e7eb;
-      border-radius: 6px;
-      overflow: hidden;
-    }
-    .roster-table th {
-      background: #f8faff;
-      padding: 6px 8px;
-      text-align: left;
-      font-size: 9px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-      color: #6b7fa8;
-      border-bottom: 1.5px solid #e2e8f0;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-    .roster-table td {
-      padding: 5px 8px;
-      border-bottom: 1px solid #f3f4f6;
-      background: white;
-      width: auto;
-      min-width: unset;
-      font-size: 10px;
-      color: #374151;
-    }
+    .chip { display: inline-block; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; border-radius: 20px; padding: 2px 9px; font-size: 10px; font-weight: 600; margin: 2px 2px 2px 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .roster-table { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 6px; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; }
+    .roster-table th { background: #f8faff; padding: 6px 8px; text-align: left; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #6b7fa8; border-bottom: 1.5px solid #e2e8f0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .roster-table td { padding: 5px 8px; border-bottom: 1px solid #f3f4f6; background: white; width: auto; min-width: unset; font-size: 10px; color: #374151; }
     .roster-table tr:last-child td { border-bottom: none; }
-
-    /* ── SIGNATURE ── */
-    .sig-img {
-      display: block;
-      max-width: 220px;
-      max-height: 80px;
-      border: 1.5px solid #bfdbfe;
-      border-radius: 8px;
-      padding: 6px;
-      background: #f8faff;
-      margin-top: 2px;
-    }
-
-    /* ── FOOTER ── */
-    .doc-footer {
-      margin-top: 36px;
-      padding-top: 16px;
-      border-top: 1.5px solid #e5e7eb;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 9.5px;
-      color: #9ca3af;
-    }
+    .sig-img { display: block; max-width: 220px; max-height: 80px; border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 6px; background: #f8faff; margin-top: 2px; }
+    .doc-footer { margin-top: 36px; padding-top: 16px; border-top: 1.5px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; font-size: 9.5px; color: #9ca3af; }
     .doc-footer-left { line-height: 1.8; }
     .doc-footer-right { text-align: right; line-height: 1.8; }
-
-    /* ── PRINT ── */
     @media print {
       body { background: white; }
-      .cover {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
-      .section-header {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
-      .chip {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
+      .cover, .section-header, .chip { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       .section { page-break-inside: avoid; }
-      @page {
-        size: A4;
-        margin: 15mm 12mm;
-      }
+      @page { size: A4; margin: 15mm 12mm; }
     }
   </style>
 </head>
 <body>
-
-  <!-- COVER HEADER -->
   <div class="cover">
     <div class="cover-left">
       <div class="cover-agency">Department of Migrant Workers — Caraga Region XIII</div>
-      <div class="cover-title">
-        OFW Family Profiling &amp;<br>Reintegration Needs Assessment Form
-      </div>
+      <div class="cover-title">OFW Family Profiling &amp;<br>Reintegration Needs Assessment Form</div>
       <div class="cover-meta">
         <strong>Respondent:</strong> ${response.respondent_name || '—'}<br>
         <strong>Enumerator:</strong> ${response.enumerator_name || '—'}<br>
@@ -694,27 +686,18 @@ const printReport = (response) => {
       </div>
       <div class="cover-badge">OPRIS — Official Record</div>
     </div>
-    <div class="cover-right">
-      OPRIS<br>
-      OFW Profiling<br>
-      &amp; Reintegration<br>
-      Information<br>
-      System
-    </div>
+    <div class="cover-right">OPRIS<br>OFW Profiling<br>&amp; Reintegration<br>Information<br>System</div>
   </div>
 
-  <!-- PRINT BAR -->
   <div class="print-bar">
     <div>
       <div class="print-bar-text">Full OFW Profiling Report — ${response.respondent_name || 'Unnamed Respondent'}</div>
       <div class="print-bar-sub">Review the data below, then click Print to save as PDF or send to printer.</div>
     </div>
-    <button class="print-btn" onclick="window.print()"> &nbsp; Print / Save as PDF</button>
+    <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
   </div>
 
-  <!-- REPORT BODY -->
   <div class="body">
-
     ${section('I', 'General Information', [
       row('Date of Interview', g.dateOfInterview),
       row('Time of Interview', g.timeOfInterview),
@@ -1080,7 +1063,6 @@ const printReport = (response) => {
       sigRow('Enumerator Signature', co.enumeratorSignature),
     ])}
 
-    <!-- DOCUMENT FOOTER -->
     <div class="doc-footer">
       <div class="doc-footer-left">
         <strong>OPRIS</strong> — OFW Profiling &amp; Reintegration Information System<br>
@@ -1091,7 +1073,6 @@ const printReport = (response) => {
         This is an official DMW document.
       </div>
     </div>
-
   </div>
 </body>
 </html>`
@@ -1131,16 +1112,18 @@ const printReport = (response) => {
 .progress-rail-inner {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
-  padding: 10px 0 8px 0;
+  padding: 10px 16px 8px 0;
   box-sizing: border-box;
   min-height: 52px;
+  flex-wrap: wrap;
 }
 .rail-menu-btn {
   color: white !important;
   flex-shrink: 0;
   margin-left: 0 !important;
+  padding-left: 0 !important;
 }
 .rail-title-block {
   display: flex;
@@ -1156,6 +1139,7 @@ const printReport = (response) => {
 }
 .rail-divider {
   color: rgba(255, 255, 255, 0.5);
+  font-weight: 400;
   font-size: 13px;
 }
 .rail-sub {
@@ -1164,6 +1148,50 @@ const printReport = (response) => {
   color: rgba(255, 255, 255, 0.75);
   white-space: nowrap;
 }
+
+/* Export toggle */
+.export-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.export-toggle input {
+  accent-color: #ffffff;
+  width: 13px;
+  height: 13px;
+  cursor: pointer;
+}
+
+.rail-export-btn {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.rail-export-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.22);
+}
+.rail-export-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .rail-refresh-btn {
   display: inline-flex;
   align-items: center;
@@ -1178,6 +1206,7 @@ const printReport = (response) => {
   cursor: pointer;
   transition: background 0.15s;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 .rail-refresh-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.22);
@@ -1209,12 +1238,14 @@ const printReport = (response) => {
   font-weight: 900;
   color: #0f2a5e;
   line-height: 1.15;
+  letter-spacing: -0.4px;
   margin: 0 0 8px;
 }
 .page-sub {
   font-size: 13px;
   color: #6b7fa8;
   margin: 0;
+  line-height: 1.6;
 }
 .page-stats {
   display: flex;
@@ -1313,12 +1344,13 @@ const printReport = (response) => {
   display: flex;
   align-items: center;
   padding: 0;
+  transition: color 0.12s;
 }
 .search-clear:hover {
   color: #374151;
 }
 
-/* ── DATA TABLE ── */
+/* ── TABLE ── */
 .table-wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -1390,6 +1422,7 @@ const printReport = (response) => {
 .td--action {
   text-align: right;
 }
+
 .date-main {
   font-weight: 600;
   font-size: 13px;
@@ -1400,6 +1433,7 @@ const printReport = (response) => {
   color: #9ca3af;
   margin-top: 2px;
 }
+
 .respondent-name {
   font-weight: 600;
   font-size: 13px;
@@ -1426,12 +1460,14 @@ const printReport = (response) => {
     border-color 0.14s,
     color 0.14s,
     box-shadow 0.14s;
+  position: relative;
 }
 .gps-badge--btn::after {
   content: '↗';
   font-size: 10px;
   color: #93c5fd;
   margin-left: 3px;
+  transition: color 0.14s;
 }
 .gps-badge--btn:hover {
   background: #1d4ed8;
@@ -1441,6 +1477,13 @@ const printReport = (response) => {
 }
 .gps-badge--btn:hover::after {
   color: rgba(255, 255, 255, 0.7);
+}
+
+/* Action buttons */
+.action-btn-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .view-btn {
@@ -1467,6 +1510,29 @@ const printReport = (response) => {
   border-color: #1d4ed8;
   color: white;
   box-shadow: 0 2px 10px rgba(29, 78, 216, 0.3);
+}
+
+.delete-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: #fef2f2;
+  border: 1.5px solid #fecaca;
+  border-radius: 8px;
+  color: #ef4444;
+  cursor: pointer;
+  transition:
+    background 0.14s,
+    border-color 0.14s,
+    color 0.14s;
+  flex-shrink: 0;
+}
+.delete-btn:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: white;
 }
 
 /* ── PAGINATION ── */
@@ -1523,7 +1589,7 @@ const printReport = (response) => {
   font-weight: 800;
 }
 
-/* ── MODALS ── */
+/* ── MODAL ── */
 .modal-card {
   background: white;
   border-radius: 20px;
@@ -1541,6 +1607,9 @@ const printReport = (response) => {
   background: #3b82f6;
   flex-shrink: 0;
 }
+.modal-header--danger {
+  background: #ef4444;
+}
 .modal-header-left {
   display: flex;
   align-items: center;
@@ -1557,6 +1626,9 @@ const printReport = (response) => {
   justify-content: center;
   flex-shrink: 0;
 }
+.modal-icon-wrap--danger {
+  background: rgba(255, 255, 255, 0.22);
+}
 .modal-title {
   font-size: 16px;
   font-weight: 800;
@@ -1565,7 +1637,7 @@ const printReport = (response) => {
 }
 .modal-sub {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.7);
   margin-top: 3px;
   display: flex;
   align-items: center;
@@ -1617,19 +1689,20 @@ const printReport = (response) => {
 .modal-footer {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 10px;
   padding: 14px 28px;
   border-top: 1px solid #eef1f8;
   background: #fafbff;
   flex-shrink: 0;
 }
+
 .map-body {
   background: #e5e7eb;
   line-height: 0;
   flex-shrink: 0;
 }
 
-/* ── BUTTONS ── */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -1641,16 +1714,14 @@ const printReport = (response) => {
   padding: 9px 20px;
   cursor: pointer;
   border: none;
-  transition:
-    background 0.14s,
-    opacity 0.14s;
+  transition: background 0.14s;
 }
 .btn-outline {
   background: white;
   border: 1.5px solid #e5e7eb;
   color: #374151;
 }
-.btn-outline:hover {
+.btn-outline:hover:not(:disabled) {
   border-color: #9ca3af;
   background: #f9fafb;
 }
@@ -1670,8 +1741,88 @@ const printReport = (response) => {
   opacity: 0.88;
   box-shadow: 0 4px 16px rgba(29, 78, 216, 0.4);
 }
+.btn-danger {
+  background: #fef2f2;
+  color: #ef4444;
+  border: 1.5px solid #fecaca;
+}
+.btn-danger:hover:not(:disabled) {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
-/* ── RESPONSIVE ── */
+/* ── DELETE MODAL BODY ── */
+.delete-body {
+  padding: 24px 28px;
+}
+.delete-text {
+  font-size: 13.5px;
+  color: #374151;
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+.delete-text strong {
+  color: #111827;
+}
+.delete-warning {
+  display: flex;
+  align-items: center;
+  background: #fffbeb;
+  border: 1.5px solid #fde68a;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #92400e;
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  background: #0f2a5e;
+  color: white;
+  border-radius: 12px;
+  padding: 12px 22px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+  z-index: 9999;
+}
+.toast--success {
+  background: #0f2a5e;
+}
+.toast--error {
+  background: #b91c1c;
+}
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.25s ease;
+}
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(10px);
+}
+
+.spin {
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── TABLET ── */
 @media (max-width: 768px) {
   .responses-body {
     padding: 52px 20px 0;
@@ -1703,15 +1854,24 @@ const printReport = (response) => {
     flex-wrap: wrap;
   }
 }
+
+/* ── MOBILE ── */
 @media (max-width: 480px) {
   .responses-body {
     padding: 52px 12px 0;
+  }
+  .progress-rail-inner {
+    padding: 9px 12px 7px 0;
+    height: unset;
+    min-height: 48px;
+    gap: 8px;
   }
   .rail-title {
     font-size: 12px;
   }
   .rail-sub,
-  .rail-divider {
+  .rail-divider,
+  .export-toggle span {
     display: none;
   }
   .page-title {
@@ -1728,6 +1888,8 @@ const printReport = (response) => {
     padding: 14px;
   }
 }
+
+/* ── LARGE DESKTOP ── */
 @media (min-width: 1200px) {
   .responses-body {
     padding: 52px 64px 0;
