@@ -19,11 +19,58 @@
           </div>
         </div>
 
+        <!-- ── STICKY FILTER BAR ── -->
+        <div class="filter-bar">
+          <div class="filter-bar-inner">
+            <div class="filter-field">
+              <label class="filter-label">From</label>
+              <input type="date" v-model="filters.dateFrom" class="filter-input" />
+            </div>
+
+            <div class="filter-field">
+              <label class="filter-label">To</label>
+              <input type="date" v-model="filters.dateTo" class="filter-input" />
+            </div>
+
+            <div class="filter-field">
+              <label class="filter-label">Municipality / City</label>
+              <select v-model="filters.municipality" class="filter-select">
+                <option value="">All Municipalities</option>
+                <option v-for="m in municipalityOptions" :key="m" :value="m">{{ m }}</option>
+              </select>
+            </div>
+
+            <div class="filter-field">
+              <label class="filter-label">Enumerator</label>
+              <select v-model="filters.enumerator" class="filter-select">
+                <option value="">All Enumerators</option>
+                <option v-for="e in enumeratorOptions" :key="e" :value="e">{{ e }}</option>
+              </select>
+            </div>
+
+            <button class="filter-clear-btn" @click="clearFilters" :disabled="!hasActiveFilters">
+              <v-icon size="14" style="margin-right: 4px">mdi-filter-remove-outline</v-icon>
+              Clear
+            </button>
+
+            <div class="filter-result-badge">
+              <v-icon size="13" style="margin-right: 4px">mdi-database-search-outline</v-icon>
+              {{ filteredResponses.length }} of {{ responses.length }} results
+            </div>
+          </div>
+        </div>
+
         <!-- ── BODY ── -->
         <div class="reports-body">
           <div v-if="loading" class="loading-state">
             <v-progress-circular indeterminate color="primary" size="40" />
             <p>Loading analytics data…</p>
+          </div>
+
+          <div v-else-if="filteredResponses.length === 0" class="loading-state">
+            <v-icon size="40" color="#9ca3af">mdi-filter-off-outline</v-icon>
+            <p>No responses match the current filters.</p>
+            <button class="filter-clear-btn" @click="clearFilters">Clear Filters</button>
           </div>
 
           <template v-else>
@@ -668,6 +715,67 @@ onMounted(async () => {
   loading.value = false
 })
 
+// ── Filters ───────────────────────────────────────────
+const filters = ref({
+  dateFrom: '',
+  dateTo: '',
+  municipality: '',
+  enumerator: '',
+})
+
+const hasActiveFilters = computed(
+  () =>
+    !!(
+      filters.value.dateFrom ||
+      filters.value.dateTo ||
+      filters.value.municipality ||
+      filters.value.enumerator
+    ),
+)
+
+const clearFilters = () => {
+  filters.value = { dateFrom: '', dateTo: '', municipality: '', enumerator: '' }
+}
+
+// ── Dropdown options (derived from raw data, not filtered data) ──
+const municipalityOptions = computed(() => {
+  const set = new Set(
+    responses.value.map((r) => r.answers?.general?.municipalityCity).filter(Boolean),
+  )
+  return [...set].sort()
+})
+
+const enumeratorOptions = computed(() => {
+  const set = new Set(responses.value.map((r) => r.enumerator_name).filter(Boolean))
+  return [...set].sort()
+})
+
+// ── Filtered dataset — everything below reads from this ──
+const filteredResponses = computed(() => {
+  return responses.value.filter((r) => {
+    // Date range filter
+    if (filters.value.dateFrom) {
+      const from = new Date(filters.value.dateFrom)
+      from.setHours(0, 0, 0, 0)
+      if (new Date(r.created_at) < from) return false
+    }
+    if (filters.value.dateTo) {
+      const to = new Date(filters.value.dateTo)
+      to.setHours(23, 59, 59, 999)
+      if (new Date(r.created_at) > to) return false
+    }
+    // Municipality filter
+    if (filters.value.municipality) {
+      if (r.answers?.general?.municipalityCity !== filters.value.municipality) return false
+    }
+    // Enumerator filter
+    if (filters.value.enumerator) {
+      if (r.enumerator_name !== filters.value.enumerator) return false
+    }
+    return true
+  })
+})
+
 // ── Color palette ─────────────────────────────────────
 const PALETTE = [
   '#1d4ed8',
@@ -688,11 +796,10 @@ const PALETTE = [
   '#ef4444',
 ]
 
-// ── Helper: count scalar field ────────────────────────
-// Handles both old and new field name variants via fallback chain
+// ── Helper: count scalar field (now reads from filteredResponses) ──
 const countField = (getVal, limit = 10) => {
   const counts = {}
-  responses.value.forEach((r) => {
+  filteredResponses.value.forEach((r) => {
     const val = getVal(r.answers)
     if (val && val !== '' && val !== false && val !== null) {
       const key = String(val)
@@ -707,7 +814,7 @@ const countField = (getVal, limit = 10) => {
 // ── Helper: count array field ─────────────────────────
 const countArray = (getVal, limit = 12) => {
   const counts = {}
-  responses.value.forEach((r) => {
+  filteredResponses.value.forEach((r) => {
     const arr = getVal(r.answers)
     if (Array.isArray(arr)) {
       arr.forEach((item) => {
@@ -747,33 +854,32 @@ const makeDoughnut = (entries) => ({
   ],
 })
 
-// ── Empty chart sentinel ──────────────────────────────
-const empty = { labels: [], datasets: [] }
-
 // ══ SUMMARY CARDS ════════════════════════════════════
 const summaryCards = computed(() => {
   const now = new Date()
-  const thisMonth = responses.value.filter((r) => {
+  const thisMonth = filteredResponses.value.filter((r) => {
     const d = new Date(r.created_at)
     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
   }).length
 
   const uniqueCountries = new Set(
-    responses.value
+    filteredResponses.value
       .map((r) => r.answers?.migration?.countryDestination || r.answers?.migration?.country)
       .filter(Boolean),
   ).size
 
-  const femaleOFWs = responses.value.filter((r) => r.answers?.ofwProfile?.sex === 'Female').length
+  const femaleOFWs = filteredResponses.value.filter(
+    (r) => r.answers?.ofwProfile?.sex === 'Female',
+  ).length
 
-  const highRisk = responses.value.filter(
+  const highRisk = filteredResponses.value.filter(
     (r) => r.answers?.risk?.priorityLevel === 'High / urgent',
   ).length
 
   return [
     {
       label: 'Total Responses',
-      value: responses.value.length,
+      value: filteredResponses.value.length,
       icon: 'mdi-clipboard-check-outline',
       color: '#2563eb',
       bg: '#dbeafe',
@@ -808,21 +914,22 @@ const summaryCards = computed(() => {
     },
     {
       label: 'With GPS',
-      value: responses.value.filter((r) => r.latitude).length,
+      value: filteredResponses.value.filter((r) => r.latitude).length,
       icon: 'mdi-map-marker-outline',
       color: '#8b5cf6',
       bg: '#ede9fe',
     },
     {
       label: 'Urgent Referral',
-      value: responses.value.filter((r) => r.answers?.risk?.needsUrgentReferral === 'Yes').length,
+      value: filteredResponses.value.filter((r) => r.answers?.risk?.needsUrgentReferral === 'Yes')
+        .length,
       icon: 'mdi-ambulance',
       color: '#f97316',
       bg: '#ffedd5',
     },
     {
       label: 'Enumerators',
-      value: new Set(responses.value.map((r) => r.enumerator_name).filter(Boolean)).size,
+      value: new Set(filteredResponses.value.map((r) => r.enumerator_name).filter(Boolean)).size,
       icon: 'mdi-account-tie-outline',
       color: '#06b6d4',
       bg: '#cffafe',
@@ -833,13 +940,12 @@ const summaryCards = computed(() => {
 // ══ SURVEY TRENDS ═════════════════════════════════════
 const monthlyChart = computed(() => {
   const counts = {}
-  responses.value.forEach((r) => {
+  filteredResponses.value.forEach((r) => {
     const d = new Date(r.created_at)
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
     counts[key] = (counts[key] || 0) + 1
   })
   const sorted = Object.entries(counts).sort((a, b) => a[0].localeCompare(b[0]))
-  // Format label for display
   const labels = sorted.map(([k]) => {
     const [y, m] = k.split('-')
     return new Date(+y, +m - 1).toLocaleString('en-PH', { month: 'short', year: '2-digit' })
@@ -866,11 +972,9 @@ const respondentTypeChart = computed(() =>
 const sexChart = computed(() => makeDoughnut(countField((a) => a?.ofwProfile?.sex)))
 const civilStatusChart = computed(() => makeDoughnut(countField((a) => a?.ofwProfile?.civilStatus)))
 const owwaChart = computed(() =>
-  // section saves as owwaStatus; old data may have owaStatus
   makeDoughnut(countField((a) => a?.ofwProfile?.owwaStatus || a?.ofwProfile?.owaStatus)),
 )
 const educationChart = computed(() =>
-  // section saves as educationalAttainment; old data may have education
   makeDoughnut(countField((a) => a?.ofwProfile?.educationalAttainment || a?.ofwProfile?.education)),
 )
 
@@ -924,11 +1028,9 @@ const planningAbroadChart = computed(() =>
 
 // ══ SOCIO-ECONOMIC ════════════════════════════════════
 const housingChart = computed(() =>
-  // section saves as housingUnit; old data may have housingType
   makeDoughnut(countField((a) => a?.socioEconomic?.housingUnit || a?.socioEconomic?.housingType)),
 )
 const incomeChart = computed(() =>
-  // section saves as averageMonthlyIncome; old data may have avgMonthlyIncome
   makeBar(
     countField((a) => a?.socioEconomic?.averageMonthlyIncome || a?.socioEconomic?.avgMonthlyIncome),
     '#8b5cf6',
@@ -1003,7 +1105,6 @@ const majorProblemsChart = computed(() =>
 )
 const priorityChart = computed(() => {
   const entries = countField((a) => a?.risk?.priorityLevel)
-  // colour-code by severity
   const colors = entries.map(([label]) =>
     label === 'High / urgent' ? '#ef4444' : label === 'Medium' ? '#f59e0b' : '#10b981',
   )
@@ -1121,7 +1222,7 @@ const barOptionsH = {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 100;
+  z-index: 110;
   background: linear-gradient(135deg, #1d4ed8, #2563eb, #3b82f6);
   box-shadow: 0 4px 18px rgba(37, 99, 235, 0.25);
   min-height: 52px;
@@ -1135,34 +1236,135 @@ const barOptionsH = {
 }
 .rail-title-block {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 8px;
-  flex-wrap: nowrap;
-  min-width: 0;
 }
 .rail-title {
   font-size: 13px;
   font-weight: 700;
   color: white;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .rail-sep {
   color: rgba(255, 255, 255, 0.4);
   font-size: 13px;
-  flex-shrink: 0;
 }
 .rail-sub {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.75);
+}
+
+/* ── STICKY FILTER BAR ── */
+/* ── STICKY FILTER BAR ── */
+.filter-bar {
+  position: fixed;
+  top: 52px;
+  left: 0;
+  right: 0;
+  z-index: 60; /* below sidebar (which sits at z-index 50 but lives in its own column) */
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 2px 10px rgba(15, 42, 94, 0.06);
+  transition: left 0.2s ease;
+}
+
+/* Push the filter bar past the sidebar on desktop, same breakpoint as Sidebar.vue (960px) */
+@media (min-width: 960px) {
+  .filter-bar {
+    left: 272px;
+  }
+}
+.filter-bar-inner {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  padding: 10px 28px;
+  max-width: 1280px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.filter-label {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #6b7fa8;
+}
+.filter-input,
+.filter-select {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12.5px;
+  font-family: inherit;
+  color: #111827;
+  background: #f8faff;
+  outline: none;
+  transition:
+    border-color 0.14s,
+    background 0.14s;
+  min-width: 140px;
+  cursor: pointer;
+}
+.filter-input:focus,
+.filter-select:focus {
+  border-color: #3b82f6;
+  background: #ffffff;
+}
+.filter-input {
+  cursor: text;
+  min-width: 130px;
+}
+
+.filter-clear-btn {
+  display: inline-flex;
+  align-items: center;
+  background: #fef2f2;
+  border: 1.5px solid #fecaca;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ef4444;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    background 0.14s,
+    color 0.14s;
   white-space: nowrap;
-  flex-shrink: 0;
+  height: 31px;
+}
+.filter-clear-btn:hover:not(:disabled) {
+  background: #ef4444;
+  color: white;
+}
+.filter-clear-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.filter-result-badge {
+  display: inline-flex;
+  align-items: center;
+  background: #eff6ff;
+  border: 1.5px solid #bfdbfe;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #1d4ed8;
+  white-space: nowrap;
+  height: 31px;
+  margin-left: auto;
 }
 
 /* ── BODY ── */
 .reports-body {
-  padding: 72px 28px 56px;
+  padding: 116px 28px 56px;
   max-width: 1280px;
   margin: 0 auto;
 }
@@ -1173,9 +1375,10 @@ const barOptionsH = {
   align-items: center;
   justify-content: center;
   gap: 16px;
-  min-height: 60vh;
+  min-height: 50vh;
   color: #6b7fa8;
   font-size: 13px;
+  text-align: center;
 }
 
 /* ── SECTION LABEL ── */
@@ -1187,7 +1390,6 @@ const barOptionsH = {
   color: #6b7fa8;
   margin-bottom: 10px;
   margin-top: 8px;
-  padding-left: 2px;
   border-left: 3px solid #3b82f6;
   padding-left: 10px;
 }
@@ -1253,13 +1455,50 @@ const barOptionsH = {
   font-style: italic;
 }
 
+/* ── TABLET ── */
+@media (max-width: 900px) {
+  .filter-bar-inner {
+    padding: 10px 16px;
+  }
+  .filter-result-badge {
+    margin-left: 0;
+    order: 10;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 /* ── MOBILE ── */
 @media (max-width: 600px) {
   .reports-body {
-    padding: 68px 14px 40px;
+    padding: 132px 14px 40px;
   }
   .stat-value {
     font-size: 20px;
+  }
+  .filter-field {
+    flex: 1 1 calc(50% - 7px);
+    min-width: 0;
+  }
+  .filter-input,
+  .filter-select {
+    min-width: 0;
+    width: 100%;
+  }
+  .filter-clear-btn {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+}
+
+@media (min-width: 960px) and (max-width: 1199px) {
+  .filter-bar-inner {
+    padding: 10px 20px;
+    gap: 10px;
+  }
+  .filter-input,
+  .filter-select {
+    min-width: 110px;
   }
 }
 </style>
