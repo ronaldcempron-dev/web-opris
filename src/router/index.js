@@ -10,6 +10,12 @@ const routes = [
   },
   {
     path: '/',
+    name: 'dashboard',
+    component: () => import('@/views/DashboardView.vue'),
+    meta: { requiresAuth: true, allowedRole: 'enumerator' },
+  },
+  {
+    path: '/survey',
     name: 'survey',
     component: () => import('@/views/SurveyView.vue'),
     meta: { requiresAuth: true, allowedRole: 'enumerator' },

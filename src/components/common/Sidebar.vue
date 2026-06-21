@@ -16,18 +16,31 @@
       <!-- ── NAV ITEMS ── -->
       <nav class="sidebar-nav">
         <!-- Enumerator only -->
-        <button
-          v-if="auth.role === 'enumerator'"
-          class="sidebar-item"
-          :class="{ active: currentRoute === 'survey' }"
-          @click="goTo('/')"
-        >
-          <div class="sidebar-item-icon">
-            <v-icon size="17">mdi-file-document-outline</v-icon>
-          </div>
-          <span class="sidebar-item-label">Survey Form</span>
-          <div v-if="currentRoute === 'survey'" class="sidebar-item-pip" />
-        </button>
+        <template v-if="auth.role === 'enumerator'">
+          <button
+            class="sidebar-item"
+            :class="{ active: currentRoute === 'dashboard' }"
+            @click="goTo('/')"
+          >
+            <div class="sidebar-item-icon">
+              <v-icon size="17">mdi-view-dashboard-outline</v-icon>
+            </div>
+            <span class="sidebar-item-label">Dashboard</span>
+            <div v-if="currentRoute === 'dashboard'" class="sidebar-item-pip" />
+          </button>
+
+          <button
+            class="sidebar-item"
+            :class="{ active: currentRoute === 'survey' }"
+            @click="goTo('/survey')"
+          >
+            <div class="sidebar-item-icon">
+              <v-icon size="17">mdi-file-document-outline</v-icon>
+            </div>
+            <span class="sidebar-item-label">New Survey</span>
+            <div v-if="currentRoute === 'survey'" class="sidebar-item-pip" />
+          </button>
+        </template>
 
         <!-- Admin only -->
         <template v-if="auth.role === 'admin'">
@@ -170,7 +183,8 @@ onUnmounted(() => {
 const currentRoute = computed(() => {
   if (route.path === '/responses') return 'responses'
   if (route.path === '/reports') return 'reports'
-  return 'survey'
+  if (route.path === '/survey') return 'survey'
+  return 'dashboard'
 })
 
 const goTo = (path) => router.push(path)
